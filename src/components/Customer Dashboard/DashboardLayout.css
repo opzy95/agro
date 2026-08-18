@@ -1,0 +1,91 @@
+/* Dashboard Layout Styles */
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f8fafc;
+  position: relative;
+}
+
+/* Sidebar Container */
+.dashboard-sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  z-index: 1000;
+  flex-shrink: 0;
+}
+
+/* Main Content */
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 200px;
+  min-width: 0;
+  width: calc(100% - 200px);
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  flex: 1;
+  overflow-y: auto;
+  background: #f8fafc;
+}
+
+.content-container {
+  width: 100%;
+  min-height: calc(100vh - 70px);
+}
+
+/* Mobile Sidebar Overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+  .dashboard-main {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .dashboard-sidebar-container {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .dashboard-sidebar-container.mobile-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboard-sidebar-container {
+    width: 200px;
+  }
+}
+
+/* Smooth transitions */
+.dashboard-layout * {
+  box-sizing: border-box;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-sidebar-container {
+    transition: none;
+  }
+}

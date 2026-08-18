@@ -1,0 +1,549 @@
+/* Payment Methods Styles */
+.payment-methods {
+  width: 100%;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Header Section */
+.payment-header {
+  max-width: 1200px;
+  margin: 2rem auto 2rem auto;
+  padding: 0 2rem;
+}
+
+.payment-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 1rem 0;
+}
+
+.payment-subtitle {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Main Content */
+.payment-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Cards Section */
+.cards-section {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0;
+  padding: 2rem 2rem 0 2rem;
+}
+
+/* Cards List */
+.cards-list {
+  padding: 1.5rem 2rem 2rem 2rem;
+}
+
+.card-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.card-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.card-main {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card-type {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-icon {
+  font-size: 1.25rem;
+}
+
+.card-brand {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.card-details {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.card-number {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a202c;
+  font-family: 'Courier New', monospace;
+}
+
+.default-badge {
+  background: #4a7c59;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-holder-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.holder-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1a202c;
+}
+
+.expiry-date {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+/* Card Actions */
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.set-default-btn {
+  background: none;
+  border: none;
+  color: #4a7c59;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.set-default-btn:hover {
+  background: #f0f9f0;
+  color: #2d5016;
+}
+
+.edit-card-btn,
+.delete-card-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-card-btn:hover {
+  background: #f1f5f9;
+}
+
+.delete-card-btn:hover {
+  background: #fef2f2;
+}
+
+.edit-icon,
+.delete-icon {
+  font-size: 1rem;
+  color: #64748b;
+}
+
+.delete-card-btn:hover .delete-icon {
+  color: #dc2626;
+}
+
+/* Add Card Item */
+.add-card-item {
+  margin-top: 1rem;
+}
+
+.add-card-btn {
+  width: 100%;
+  padding: 2rem;
+  background: #ffffff;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+}
+
+.add-card-btn:hover {
+  border-color: #4a7c59;
+  background: #f0f9f0;
+  color: #4a7c59;
+}
+
+.add-icon {
+  font-size: 2rem;
+  font-weight: 300;
+}
+
+.add-text {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+/* Other Payment Options */
+.other-payment-section {
+  padding: 2rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.section-header-small {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.options-icon {
+  font-size: 1rem;
+  color: #64748b;
+}
+
+.options-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.payment-options {
+  display: flex;
+  gap: 1rem;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payment-option:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.option-icon {
+  font-size: 1.125rem;
+}
+
+.option-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1a202c;
+}
+
+/* Sidebar Section */
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Billing Address Section */
+.billing-address-section {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.billing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+}
+
+.billing-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.location-icon {
+  font-size: 1.25rem;
+  color: #4a7c59;
+}
+
+.billing-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0;
+}
+
+.edit-address-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.edit-address-btn:hover {
+  background: #f1f5f9;
+}
+
+.address-content {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+.address-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+}
+
+.address-details {
+  margin-bottom: 1rem;
+}
+
+.address-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+
+.address-line,
+.address-city,
+.address-country {
+  font-size: 1rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.address-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f0f9f0;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.info-icon {
+  font-size: 1rem;
+  color: #4a7c59;
+  flex-shrink: 0;
+}
+
+.info-text {
+  font-size: 0.875rem;
+  color: #2d5016;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.add-address-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  color: #4a7c59;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-address-btn:hover {
+  background: #f0f9f0;
+  border-color: #4a7c59;
+}
+
+.plus-icon {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Security Section */
+.security-section {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.security-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #4a7c59;
+}
+
+.security-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 1rem 0;
+}
+
+.security-text {
+  font-size: 0.95rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+  .payment-content {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar-section {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .payment-header,
+  .payment-content {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .payment-title {
+    font-size: 2rem;
+  }
+
+  .section-title {
+    padding: 1.5rem 1rem 0 1rem;
+  }
+
+  .cards-list {
+    padding: 1rem;
+  }
+
+  .card-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .card-main {
+    width: 100%;
+  }
+
+  .card-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .payment-options {
+    flex-direction: column;
+  }
+
+  .billing-header {
+    padding: 1rem;
+  }
+
+  .address-content {
+    padding: 0 1rem 1rem 1rem;
+  }
+
+  .security-section {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-title {
+    font-size: 1.75rem;
+  }
+
+  .card-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .card-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .add-card-btn {
+    padding: 1.5rem 1rem;
+  }
+
+  .address-info {
+    flex-direction: column;
+    text-align: left;
+  }
+}
