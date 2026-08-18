@@ -39,7 +39,9 @@ const ShopPage = () => {
       verified: true,
       badges: ['organic'],
       rating: 4.8,
-      inStock: true
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: true
     },
     {
       id: 2,
@@ -51,7 +53,9 @@ const ShopPage = () => {
       verified: false,
       badges: ['fresh'],
       rating: 4.7,
-      inStock: true
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: false
     },
     {
       id: 3,
@@ -63,7 +67,9 @@ const ShopPage = () => {
       verified: true,
       badges: ['organic'],
       rating: 4.6,
-      inStock: true
+      inStock: true,
+      category: 'fruits',
+      isOrganic: true
     },
     {
       id: 4,
@@ -75,7 +81,9 @@ const ShopPage = () => {
       verified: false,
       badges: [],
       rating: 4.4,
-      inStock: true
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: false
     },
     {
       id: 5,
@@ -87,7 +95,9 @@ const ShopPage = () => {
       verified: true,
       badges: ['fresh'],
       rating: 4.9,
-      inStock: true
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: false
     },
     {
       id: 6,
@@ -99,7 +109,261 @@ const ShopPage = () => {
       verified: false,
       badges: ['organic'],
       rating: 4.3,
-      inStock: true
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: true
+    },
+    {
+      id: 7,
+      name: 'Free-Range Organic Eggs',
+      price: 5.99,
+      unit: 'dozen',
+      image: background1,
+      seller: 'Happy Hens Farm',
+      verified: true,
+      badges: ['organic'],
+      rating: 4.9,
+      inStock: true,
+      category: 'dairy',
+      isOrganic: true
+    },
+    {
+      id: 8,
+      name: 'Fresh Blueberries',
+      price: 8.50,
+      unit: 'lb',
+      image: background2,
+      seller: 'Berry Fresh Farms',
+      verified: true,
+      badges: ['organic'],
+      rating: 4.8,
+      inStock: true,
+      category: 'fruits',
+      isOrganic: true
+    },
+    {
+      id: 9,
+      name: 'Organic Spinach Bundle',
+      price: 3.50,
+      unit: 'bunch',
+      image: background,
+      seller: 'Leafy Greens Co',
+      verified: true,
+      badges: ['fresh'],
+      rating: 4.7,
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: true
+    },
+    {
+      id: 10,
+      name: 'Fresh Broccoli Crowns',
+      price: 4.25,
+      unit: 'lb',
+      image: heroImg,
+      seller: 'Green Valley Farms',
+      verified: true,
+      badges: ['organic'],
+      rating: 4.6,
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: true
+    },
+    {
+      id: 11,
+      name: 'Heirloom Tomatoes',
+      price: 6.75,
+      unit: 'lb',
+      image: background1,
+      seller: 'Sunrise Orchards',
+      verified: true,
+      badges: ['organic'],
+      rating: 4.8,
+      inStock: true,
+      category: 'fruits',
+      isOrganic: true
+    },
+    {
+      id: 12,
+      name: 'Raw Unpasteurized Honey',
+      price: 12.50,
+      unit: 'jar',
+      image: background2,
+      seller: 'Golden Bee Apiary',
+      verified: true,
+      badges: ['organic'],
+      rating: 4.9,
+      inStock: true,
+      category: 'dairy',
+      isOrganic: true
+    },
+    {
+      id: 13,
+      name: 'Fresh Mushrooms Mix',
+      price: 7.50,
+      unit: 'lb',
+      image: background,
+      seller: 'Forest Fresh Farms',
+      verified: true,
+      badges: ['fresh'],
+      rating: 4.5,
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: false
+    },
+    {
+      id: 14,
+      name: 'Organic Zucchini',
+      price: 3.75,
+      unit: 'lb',
+      image: heroImg,
+      seller: 'Valley Gardens',
+      verified: false,
+      badges: ['organic'],
+      rating: 4.4,
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: true
+    },
+    {
+      id: 15,
+      name: 'Fresh Corn on the Cob',
+      price: 4.50,
+      unit: '4 pack',
+      image: background1,
+      seller: 'Cornfield Farms',
+      verified: false,
+      badges: ['fresh'],
+      rating: 4.7,
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: false
+    },
+    {
+      id: 16,
+      name: 'Organic Avocados',
+      price: 7.99,
+      unit: '3 pack',
+      image: background2,
+      seller: 'Green Valley Farms',
+      verified: true,
+      badges: ['organic'],
+      rating: 4.8,
+      inStock: true,
+      category: 'fruits',
+      isOrganic: true
+    },
+    {
+      id: 17,
+      name: 'Fresh Cucumber Bundle',
+      price: 3.25,
+      unit: 'bunch',
+      image: background,
+      seller: 'Valley Gardens',
+      verified: false,
+      badges: ['fresh'],
+      rating: 4.6,
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: false
+    },
+    {
+      id: 18,
+      name: 'Organic Garlic Bulbs',
+      price: 5.50,
+      unit: 'lb',
+      image: heroImg,
+      seller: 'Mountain View Farms',
+      verified: true,
+      badges: ['organic'],
+      rating: 4.5,
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: true
+    },
+    {
+      id: 19,
+      name: 'Fresh Watermelon',
+      price: 9.99,
+      unit: 'whole',
+      image: background1,
+      seller: 'Summer Harvest Farms',
+      verified: false,
+      badges: ['fresh'],
+      rating: 4.8,
+      inStock: true,
+      category: 'fruits',
+      isOrganic: false
+    },
+    {
+      id: 20,
+      name: 'Organic Almonds',
+      price: 14.99,
+      unit: 'lb',
+      image: background2,
+      seller: 'Nut Valley Farms',
+      verified: true,
+      badges: ['organic'],
+      rating: 4.9,
+      inStock: true,
+      category: 'dairy',
+      isOrganic: true
+    },
+    {
+      id: 21,
+      name: 'Fresh Raspberries',
+      price: 8.25,
+      unit: 'lb',
+      image: background,
+      seller: 'Berry Fresh Farms',
+      verified: true,
+      badges: ['organic'],
+      rating: 4.8,
+      inStock: true,
+      category: 'fruits',
+      isOrganic: true
+    },
+    {
+      id: 22,
+      name: 'Organic Kale',
+      price: 4.00,
+      unit: 'bunch',
+      image: heroImg,
+      seller: 'Green Valley Farms',
+      verified: true,
+      badges: ['fresh'],
+      rating: 4.7,
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: true
+    },
+    {
+      id: 23,
+      name: 'Fresh Carrots Bundle',
+      price: 5.50,
+      unit: 'lb',
+      image: background1,
+      seller: 'Carrot Patch Farm',
+      verified: false,
+      badges: ['fresh'],
+      rating: 4.6,
+      inStock: true,
+      category: 'vegetables',
+      isOrganic: false
+    },
+    {
+      id: 24,
+      name: 'Organic Olive Oil',
+      price: 18.50,
+      unit: 'bottle',
+      image: background2,
+      seller: 'Golden Grove Oils',
+      verified: true,
+      badges: ['organic'],
+      rating: 4.9,
+      inStock: true,
+      category: 'dairy',
+      isOrganic: true
     }
   ];
 
@@ -114,6 +378,46 @@ const ShopPage = () => {
       addToWishlist(product);
     }
   };
+
+  // Filter products based on selected filters
+  const filteredProducts = products.filter((product) => {
+    // Check category filter
+    const selectedCategories = Object.entries(filters.categories)
+      .filter(([key, value]) => value)
+      .map(([key]) => key);
+    
+    // If any category is selected, product must match one of them
+    if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) {
+      return false;
+    }
+
+    // Check organic filter
+    if (filters.organicOnly && !product.isOrganic) {
+      return false;
+    }
+
+    // Check search term
+    if (searchTerm && !product.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
+    }
+
+    return true;
+  });
+
+  // Sort products based on selected sort
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      case 'newest':
+        return b.id - a.id;
+      case 'popular':
+      default:
+        return b.rating - a.rating;
+    }
+  });
 
   const handleCategoryFilter = (category) => {
     setFilters(prev => ({
@@ -224,7 +528,7 @@ const ShopPage = () => {
                       onChange={() => handleCategoryFilter('vegetables')}
                     />
                     <span className="checkbox-custom"></span>
-                    Vegetables (42)
+                    Vegetables ({products.filter(p => p.category === 'vegetables').length})
                   </label>
 
                   <label className="filter-checkbox checked">
@@ -234,7 +538,7 @@ const ShopPage = () => {
                       onChange={() => handleCategoryFilter('fruits')}
                     />
                     <span className="checkbox-custom"></span>
-                    Fruits (28)
+                    Fruits ({products.filter(p => p.category === 'fruits').length})
                   </label>
 
                   <label className="filter-checkbox">
@@ -244,7 +548,7 @@ const ShopPage = () => {
                       onChange={() => handleCategoryFilter('dairy')}
                     />
                     <span className="checkbox-custom"></span>
-                    Dairy & Eggs (15)
+                    Dairy & Eggs ({products.filter(p => p.category === 'dairy').length})
                   </label>
                 </div>
 
@@ -287,7 +591,7 @@ const ShopPage = () => {
               {/* Products Grid */}
               <div className="products-section">
                 <div className="products-grid">
-                  {products.map((product) => (
+                  {sortedProducts.map((product) => (
                     <div key={product.id} className="product-card">
                       <div className="product-image">
                         <img src={product.image} alt={product.name} />

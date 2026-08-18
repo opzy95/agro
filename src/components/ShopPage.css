@@ -587,7 +587,8 @@
 .product-pricing {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .product-price {
@@ -599,12 +600,12 @@
 .product-unit {
   color: #666;
   font-size: 0.8rem;
-  margin-left: 0.25rem;
+  margin-left: -0.3rem;
 }
 
 .add-to-cart {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: #4a7c59;
   color: white;
@@ -617,6 +618,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .add-to-cart:hover {
@@ -636,8 +638,13 @@
 }
 
 .cart-quantity {
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 700;
+  line-height: 1.2;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  color: white;
 }
 
 @keyframes pulse {
