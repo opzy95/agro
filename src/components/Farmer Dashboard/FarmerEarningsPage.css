@@ -1,0 +1,488 @@
+/* Farmer Earnings Page Styles */
+.earnings-page {
+  width: 100%;
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0.5rem 0 0 0;
+}
+
+/* Stats Cards */
+.earnings-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+.stat-card.primary {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-color: #6ee7b7;
+}
+
+.stat-card.success {
+  background: white;
+}
+
+.stat-card.warning {
+  background: white;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-icon {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.stat-title {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.stat-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.stat-date {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0.5rem 0 0 0;
+}
+
+.stat-action {
+  background: white;
+  color: #059669;
+  border: 2px solid #059669;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.stat-action:hover {
+  background: #ecfdf5;
+}
+
+/* Earnings Grid */
+.earnings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Earnings Chart */
+.earnings-chart {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.chart-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.chart-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chart-period {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.chart-period:hover {
+  border-color: #059669;
+  color: #059669;
+}
+
+.chart-period.active {
+  background: #059669;
+  color: white;
+  border-color: #059669;
+}
+
+.chart-container {
+  margin-bottom: 1rem;
+}
+
+.chart-labels {
+  display: flex;
+  justify-content: space-around;
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* Recent Payouts */
+.recent-payouts {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.payouts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.payouts-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.view-all {
+  color: #059669;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.view-all:hover {
+  color: #047857;
+}
+
+.payouts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.payout-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.payout-item:hover {
+  background: #f3f4f6;
+}
+
+.payout-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.payout-details {
+  flex: 1;
+}
+
+.payout-type {
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.payout-date {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin: 0.25rem 0 0 0;
+}
+
+.payout-amount {
+  font-weight: 700;
+  color: #111827;
+  font-size: 1rem;
+  min-width: 80px;
+  text-align: right;
+}
+
+.payout-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.payout-status.processed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.payout-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Transaction History */
+.transaction-history {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.history-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.filter-btn {
+  background: white;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.filter-btn:hover {
+  border-color: #059669;
+  color: #059669;
+}
+
+/* Table */
+.history-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 120px 1fr 120px 120px;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+  font-weight: 600;
+  color: #6b7280;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 120px 120px;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  align-items: center;
+  transition: background 0.2s ease;
+}
+
+.table-row:hover {
+  background: #f9fafb;
+}
+
+.col-date {
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.col-description {
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.col-type {
+  text-align: center;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.type-badge.credit {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.type-badge.debit {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.col-amount {
+  text-align: right;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.col-amount.credit {
+  color: #059669;
+}
+
+.col-amount.debit {
+  color: #ef4444;
+}
+
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.pagination-info {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.pagination {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.pagination-btn:hover {
+  border-color: #059669;
+  color: #059669;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+  .earnings-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .earnings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .earnings-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .col-type,
+  .col-amount {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.75rem;
+  }
+
+  .stat-amount {
+    font-size: 1.5rem;
+  }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: 1fr;
+  }
+
+  .col-type,
+  .col-amount {
+    grid-column: auto;
+  }
+
+  .history-table {
+    font-size: 0.85rem;
+  }
+
+  .table-footer {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+}

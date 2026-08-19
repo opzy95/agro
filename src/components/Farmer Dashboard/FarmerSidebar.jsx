@@ -1,48 +1,51 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../routes/routeUtils';
-import './DashboardSidebar.css';
+import './FarmerSidebar.css';
 
-const DashboardSidebar = ({ user }) => {
+const FarmerSidebar = ({ farmer }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Clear any session/auth data if needed
-    // For now, just navigate to login
-    navigate(ROUTES.LOGIN);
+    navigate('/login');
   };
 
   const menuItems = [
     {
       icon: '📊',
       label: 'Dashboard',
-      path: '/customer/dashboard',
-      isActive: location.pathname === '/customer/dashboard'
+      path: '/farmer/dashboard',
+      isActive: location.pathname === '/farmer/dashboard'
     },
     {
       icon: '📦',
-      label: 'My Orders',
-      path: '/customer/orders',
-      isActive: location.pathname === '/customer/orders'
+      label: 'Products',
+      path: '/farmer/products',
+      isActive: location.pathname === '/farmer/products'
     },
     {
-      icon: '💝',
-      label: 'Wishlist',
-      path: '/customer/wishlist',
-      isActive: location.pathname === '/customer/wishlist'
+      icon: '🛒',
+      label: 'Orders',
+      path: '/farmer/orders',
+      isActive: location.pathname === '/farmer/orders'
     },
     {
-      icon: '💳',
-      label: 'Payment Methods',
-      path: '/customer/payment-methods',
-      isActive: location.pathname === '/customer/payment-methods'
+      icon: '💰',
+      label: 'Earnings',
+      path: '/farmer/earnings',
+      isActive: location.pathname === '/farmer/earnings'
+    },
+    {
+      icon: '📈',
+      label: 'Analytics',
+      path: '/farmer/analytics',
+      isActive: location.pathname === '/farmer/analytics'
     },
     {
       icon: '⚙️',
       label: 'Settings',
-      path: '/customer/settings',
-      isActive: location.pathname === '/customer/settings'
+      path: '/farmer/settings',
+      isActive: location.pathname === '/farmer/settings'
     }
   ];
 
@@ -56,26 +59,22 @@ const DashboardSidebar = ({ user }) => {
   ];
 
   return (
-    <div className="dashboard-sidebar">
+    <div className="farmer-sidebar">
       {/* Logo */}
       <div className="sidebar-logo">
         <Link to="/" className="logo-link">
-          <h2 className="logo-text">HarvestHub</h2>
+          <h2 className="logo-text">AgroFresh</h2>
         </Link>
       </div>
 
-      {/* User Profile */}
+      {/* Farmer Profile */}
       <div className="sidebar-profile">
         <div className="profile-avatar">
-          <img 
-            src={user?.avatar || "/api/placeholder/48/48"} 
-            alt="User Avatar" 
-            className="avatar-image"
-          />
+          <div className="avatar-fallback">👨‍🌾</div>
         </div>
         <div className="profile-info">
-          <h3 className="profile-welcome">Welcome back</h3>
-          <p className="profile-subtitle">Manage your harvest</p>
+          <h3 className="profile-welcome">{farmer?.name || 'Green Valley Farm'}</h3>
+          <p className="profile-subtitle">{farmer?.farmName || 'Premium Producer'}</p>
         </div>
       </div>
 
@@ -103,7 +102,7 @@ const DashboardSidebar = ({ user }) => {
             <li key={index} className="sidebar-nav-item">
               <Link 
                 to={item.path} 
-                className={`sidebar-nav-link ${item.isLogout ? 'logout-link' : ''}`}
+                className="sidebar-nav-link"
               >
                 <span className="nav-icon">{item.icon}</span>
                 <span className="nav-label">{item.label}</span>
@@ -121,14 +120,9 @@ const DashboardSidebar = ({ user }) => {
             </button>
           </li>
         </ul>
-
-        {/* Go to Shop Button */}
-        <Link to="/customer/shop" className="shop-button">
-          Go to Shop
-        </Link>
       </div>
     </div>
   );
 };
 
-export default DashboardSidebar;
+export default FarmerSidebar;

@@ -12,6 +12,8 @@ import ShopPage from '../components/ShopPage';
 import CartPage from '../components/CartPage';
 import Wishlist from '../components/Wishlist';
 import Footer from '../components/Footer';
+
+// Customer Dashboard Components
 import CustomerDashboardPage from '../components/Customer Dashboard/CustomerDashboardPage';
 import CustomerSettingsPage from '../components/Customer Dashboard/CustomerSettingsPage';
 import MyOrdersPage from '../components/Customer Dashboard/MyOrdersPage';
@@ -19,6 +21,14 @@ import PaymentMethodsPage from '../components/Customer Dashboard/PaymentMethodsP
 import CustomerShopPage from '../components/Customer Dashboard/CustomerShopPage';
 import CustomerWishlistPage from '../components/Customer Dashboard/CustomerWishlistPage';
 import CustomerCartPage from '../components/Customer Dashboard/CustomerCartPage';
+
+// Farmer Dashboard Components
+import FarmerEarningsPage from '../components/Farmer Dashboard/FarmerEarningsPage';
+import FarmerDashboardPage from '../components/Farmer Dashboard/FarmerDashboardPage';
+import FarmerProductsPage from '../components/Farmer Dashboard/FarmerProductsPage';
+import FarmerOrdersPage from '../components/Farmer Dashboard/FarmerOrdersPage';
+import FarmerAnalyticsPage from '../components/Farmer Dashboard/FarmerAnalyticsPage';
+import FarmerSettingsPage from '../components/Farmer Dashboard/FarmerSettingsPage';
 
 const AppRoutes = () => {
   return (
@@ -81,6 +91,14 @@ const AppRoutes = () => {
       <Route path="/customer/shop" element={<CustomerShopPage />} />
       <Route path="/customer/wishlist" element={<CustomerWishlistPage />} />
       <Route path="/customer/cart" element={<CustomerCartPage />} />
+      
+      {/* Farmer Dashboard Routes - No Header/Footer */}
+      <Route path="/farmer/dashboard" element={<FarmerDashboardPage />} />
+      <Route path="/farmer/products" element={<FarmerProductsPage />} />
+      <Route path="/farmer/orders" element={<FarmerOrdersPage />} />
+      <Route path="/farmer/earnings" element={<FarmerEarningsPage />} />
+      <Route path="/farmer/analytics" element={<FarmerAnalyticsPage />} />
+      <Route path="/farmer/settings" element={<FarmerSettingsPage />} />
       
       {/* Authentication Routes - No Header/Footer */}
       <Route path="/login" element={<Login />} />

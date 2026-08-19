@@ -11,7 +11,8 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    rememberMe: false
+    rememberMe: false,
+    userType: 'customer' // customer or farmer
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -28,11 +29,14 @@ const Login = () => {
     console.log('Login data:', formData);
     
     // Simulate login success - replace with actual authentication logic
-    // For now, we'll just navigate to dashboard immediately
-    // In real app, you'd validate credentials first
+    // For now, we'll just navigate to dashboard based on user type
     
-    // Redirect to customer dashboard on successful login
-    navigate('/customer/dashboard');
+    // Redirect based on user type
+    if (formData.userType === 'farmer') {
+      navigate('/farmer/dashboard');
+    } else {
+      navigate('/customer/dashboard');
+    }
   };
 
   return (
@@ -73,6 +77,23 @@ const Login = () => {
           </div>
 
           <form onSubmit={handleSubmit}>
+            {/* User Type Selection */}
+            <div className="form-group">
+              <label htmlFor="userType">Login as</label>
+              <div className="input-wrapper">
+                <select
+                  id="userType"
+                  name="userType"
+                  value={formData.userType}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="customer">Customer</option>
+                  <option value="farmer">Farmer</option>
+                </select>
+              </div>
+            </div>
+
             {/* Email Field */}
             <div className="form-group">
               <label htmlFor="email">Email</label>

@@ -1,0 +1,127 @@
+/* Farmer Layout Styles */
+.farmer-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  overflow: visible;
+  background: white;
+}
+
+/* Sidebar */
+.farmer-layout-sidebar {
+  flex-shrink: 0;
+  width: 200px;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+}
+
+/* Main Content Area */
+.farmer-layout-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+  height: auto;
+  overflow: visible;
+  background: #f9fafb;
+}
+
+/* TopBar */
+.farmer-layout-topbar {
+  flex-shrink: 0;
+  height: 80px;
+  border-bottom: 1px solid #e5e7eb;
+  overflow: visible;
+  background: white;
+}
+
+/* Page Content */
+.farmer-layout-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #f9fafb;
+  padding: 2rem;
+  min-height: calc(100vh - 80px);
+  display: block;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+/* Scrollbar */
+.farmer-layout-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.farmer-layout-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.farmer-layout-content::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.farmer-layout-content::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Sidebar Overlay for Mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .farmer-layout {
+    flex-direction: row;
+  }
+
+  .farmer-layout-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 999;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    width: 200px;
+  }
+
+  .farmer-layout-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .farmer-layout-sidebar.open ~ .sidebar-overlay {
+    display: block;
+  }
+
+  .farmer-layout-main {
+    height: auto;
+  }
+
+  .farmer-layout-content {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .farmer-layout-content {
+    padding: 1rem;
+  }
+}

@@ -8,6 +8,21 @@ export const ROUTES = {
   SHOP: '/shop',
   CART: '/cart',
   WISHLIST: '/wishlist',
+  // Customer Dashboard Routes
+  CUSTOMER_DASHBOARD: '/customer/dashboard',
+  CUSTOMER_SETTINGS: '/customer/settings',
+  CUSTOMER_ORDERS: '/customer/orders',
+  CUSTOMER_PAYMENT: '/customer/payment-methods',
+  CUSTOMER_SHOP: '/customer/shop',
+  CUSTOMER_WISHLIST: '/customer/wishlist',
+  CUSTOMER_CART: '/customer/cart',
+  // Farmer Dashboard Routes
+  FARMER_DASHBOARD: '/farmer/dashboard',
+  FARMER_PRODUCTS: '/farmer/products',
+  FARMER_ORDERS: '/farmer/orders',
+  FARMER_EARNINGS: '/farmer/earnings',
+  FARMER_ANALYTICS: '/farmer/analytics',
+  FARMER_SETTINGS: '/farmer/settings',
 };
 
 // Navigation helper functions

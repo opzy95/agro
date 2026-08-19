@@ -153,7 +153,8 @@
   align-items: center;
 }
 
-.input-wrapper input {
+.input-wrapper input,
+.input-wrapper select {
   width: 100%;
   padding: 0.875rem 1rem;
   border: 2px solid #e5e7eb;
@@ -164,7 +165,8 @@
   color: #000000;
 }
 
-.input-wrapper input:focus {
+.input-wrapper input:focus,
+.input-wrapper select:focus {
   outline: none;
   border-color: #4a7c59;
   background: white;
