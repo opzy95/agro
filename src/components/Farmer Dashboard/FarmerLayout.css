@@ -1,13 +1,13 @@
-/* Farmer Layout Styles */
+/* Farmer Layout Styles - Senior Fix */
 .farmer-layout {
   display: flex;
   width: 100%;
-  min-height: 100vh;
-  overflow: visible;
+  height: 100vh;
   background: white;
+  overflow: hidden;
 }
 
-/* Sidebar */
+/* Sidebar - Fixed Height */
 .farmer-layout-sidebar {
   flex-shrink: 0;
   width: 200px;
@@ -17,44 +17,45 @@
   display: flex;
   background: white;
   border-right: 1px solid #e5e7eb;
+  position: relative;
+  z-index: 100;
 }
 
-/* Main Content Area */
+/* Main Content Area - Flex Container */
 .farmer-layout-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  min-height: 100vh;
-  height: auto;
-  overflow: visible;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
   background: #f9fafb;
 }
 
-/* TopBar */
+/* TopBar - Fixed Height */
 .farmer-layout-topbar {
   flex-shrink: 0;
   height: 80px;
   border-bottom: 1px solid #e5e7eb;
-  overflow: visible;
   background: white;
+  z-index: 50;
+  overflow: visible;
 }
 
-/* Page Content */
+/* Page Content - Fills Remaining Space */
 .farmer-layout-content {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   background: #f9fafb;
   padding: 2rem;
-  min-height: calc(100vh - 80px);
+  width: 100%;
   display: block;
   position: relative;
   z-index: 1;
-  width: 100%;
 }
 
-/* Scrollbar */
+/* Scrollbar Styling */
 .farmer-layout-content::-webkit-scrollbar {
   width: 8px;
 }
@@ -85,6 +86,7 @@
 @media (max-width: 768px) {
   .farmer-layout {
     flex-direction: row;
+    height: 100vh;
   }
 
   .farmer-layout-sidebar {
@@ -112,7 +114,8 @@
   }
 
   .farmer-layout-main {
-    height: auto;
+    height: 100vh;
+    width: 100%;
   }
 
   .farmer-layout-content {

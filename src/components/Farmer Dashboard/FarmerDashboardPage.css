@@ -1,7 +1,7 @@
-/* Farmer Dashboard Page Styles */
+/* Farmer Dashboard Page Styles - Senior Refactor */
 .farmer-dashboard-page {
   width: 100%;
-  min-height: 100%;
+  height: 100%;
   display: block;
   position: relative;
   background: #f9fafb;
@@ -79,6 +79,7 @@
 
 .btn-secondary:hover {
   background: #ecfdf5;
+  color: black;
 }
 
 /* Stats Grid */

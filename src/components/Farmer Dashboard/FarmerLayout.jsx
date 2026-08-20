@@ -21,12 +21,12 @@ const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifica
         <FarmerSidebar farmer={farmer} />
       </aside>
 
-      {/* Sidebar Overlay - Sibling to sidebar */}
+      {/* Sidebar Overlay for Mobile */}
       {sidebarOpen && (
         <div className="sidebar-overlay" onClick={closeSidebar} />
       )}
 
-      {/* Main Content */}
+      {/* Main Content Container */}
       <div className="farmer-layout-main">
         {/* TopBar */}
         <div className="farmer-layout-topbar">
@@ -37,7 +37,7 @@ const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifica
           />
         </div>
 
-        {/* Page Content */}
+        {/* Page Content - Children Render Here */}
         <main className="farmer-layout-content">
           {children}
         </main>

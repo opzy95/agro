@@ -1,6 +1,8 @@
-/* Farmer Products Page */
+/* Farmer Products Page - Full Width */
 .farmer-products-page {
+  width: 100%;
   padding: 2rem;
+  display: block;
 }
 
 /* Page Header */
@@ -54,12 +56,13 @@
   font-weight: 700;
 }
 
-/* Stats Cards */
+/* Stats Cards - Full Width Responsive */
 .products-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+  width: 100%;
 }
 
 .stat-card {
@@ -110,12 +113,13 @@
   margin: 0;
 }
 
-/* Filters Section */
+/* Filters Section - Full Width */
 .products-filters {
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .search-box {
@@ -170,11 +174,12 @@
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
 }
 
-/* Products Grid */
+/* Products Grid - Optimized for Full Width */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1.5rem;
+  width: 100%;
 }
 
 .product-card {
@@ -211,6 +216,13 @@
   justify-content: center;
   font-size: 4rem;
   background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+  overflow: hidden;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .product-status {

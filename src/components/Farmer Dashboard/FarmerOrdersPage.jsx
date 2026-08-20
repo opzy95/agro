@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import FarmerLayout from './FarmerLayout';
+import './FarmerOrdersPage.css';
 
 const FarmerOrdersPage = () => {
   const [selectedTab, setSelectedTab] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const farmer = {
     name: 'Green Valley Farm',
@@ -10,46 +13,73 @@ const FarmerOrdersPage = () => {
     avatar: null
   };
 
+  // Order stats
+  const orderStats = [
+    {
+      title: 'TOTAL ORDERS',
+      value: '42',
+      icon: '📊',
+      color: 'total'
+    },
+    {
+      title: 'PENDING',
+      value: '7',
+      icon: '⏳',
+      color: 'pending'
+    },
+    {
+      title: 'PROCESSING',
+      value: '12',
+      icon: '🚛',
+      color: 'processing'
+    },
+    {
+      title: 'COMPLETED',
+      value: '23',
+      icon: '✅',
+      color: 'completed'
+    }
+  ];
+
   const orders = [
     {
-      id: '#ORD-092',
-      customer: 'Amina Bello',
-      product: 'Fresh Tomatoes (50kg)',
-      date: 'Today, 10:42 AM',
-      amount: '₦45,000',
-      status: 'Completed'
-    },
-    {
-      id: '#ORD-091',
-      customer: 'Chukwudi Eze',
-      product: 'Yam Tubers (100 pcs)',
-      date: 'Yesterday, 14:15 PM',
-      amount: '₦120,000',
-      status: 'Processing'
-    },
-    {
-      id: '#ORD-090',
-      customer: 'Fatima Yusuf',
-      product: 'Maize (Bag)',
-      date: 'Oct 24, 2023',
-      amount: '₦22,000',
+      id: '#HH1001',
+      customer: 'John Ade',
+      customerInitials: 'JA',
+      product: 'Fresh Tomatoes',
+      date: '11 Aug 2026',
+      quantity: '5 baskets',
+      amount: '₦42,500',
       status: 'Pending'
     },
     {
-      id: '#ORD-089',
-      customer: 'Oluwaseun Ade',
-      product: 'Ofada Rice (50kg)',
-      date: 'Oct 22, 2023',
-      amount: '₦58,000',
-      status: 'Cancelled'
+      id: '#HH1002',
+      customer: 'Mary James',
+      customerInitials: 'MJ',
+      product: 'Yam',
+      date: '10 Aug 2026',
+      quantity: '10 tubers',
+      amount: '₦35,000',
+      status: 'Processing'
+    },
+    {
+      id: '#HH1003',
+      customer: 'David Cole',
+      customerInitials: 'DC',
+      product: 'Rice',
+      date: '9 Aug 2026',
+      quantity: '3 bags',
+      amount: '₦78,000',
+      status: 'Completed'
     }
   ];
 
   const tabs = [
-    { id: 'all', label: 'All Orders', count: orders.length },
-    { id: 'completed', label: 'Completed', count: orders.filter(o => o.status === 'Completed').length },
-    { id: 'processing', label: 'Processing', count: orders.filter(o => o.status === 'Processing').length },
+    { id: 'all', label: 'All', count: orders.length },
     { id: 'pending', label: 'Pending', count: orders.filter(o => o.status === 'Pending').length },
+    { id: 'processing', label: 'Processing', count: orders.filter(o => o.status === 'Processing').length },
+    { id: 'completed', label: 'Completed', count: orders.filter(o => o.status === 'Completed').length },
+    { id: 'cancelled', label: 'Cancelled', count: 0 }
   ];
 
   const filteredOrders = selectedTab === 'all' 
@@ -68,184 +98,116 @@ const FarmerOrdersPage = () => {
 
   return (
     <FarmerLayout farmer={farmer} showSearch={true} showNotifications={true}>
-      <div style={{ 
-        background: '#f9fafb',
-        padding: '2rem',
-        minHeight: 'calc(100vh - 80px)'
-      }}>
+      <div className="farmer-orders-page">
         {/* Header */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '2rem'
-        }}>
-          <div>
-            <h1 style={{
-              fontSize: '1.75rem',
-              fontWeight: 700,
-              color: '#111827',
-              margin: 0
-            }}>Orders</h1>
-            <p style={{
-              color: '#6b7280',
-              margin: '0.5rem 0 0 0'
-            }}>Manage your customer orders</p>
+        <div className="orders-header">
+          <div className="header-content">
+            <h1>Orders</h1>
+            <p>Manage and track orders from your customers.</p>
           </div>
-          <button style={{
-            background: '#059669',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            padding: '0.75rem 1.5rem',
-            fontWeight: 600,
-            cursor: 'pointer'
-          }}>
-            Export Orders
-          </button>
         </div>
 
-        {/* Tabs */}
-        <div style={{
-          background: 'white',
-          borderRadius: '12px',
-          border: '1px solid #e5e7eb',
-          marginBottom: '1.5rem'
-        }}>
-          <div style={{
-            display: 'flex',
-            borderBottom: '1px solid #e5e7eb'
-          }}>
+        {/* Stats Cards */}
+        <div className="order-stats-grid">
+          {orderStats.map((stat, index) => (
+            <div key={index} className={`order-stat-card ${stat.color}`}>
+              <div className="stat-icon-wrapper">
+                <span className="stat-icon-bg">
+                  {stat.color === 'total' && <span className="stat-icon">📊</span>}
+                  {stat.color === 'pending' && <span className="stat-icon">⏳</span>}
+                  {stat.color === 'processing' && <span className="stat-icon">🚛</span>}
+                  {stat.color === 'completed' && <span className="stat-icon">✅</span>}
+                </span>
+              </div>
+              <div className="stat-content">
+                <p className="stat-title">{stat.title}</p>
+                <h2 className="stat-value">{stat.value}</h2>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Filters and Controls */}
+        <div className="orders-controls">
+          <div className="orders-tabs">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setSelectedTab(tab.id)}
-                style={{
-                  padding: '1rem 1.5rem',
-                  border: 'none',
-                  background: selectedTab === tab.id ? '#ecfdf5' : 'transparent',
-                  color: selectedTab === tab.id ? '#059669' : '#6b7280',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  borderBottom: selectedTab === tab.id ? '2px solid #059669' : 'none',
-                  borderRadius: '12px 12px 0 0'
-                }}
+                className={`tab-button ${selectedTab === tab.id ? 'active' : ''}`}
               >
-                {tab.label} ({tab.count})
+                {tab.label}
               </button>
             ))}
           </div>
 
-          {/* Orders Table */}
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{
-              width: '100%',
-              borderCollapse: 'collapse'
-            }}>
-              <thead style={{
-                background: '#f9fafb',
-                borderBottom: '2px solid #e5e7eb'
-              }}>
-                <tr>
-                  <th style={{
-                    padding: '1rem',
-                    textAlign: 'left',
-                    fontWeight: 600,
-                    color: '#6b7280',
-                    fontSize: '0.85rem',
-                    textTransform: 'uppercase'
-                  }}>ORDER ID</th>
-                  <th style={{
-                    padding: '1rem',
-                    textAlign: 'left',
-                    fontWeight: 600,
-                    color: '#6b7280',
-                    fontSize: '0.85rem',
-                    textTransform: 'uppercase'
-                  }}>CUSTOMER</th>
-                  <th style={{
-                    padding: '1rem',
-                    textAlign: 'left',
-                    fontWeight: 600,
-                    color: '#6b7280',
-                    fontSize: '0.85rem',
-                    textTransform: 'uppercase'
-                  }}>PRODUCT</th>
-                  <th style={{
-                    padding: '1rem',
-                    textAlign: 'left',
-                    fontWeight: 600,
-                    color: '#6b7280',
-                    fontSize: '0.85rem',
-                    textTransform: 'uppercase'
-                  }}>DATE</th>
-                  <th style={{
-                    padding: '1rem',
-                    textAlign: 'left',
-                    fontWeight: 600,
-                    color: '#6b7280',
-                    fontSize: '0.85rem',
-                    textTransform: 'uppercase'
-                  }}>AMOUNT</th>
-                  <th style={{
-                    padding: '1rem',
-                    textAlign: 'left',
-                    fontWeight: 600,
-                    color: '#6b7280',
-                    fontSize: '0.85rem',
-                    textTransform: 'uppercase'
-                  }}>STATUS</th>
+          {/* <div className="orders-actions">
+            <button className="action-btn">
+              📅 <span>Date</span>
+            </button>
+            <button className="action-btn">
+              ⚙️ <span>Sort</span>
+            </button>
+          </div> */}
+        </div>
+
+        {/* Orders Table */}
+        <div className="orders-table-container">
+          <table className="orders-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Date</th>
+                <th>Quantity</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredOrders.map((order) => (
+                <tr key={order.id}>
+                  <td className="order-id">{order.id}</td>
+                  <td className="customer-cell">
+                    <div className="customer-info">
+                      <div className="customer-avatar">
+                        {order.customerInitials}
+                      </div>
+                      <span>{order.customer}</span>
+                    </div>
+                  </td>
+                  <td>{order.product}</td>
+                  <td>{order.date}</td>
+                  <td>{order.quantity}</td>
+                  <td className="amount">{order.amount}</td>
+                  <td>
+                    <span className={`status-badge ${getStatusColor(order.status)}`}>
+                      {order.status === 'Pending' && '● '}
+                      {order.status === 'Processing' && '● '}
+                      {order.status === 'Completed' && '● '}
+                      {order.status}
+                    </span>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filteredOrders.map((order) => (
-                  <tr key={order.id} style={{
-                    borderBottom: '1px solid #f3f4f6'
-                  }}>
-                    <td style={{
-                      padding: '1rem',
-                      fontWeight: 600,
-                      color: '#111827'
-                    }}>{order.id}</td>
-                    <td style={{
-                      padding: '1rem',
-                      color: '#374151'
-                    }}>{order.customer}</td>
-                    <td style={{
-                      padding: '1rem',
-                      color: '#374151'
-                    }}>{order.product}</td>
-                    <td style={{
-                      padding: '1rem',
-                      color: '#374151'
-                    }}>{order.date}</td>
-                    <td style={{
-                      padding: '1rem',
-                      fontWeight: 600,
-                      color: '#111827'
-                    }}>{order.amount}</td>
-                    <td style={{ padding: '1rem' }}>
-                      <span style={{
-                        display: 'inline-block',
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '20px',
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                        textTransform: 'capitalize',
-                        background: order.status === 'Completed' ? '#d1fae5' : 
-                                   order.status === 'Processing' ? '#fef3c7' :
-                                   order.status === 'Pending' ? '#fecaca' : '#e5e7eb',
-                        color: order.status === 'Completed' ? '#065f46' :
-                               order.status === 'Processing' ? '#92400e' :
-                               order.status === 'Pending' ? '#991b1b' : '#374151'
-                      }}>
-                        {order.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="orders-pagination">
+          <div className="pagination-info">
+            Showing 1 to 3 of 42 entries
+          </div>
+          <div className="pagination-controls">
+            <button className="pagination-btn" disabled>
+              ❮
+            </button>
+            <button className="pagination-btn active">1</button>
+            <button className="pagination-btn">2</button>
+            <button className="pagination-btn">3</button>
+            <button className="pagination-btn">❯</button>
           </div>
         </div>
       </div>

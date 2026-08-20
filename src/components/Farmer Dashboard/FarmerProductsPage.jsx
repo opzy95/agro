@@ -3,6 +3,10 @@ import FarmerLayout from './FarmerLayout';
 import AddProductModal from './AddProductModal';
 import './FarmerProductsPage.css';
 
+// Import images from assets
+import tomatoImg from '../../assets/tomato.png';
+import bowlImg from '../../assets/bowl.png';
+
 const FarmerProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
@@ -16,38 +20,13 @@ const FarmerProductsPage = () => {
     avatar: '/api/placeholder/48/48'
   };
 
-  const productStats = [
-    {
-      title: 'Total Products',
-      value: '18',
-      icon: '📦'
-    },
-    {
-      title: 'Active',
-      value: '15',
-      icon: '✓',
-      color: 'success'
-    },
-    {
-      title: 'Out of Stock',
-      value: '2',
-      icon: '⚠️',
-      color: 'warning'
-    },
-    {
-      title: 'Drafts',
-      value: '1',
-      icon: '📝',
-      color: 'draft'
-    }
-  ];
-
-  const products = [
+  // Initial products with actual images from assets
+  const initialProducts = [
     {
       id: 1,
       name: 'Roma Tomatoes',
       category: 'Vegetables',
-      image: '🍅',
+      image: tomatoImg,
       status: 'Active',
       price: '₦12,500',
       unit: 'basket',
@@ -55,19 +34,19 @@ const FarmerProductsPage = () => {
     },
     {
       id: 2,
-      name: 'White Yams',
-      category: 'Tubers',
-      image: '🍠',
-      status: 'Out of Stock',
+      name: 'Fresh Produce Bowl',
+      category: 'Vegetables',
+      image: bowlImg,
+      status: 'Active',
       price: '₦35,000',
-      unit: 'tuber',
-      available: '0 tubers'
+      unit: 'basket',
+      available: '30 baskets'
     },
     {
       id: 3,
       name: 'Sweet Maize',
       category: 'Grains',
-      image: '🌽',
+      image: tomatoImg,
       status: 'Active',
       price: '₦8,000',
       unit: 'bag',
@@ -77,7 +56,7 @@ const FarmerProductsPage = () => {
       id: 4,
       name: 'Ofada Rice',
       category: 'Grains',
-      image: '🍚',
+      image: bowlImg,
       status: 'Active',
       price: '₦9,500',
       unit: 'bag',
@@ -87,7 +66,7 @@ const FarmerProductsPage = () => {
       id: 5,
       name: 'Fresh Lettuce',
       category: 'Vegetables',
-      image: '🥬',
+      image: tomatoImg,
       status: 'Active',
       price: '₦2,500',
       unit: 'bunch',
@@ -97,7 +76,7 @@ const FarmerProductsPage = () => {
       id: 6,
       name: 'Green Peppers',
       category: 'Vegetables',
-      image: '🫑',
+      image: bowlImg,
       status: 'Active',
       price: '₦3,500',
       unit: 'kg',
@@ -107,7 +86,7 @@ const FarmerProductsPage = () => {
       id: 7,
       name: 'Bitter Leaf',
       category: 'Vegetables',
-      image: '🌿',
+      image: tomatoImg,
       status: 'Out of Stock',
       price: '₦1,500',
       unit: 'bunch',
@@ -117,11 +96,40 @@ const FarmerProductsPage = () => {
       id: 8,
       name: 'Carrots',
       category: 'Vegetables',
-      image: '🥕',
+      image: bowlImg,
       status: 'Draft',
       price: '₦4,000',
       unit: 'kg',
       available: 'Not set'
+    }
+  ];
+
+  // State for products - allows adding new products
+  const [products, setProducts] = useState(initialProducts);
+
+  const productStats = [
+    {
+      title: 'Total Products',
+      value: products.length.toString(),
+      icon: '📦'
+    },
+    {
+      title: 'Active',
+      value: products.filter(p => p.status === 'Active').length.toString(),
+      icon: '✓',
+      color: 'success'
+    },
+    {
+      title: 'Out of Stock',
+      value: products.filter(p => p.status === 'Out of Stock').length.toString(),
+      icon: '⚠️',
+      color: 'warning'
+    },
+    {
+      title: 'Drafts',
+      value: products.filter(p => p.status === 'Draft').length.toString(),
+      icon: '📝',
+      color: 'draft'
     }
   ];
 
@@ -143,6 +151,24 @@ const FarmerProductsPage = () => {
       default:
         return '';
     }
+  };
+
+  // Handle adding new product to the list
+  const handleAddProduct = (productData) => {
+    const newProduct = {
+      id: Math.max(...products.map(p => p.id), 0) + 1,
+      name: productData.productName,
+      category: productData.category,
+      image: productData.images[0] || tomatoImg, // Use first uploaded image or default
+      status: productData.isDraft ? 'Draft' : 'Active',
+      price: `₦${productData.price}`,
+      unit: productData.unit,
+      available: `${productData.quantity} ${productData.unit}s`
+    };
+    
+    // Add new product to products list
+    setProducts([...products, newProduct]);
+    setShowAddProductModal(false);
   };
 
   return (
@@ -229,7 +255,15 @@ const FarmerProductsPage = () => {
             filteredProducts.map((product) => (
               <div key={product.id} className="product-card">
                 <div className="product-image-wrapper">
-                  <div className="product-image">{product.image}</div>
+                  <div className="product-image">
+                    {typeof product.image === 'string' && product.image.startsWith('data:') ? (
+                      <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : typeof product.image === 'string' && !product.image.startsWith('data:') ? (
+                      <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <span>{product.image}</span>
+                    )}
+                  </div>
                   <span className={`product-status ${getStatusColor(product.status)}`}>
                     {product.status === 'Active' && '● '}
                     {product.status}
@@ -263,11 +297,7 @@ const FarmerProductsPage = () => {
         <AddProductModal
           isOpen={showAddProductModal}
           onClose={() => setShowAddProductModal(false)}
-          onSave={(productData) => {
-            console.log('Product saved:', productData);
-            setShowAddProductModal(false);
-            // Here you would typically add the product to your state or send it to the backend
-          }}
+          onSave={handleAddProduct}
         />
       </div>
     </FarmerLayout>

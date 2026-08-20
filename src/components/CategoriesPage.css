@@ -107,6 +107,7 @@
   position: relative;
   height: 200px;
   overflow: hidden;
+  display: none;
 }
 
 .large-card .product-image {

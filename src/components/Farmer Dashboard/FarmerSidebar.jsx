@@ -69,7 +69,7 @@ const FarmerSidebar = ({ farmer }) => {
 
       {/* Farmer Profile */}
       <div className="sidebar-profile">
-        <div className="profile-avatar">
+        <div className="profile-avata">
           <div className="avatar-fallback">👨‍🌾</div>
         </div>
         <div className="profile-info">

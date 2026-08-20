@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FarmerLayout from './FarmerLayout';
 import './FarmerDashboardPage.css';
 
 const FarmerDashboardPage = () => {
+  const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('1Y');
 
   const farmer = {
@@ -110,19 +112,26 @@ const FarmerDashboardPage = () => {
 
   return (
     <FarmerLayout farmer={farmer} showSearch={true} showNotifications={true}>
-      <h1>hello</h1>
       <div className="farmer-dashboard-page">
+
         {/* Welcome Section */}
         <div className="welcome-section">
+          {/* <h1>hello</h1> */}
           <div className="welcome-content">
             <h1 className="welcome-title">Welcome back, Farmer! 👋</h1>
             <p className="welcome-subtitle">Here's what's happening with your farm business today.</p>
           </div>
           <div className="welcome-actions">
-            <button className="btn btn-secondary">
-              <span className="btn-icon">👁️</span> View Orders
+            <button 
+              className="btn btn-secondary"
+              onClick={() => navigate('/farmer/orders')}
+            >
+              <span className="btn-icon"></span> View Orders
             </button>
-            <button className="btn btn-primary">
+            <button 
+              className="btn btn-primary"
+              onClick={() => navigate('/farmer/products')}
+            >
               <span className="btn-icon">➕</span> Add Product
             </button>
           </div>
@@ -206,7 +215,7 @@ const FarmerDashboardPage = () => {
             <div className="products-list">
               {topProducts.map((product) => (
                 <div key={product.id} className="product-item">
-                  <div className="product-image">{product.image}</div>
+                  {/* <div className="product-image">{product.image}</div> */}
                   <div className="product-info">
                     <p className="product-name">{product.name}</p>
                     <p className="product-sales">{product.sales}</p>
@@ -223,7 +232,16 @@ const FarmerDashboardPage = () => {
         <div className="orders-section">
           <div className="section-header">
             <h2 className="section-title">Recent Orders</h2>
-            <a href="#" className="view-all-link">View All</a>
+            <a 
+              href="#" 
+              className="view-all-link"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/farmer/orders');
+              }}
+            >
+              View All
+            </a>
           </div>
           <div className="table-wrapper">
             <table className="orders-table">
@@ -262,3 +280,5 @@ const FarmerDashboardPage = () => {
 };
 
 export default FarmerDashboardPage;
+
+

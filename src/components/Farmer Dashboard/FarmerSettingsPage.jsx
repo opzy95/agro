@@ -14,7 +14,10 @@ const FarmerSettingsPage = () => {
     phone: '+234 801 234 5678',
     email: 'samuel.green@farm.com',
     bio: 'Experienced farmer with over 15 years in sustainable agriculture',
-    website: 'www.greenvalleyfarm.ng'
+    website: 'www.greenvalleyfarm.ng',
+    profileImage: null,
+    nin: '12345678901',
+    ninDocument: null
   });
 
   const [bankAccounts, setBankAccounts] = useState([
@@ -124,8 +127,31 @@ const FarmerSettingsPage = () => {
           <div className="settings-sidebar">
             <div className="settings-profile-card">
               <div className="profile-avatar-large">
-                <span>👨‍🌾</span>
+                {farmInfo.profileImage ? (
+                  <img src={farmInfo.profileImage} alt="Profile" className="profile-image-displayed" />
+                ) : (
+                  <span>👨‍🌾</span>
+                )}
               </div>
+              <input
+                type="file"
+                id="sidebarProfileImageInput"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setFarmInfo({...farmInfo, profileImage: reader.result});
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="sidebar-profile-image-input"
+              />
+              <label htmlFor="sidebarProfileImageInput" className="change-image-button">
+                Change Photo
+              </label>
               <div className="profile-info">
                 <h3>{farmInfo.firstName} {farmInfo.lastName}</h3>
                 <p>{farmInfo.farmName}</p>
@@ -197,6 +223,94 @@ const FarmerSettingsPage = () => {
                       rows="4"
                       placeholder="Tell customers about your farm and experience..."
                     />
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Location</label>
+                      <input
+                        type="text"
+                        value={farmInfo.location}
+                        onChange={(e) => setFarmInfo({...farmInfo, location: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Website (Optional)</label>
+                      <input
+                        type="url"
+                        value={farmInfo.website}
+                        onChange={(e) => setFarmInfo({...farmInfo, website: e.target.value})}
+                        placeholder="https://your-farm-website.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>NIN (National Identification Number)</label>
+                    <input
+                      type="text"
+                      value={farmInfo.nin}
+                      onChange={(e) => setFarmInfo({...farmInfo, nin: e.target.value})}
+                      placeholder="Enter your 11-digit NIN"
+                      maxLength="11"
+                    />
+                    <small style={{ color: '#9ca3af', marginTop: '0.5rem', display: 'block' }}>
+                      Your NIN must be 11 digits for verification purposes
+                    </small>
+                  </div>
+
+                  <div className="form-group">
+                    <label>NIN Document (Photo/Image)</label>
+                    <div className="document-upload">
+                      <div className="document-preview">
+                        {farmInfo.ninDocument ? (
+                          <>
+                            <img src={farmInfo.ninDocument} alt="NIN Document" className="document-image" />
+                            <div className="document-overlay">
+                              <button 
+                                className="change-document-btn"
+                                onClick={() => document.getElementById('ninDocumentInput').click()}
+                              >
+                                Change
+                              </button>
+                              <button 
+                                className="remove-document-btn"
+                                onClick={() => setFarmInfo({...farmInfo, ninDocument: null})}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="document-placeholder">
+                              <span>📄</span>
+                              <p>No document uploaded</p>
+                              <small>Upload a clear image of your NIN</small>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        id="ninDocumentInput"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setFarmInfo({...farmInfo, ninDocument: reader.result});
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="document-input"
+                      />
+                      <label htmlFor="ninDocumentInput" className="upload-document-button">
+                        Upload NIN Document
+                      </label>
+                    </div>
                   </div>
 
                   <div className="form-row">
