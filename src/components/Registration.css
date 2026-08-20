@@ -3,6 +3,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   min-height: 100vh;
+  height: auto;
   background: #f5f7fa;
 }
 
@@ -14,6 +15,7 @@
   align-items: center;
   justify-content: center;
   padding: 4rem 2rem;
+  box-sizing: border-box;
 }
 
 .registration-info {
@@ -60,10 +62,10 @@
 .registration-right {
   background: white;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: 2rem;
-  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .registration-form {
@@ -71,6 +73,8 @@
   max-width: 500px;
   background: white;
   padding: 2.5rem;
+  margin: auto 0;
+  box-sizing: border-box;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.05);

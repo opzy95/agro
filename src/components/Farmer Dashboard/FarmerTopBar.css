@@ -342,7 +342,7 @@
 }
 
 /* Mobile */
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .farmer-topbar {
     padding: 0.75rem 1rem;
     height: 64px;

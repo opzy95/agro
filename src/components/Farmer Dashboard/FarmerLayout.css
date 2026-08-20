@@ -83,7 +83,7 @@
 }
 
 /* Mobile Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .farmer-layout {
     flex-direction: row;
     height: 100vh;
