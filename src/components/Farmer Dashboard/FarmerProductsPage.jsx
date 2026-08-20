@@ -111,25 +111,29 @@ const FarmerProductsPage = () => {
     {
       title: 'Total Products',
       value: products.length.toString(),
-      icon: '📦'
+      icon: '📦',
+      status: 'All Status'
     },
     {
       title: 'Active',
       value: products.filter(p => p.status === 'Active').length.toString(),
       icon: '✓',
-      color: 'success'
+      color: 'success',
+      status: 'Active'
     },
     {
       title: 'Out of Stock',
       value: products.filter(p => p.status === 'Out of Stock').length.toString(),
       icon: '⚠️',
-      color: 'warning'
+      color: 'warning',
+      status: 'Out of Stock'
     },
     {
       title: 'Drafts',
       value: products.filter(p => p.status === 'Draft').length.toString(),
       icon: '📝',
-      color: 'draft'
+      color: 'draft',
+      status: 'Draft'
     }
   ];
 
@@ -188,11 +192,17 @@ const FarmerProductsPage = () => {
         {/* Stats Cards */}
         <div className="products-stats">
           {productStats.map((stat, index) => (
-            <div key={index} className={`stat-card ${stat.color || 'default'}`}>
+            <button
+              key={index}
+              type="button"
+              className={`stat-card ${stat.color || 'default'} ${selectedStatus === stat.status ? 'selected' : ''}`}
+              onClick={() => setSelectedStatus(stat.status)}
+              aria-pressed={selectedStatus === stat.status}
+            >
               <span className="stat-icon">{stat.icon}</span>
               <p className="stat-title">{stat.title}</p>
               <p className="stat-value">{stat.value}</p>
-            </div>
+            </button>
           ))}
         </div>
 

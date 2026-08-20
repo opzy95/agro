@@ -23,8 +23,7 @@ const ShopPage = () => {
       vegetables: false,
       fruits: true,
       dairy: false
-    },
-    organicOnly: false
+    }
   });
 
   // Product data
@@ -391,11 +390,6 @@ const ShopPage = () => {
       return false;
     }
 
-    // Check organic filter
-    if (filters.organicOnly && !product.isOrganic) {
-      return false;
-    }
-
     // Check search term
     if (searchTerm && !product.name.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
@@ -429,21 +423,13 @@ const ShopPage = () => {
     }));
   };
 
-  const toggleOrganicFilter = () => {
-    setFilters(prev => ({
-      ...prev,
-      organicOnly: !prev.organicOnly
-    }));
-  };
-
   const clearFilters = () => {
     setFilters({
       categories: {
         vegetables: false,
         fruits: false,
         dairy: false
-      },
-      organicOnly: false
+      }
     });
   };
 
@@ -552,18 +538,6 @@ const ShopPage = () => {
                   </label>
                 </div>
 
-                {/* Organic Filter */}
-                <div className="filter-group">
-                  <label className="organic-toggle">
-                    <input
-                      type="checkbox"
-                      checked={filters.organicOnly}
-                      onChange={toggleOrganicFilter}
-                    />
-                    <span className="toggle-slider"></span>
-                    Organic Certified Only
-                  </label>
-                </div>
               </div>
             </aside>
 
@@ -593,7 +567,7 @@ const ShopPage = () => {
                 <div className="products-grid">
                   {sortedProducts.map((product) => (
                     <div key={product.id} className="product-card">
-                      <div className="product-image">
+                      <div className="shop-product-image">
                         <img src={product.image} alt={product.name} />
                         {product.badges.map((badge, index) => (
                           <span key={index} className={`product-badge ${badge}`}>
@@ -610,7 +584,7 @@ const ShopPage = () => {
                           </svg>
                         </button>
                       </div>
-                      <div className="product-info">
+                      <div className="shop-product-info">
                         <div className="product-rating">
                           <div className="stars">
                             {[1, 2, 3, 4, 5].map((star) => (
@@ -624,24 +598,24 @@ const ShopPage = () => {
                             <span className="rating-number">{product.rating}</span>
                           </div>
                         </div>
-                        <h3 className="product-name">{product.name}</h3>
+                        <h3 className="shop-product-name">{product.name}</h3>
                         <div className="product-farm">
                           <span className="farm-icon">🏪</span>
                           <span className="farm-name">{product.seller}</span>
                           {product.verified && <span className="verified-icon">✓</span>}
                         </div>
-                        <div className="product-pricing">
-                          <span className="product-price">${product.price.toFixed(2)}</span>
-                          <span className="product-unit">/ {product.unit}</span>
+                        <div className="shop-product-pricing">
+                          <span className="shop-product-price">${product.price.toFixed(2)}</span>
+                          <span className="shop-product-unit">/ {product.unit}</span>
                           <button 
                             className={`add-to-cart ${getItemQuantity(product.id) > 0 ? 'in-cart' : ''}`}
                             onClick={() => handleAddToCart(product)}
                             disabled={!product.inStock}
                           >
                             {getItemQuantity(product.id) > 0 ? (
-                              <span className="cart-quantity">{getItemQuantity(product.id)}</span>
+                              <span className="cart-quantity">{getItemQuantity(product.id)} in cart</span>
                             ) : (
-                              '+'
+                              'Add to cart'
                             )}
                           </button>
                         </div>

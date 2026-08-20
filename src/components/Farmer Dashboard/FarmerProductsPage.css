@@ -70,12 +70,20 @@
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 1.5rem;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .stat-card:hover {
   border-color: #d1d5db;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card.selected {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
 }
 
 .stat-card.success {
@@ -144,7 +152,13 @@
   border-radius: 8px;
   font-size: 0.9rem;
   background: white;
+  color: #1f2937;
   transition: all 0.2s ease;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
 }
 
 .search-input:focus {
@@ -159,9 +173,15 @@
   border-radius: 8px;
   font-size: 0.9rem;
   background: white;
+  color: #1f2937;
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 140px;
+}
+
+.filter-select option {
+  color: #1f2937;
+  background: white;
 }
 
 .filter-select:hover {
