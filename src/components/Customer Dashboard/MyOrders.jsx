@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import tomatoImg from '../../assets/tomato.png';
+import bowlImg from '../../assets/bowl.png';
 import './MyOrders.css';
 
 const MyOrders = () => {
@@ -19,7 +21,7 @@ const MyOrders = () => {
           source: 'Sourced from Valley Farms',
           price: 42.00,
           quantity: 2,
-          image: '/api/placeholder/60/60'
+          image: bowlImg
         },
         {
           id: 2,
@@ -27,7 +29,7 @@ const MyOrders = () => {
           source: 'Sourced from Sunrise Acres',
           price: 18.50,
           quantity: 1,
-          image: '/api/placeholder/60/60'
+          image: tomatoImg
         }
       ]
     },
@@ -43,7 +45,7 @@ const MyOrders = () => {
           source: 'Sourced from Highland Roasters',
           price: 120.00,
           quantity: 1,
-          image: '/api/placeholder/60/60'
+          image: bowlImg
         }
       ]
     },
@@ -59,7 +61,23 @@ const MyOrders = () => {
           source: 'Sourced from Green Leaf Farms',
           price: 45.00,
           quantity: 3,
-          image: '/api/placeholder/60/60'
+          image: tomatoImg
+        }
+      ]
+    },
+    {
+      id: 'HH-9158',
+      datePlaced: 'Oct 28, 2024',
+      status: 'Cancelled',
+      total: 28.00,
+      items: [
+        {
+          id: 1,
+          name: 'Fresh Garden Produce Box',
+          source: 'Sourced from Green Leaf Farms',
+          price: 28.00,
+          quantity: 1,
+          image: bowlImg
         }
       ]
     }
@@ -126,6 +144,21 @@ const MyOrders = () => {
     }
   };
 
+  const filteredOrders = orders.filter((order) => {
+    const matchesFilter =
+      activeFilter === 'All Orders' ||
+      (activeFilter === 'Ongoing' && ['In Transit', 'Processing'].includes(order.status)) ||
+      (activeFilter === 'Completed' && order.status === 'Delivered') ||
+      (activeFilter === 'Cancelled' && order.status === 'Cancelled');
+    const searchValue = searchTerm.toLowerCase();
+    const matchesSearch =
+      !searchValue ||
+      order.id.toLowerCase().includes(searchValue) ||
+      order.items.some((item) => item.name.toLowerCase().includes(searchValue));
+
+    return matchesFilter && matchesSearch;
+  });
+
   return (
     <div className="my-orders">
       {/* Header Section */}
@@ -168,7 +201,7 @@ const MyOrders = () => {
 
       {/* Orders List */}
       <div className="orders-list">
-        {orders.map((order) => (
+        {filteredOrders.map((order) => (
           <div key={order.id} className="order-card">
             {/* Order Header */}
             <div className="order-header">

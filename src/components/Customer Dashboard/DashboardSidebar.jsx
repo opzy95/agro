@@ -6,6 +6,13 @@ import './DashboardSidebar.css';
 const DashboardSidebar = ({ user }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const profileName = user?.name || 'Customer';
+  const profileInitials = profileName
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
   const handleLogout = () => {
     // Clear any session/auth data if needed
@@ -66,16 +73,20 @@ const DashboardSidebar = ({ user }) => {
 
       {/* User Profile */}
       <div className="sidebar-profile">
-        <div className="profile-avatar">
-          <img 
-            src={user?.avatar || "/api/placeholder/48/48"} 
-            alt="User Avatar" 
-            className="avatar-image"
-          />
+        <div className="sidebar-avatar">
+          {user?.avatar && !user.avatar.includes('/api/placeholder/') ? (
+            <img
+              src={user.avatar}
+              alt={`${profileName}'s avatar`}
+              className="sidebar-avatar-image"
+            />
+          ) : (
+            <span className="sidebar-avatar-initials">{profileInitials}</span>
+          )}
         </div>
         <div className="profile-info">
           <h3 className="profile-welcome">Welcome back</h3>
-          <p className="profile-subtitle">Manage your harvest</p>
+          <p className="profile-subtitle">{profileName}</p>
         </div>
       </div>
 
