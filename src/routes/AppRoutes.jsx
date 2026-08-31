@@ -30,6 +30,13 @@ import FarmerOrdersPage from '../components/Farmer Dashboard/FarmerOrdersPage';
 import FarmerAnalyticsPage from '../components/Farmer Dashboard/FarmerAnalyticsPage';
 import FarmerSettingsPage from '../components/Farmer Dashboard/FarmerSettingsPage';
 
+// Admin Dashboard Components
+import AdminDashboardPage from '../components/Admin Dashboard/AdminDashboardPage';
+import AdminOverviewPage from '../components/Admin Dashboard/AdminOverviewPage';
+import AdminUsersPage from '../components/Admin Dashboard/AdminUsersPage';
+import AdminFinancialPage from '../components/Admin Dashboard/AdminFinancialPage';
+import AdminSettingsPage from '../components/Admin Dashboard/AdminSettingsPage';
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -99,6 +106,13 @@ const AppRoutes = () => {
       <Route path="/farmer/earnings" element={<FarmerEarningsPage />} />
       <Route path="/farmer/analytics" element={<FarmerAnalyticsPage />} />
       <Route path="/farmer/settings" element={<FarmerSettingsPage />} />
+      
+      {/* Admin Dashboard Routes - No Header/Footer */}
+      <Route path="/admin/inventory" element={<AdminDashboardPage />} />
+      <Route path="/admin/overview" element={<AdminOverviewPage />} />
+      <Route path="/admin/users" element={<AdminUsersPage />} />
+      <Route path="/admin/financial" element={<AdminFinancialPage />} />
+      <Route path="/admin/settings" element={<AdminSettingsPage />} />
       
       {/* Authentication Routes - No Header/Footer */}
       <Route path="/login" element={<Login />} />

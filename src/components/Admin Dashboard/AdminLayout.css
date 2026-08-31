@@ -1,0 +1,133 @@
+/* Admin Layout Styles */
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  background: #f9fafb;
+}
+
+/* Sidebar */
+.admin-layout-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  z-index: 100;
+}
+
+.admin-layout-sidebar.open {
+  width: 250px;
+}
+
+/* Main Content Area */
+.admin-layout-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* margin-left: 250px; */
+}
+
+/* TopBar */
+.admin-layout-topbar {
+  height: 80px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  z-index: 50;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Page Content */
+.admin-layout-content {
+  flex: 1;
+  overflow-y: auto;
+  background: #f9fafb;
+  padding: 1.5rem 2rem;
+  margin-left: 0;
+}
+
+/* Sidebar Overlay for Mobile */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+  display: none;
+}
+
+/* Scrollbar Styling */
+.admin-layout-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-layout-content::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 10px;
+}
+
+.admin-layout-content::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+.admin-layout-content::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Tablet Responsive (768px and below) */
+@media (max-width: 768px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-layout-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 250px;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 999;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .admin-layout-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .admin-layout-main {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .admin-layout-topbar {
+    z-index: 100;
+  }
+
+  .admin-layout-content {
+    padding: 1.5rem;
+  }
+}
+
+/* Mobile Responsive (480px and below) */
+@media (max-width: 480px) {
+  .admin-layout-topbar {
+    height: 70px;
+  }
+
+  .admin-layout-content {
+    padding: 1rem;
+  }
+
+  .admin-layout-sidebar {
+    width: 100%;
+  }
+}
