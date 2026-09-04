@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import VerificationBadge from '../VerificationBadge';
 import './FarmerTopBar.css';
 
 const FarmerTopBar = ({ 
   onMobileMenuToggle,
   showSearch = true,
-  showNotifications = true 
+  showNotifications = true,
+  farmer = {} 
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
@@ -146,6 +148,10 @@ const FarmerTopBar = ({
           >
             <div className="profile-avatar">
               <span className="profile-fallback">👨‍🌾</span>
+            </div>
+            <div className="profile-details">
+              <span className="profile-name">{farmer?.name || 'Green Valley Farm'}</span>
+              <VerificationBadge status={farmer?.verificationStatus || 'not_verified'} size="small" />
             </div>
           </button>
         </div>

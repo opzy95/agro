@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import VerificationBadge from '../VerificationBadge';
 import './FarmerSidebar.css';
 
 const FarmerSidebar = ({ farmer }) => {
@@ -75,6 +76,7 @@ const FarmerSidebar = ({ farmer }) => {
         <div className="profile-info">
           <h3 className="profile-welcome">{farmer?.name || 'Green Valley Farm'}</h3>
           <p className="profile-subtitle">{farmer?.farmName || 'Premium Producer'}</p>
+          <VerificationBadge status={farmer?.verificationStatus || 'not_verified'} size="small" />
         </div>
       </div>
 

@@ -17,7 +17,9 @@ const FarmerSettingsPage = () => {
     website: 'www.greenvalleyfarm.ng',
     profileImage: null,
     nin: '12345678901',
-    ninDocument: null
+    ninDocument: null,
+    isVerified: false, // Admin sets this after document verification
+    verificationStatus: 'not_verified' // verified, not_verified
   });
 
   const [bankAccounts, setBankAccounts] = useState([
@@ -56,7 +58,8 @@ const FarmerSettingsPage = () => {
   const farmer = {
     name: 'Green Valley Farm',
     farmName: 'Premium Producer',
-    avatar: null
+    avatar: null,
+    verificationStatus: farmInfo.verificationStatus // Use the verification status from form data
   };
 
   const tabs = [
@@ -155,9 +158,11 @@ const FarmerSettingsPage = () => {
               <div className="profile-info">
                 <h3>{farmInfo.firstName} {farmInfo.lastName}</h3>
                 <p>{farmInfo.farmName}</p>
-                <div className="verified-badge">
-                  <span className="checkmark">✓</span>
-                  Verified Farmer
+                <div className={`verified-badge ${farmInfo.verificationStatus}`}>
+                  {farmInfo.verificationStatus === 'verified' && <span className="checkmark">✓</span>}
+                  {farmInfo.verificationStatus === 'not_verified' && <span className="checkmark">❌</span>}
+                  {farmInfo.verificationStatus === 'verified' && 'Verified Farmer'}
+                  {farmInfo.verificationStatus === 'not_verified' && 'Not Verified'}
                 </div>
               </div>
             </div>

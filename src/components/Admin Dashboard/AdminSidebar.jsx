@@ -7,6 +7,7 @@ const AdminSidebar = ({ activeMenu }) => {
 
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: '📊', path: '/admin/overview' },
+    { id: 'orders', label: 'Order Management', icon: '🛒', path: '/admin/orders' },
     { id: 'users', label: 'User Management', icon: '👥', path: '/admin/users' },
     { id: 'inventory', label: 'Inventory Control', icon: '📦', path: '/admin/inventory' },
     { id: 'financial', label: 'Financial Settlement', icon: '💰', path: '/admin/financial' },

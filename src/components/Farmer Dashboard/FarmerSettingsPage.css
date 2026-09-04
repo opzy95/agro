@@ -90,6 +90,18 @@
   border: 1px solid rgba(5, 150, 105, 0.2);
 }
 
+.verified-badge.pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.verified-badge.rejected {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
 .checkmark {
   background: #059669;
   color: white;

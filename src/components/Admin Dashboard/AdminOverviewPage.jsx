@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import AdminLayout from './AdminLayout';
+import { orders } from '../../data/orders';
 import './AdminOverviewPage.css';
 
 const AdminOverviewPage = () => {
   const [timeRange, setTimeRange] = useState('monthly');
+  const totalRevenue = orders
+    .filter((order) => order.status !== 'Cancelled')
+    .reduce((sum, order) => sum + order.total, 0);
 
   const metrics = [
     {
-      title: 'Total GMV',
-      value: '$1.24M',
+      title: 'Total Revenue',
+      value: `₦${totalRevenue.toLocaleString('en-NG')}`,
       trend: '+12.5%',
       icon: '💵',
       positive: true

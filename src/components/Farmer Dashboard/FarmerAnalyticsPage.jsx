@@ -7,7 +7,8 @@ const FarmerAnalyticsPage = () => {
   const farmer = {
     name: 'Green Valley Farm',
     farmName: 'Premium Producer',
-    avatar: null
+    avatar: null,
+    verificationStatus: 'not_verified' // Demo: showing not verified status
   };
 
   const analytics = [

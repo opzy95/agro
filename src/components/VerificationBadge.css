@@ -1,0 +1,54 @@
+/* Verification Badge Component Styles */
+.verification-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 20px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+/* Size variants */
+.verification-badge.normal {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.verification-badge.small {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.verification-badge.large {
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+}
+
+/* Status variants */
+.verification-badge.verified {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #86efac;
+}
+
+.verification-badge.not_verified {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.badge-icon {
+  font-size: 0.9em;
+  line-height: 1;
+}
+
+.badge-text {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Hover effects */
+.verification-badge:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

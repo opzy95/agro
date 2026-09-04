@@ -33,6 +33,7 @@ import FarmerSettingsPage from '../components/Farmer Dashboard/FarmerSettingsPag
 // Admin Dashboard Components
 import AdminDashboardPage from '../components/Admin Dashboard/AdminDashboardPage';
 import AdminOverviewPage from '../components/Admin Dashboard/AdminOverviewPage';
+import AdminOrdersPage from '../components/Admin Dashboard/AdminOrdersPage';
 import AdminUsersPage from '../components/Admin Dashboard/AdminUsersPage';
 import AdminFinancialPage from '../components/Admin Dashboard/AdminFinancialPage';
 import AdminSettingsPage from '../components/Admin Dashboard/AdminSettingsPage';
@@ -110,6 +111,7 @@ const AppRoutes = () => {
       {/* Admin Dashboard Routes - No Header/Footer */}
       <Route path="/admin/inventory" element={<AdminDashboardPage />} />
       <Route path="/admin/overview" element={<AdminOverviewPage />} />
+      <Route path="/admin/orders" element={<AdminOrdersPage />} />
       <Route path="/admin/users" element={<AdminUsersPage />} />
       <Route path="/admin/financial" element={<AdminFinancialPage />} />
       <Route path="/admin/settings" element={<AdminSettingsPage />} />

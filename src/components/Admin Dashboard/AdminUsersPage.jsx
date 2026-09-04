@@ -8,7 +8,7 @@ const AdminUsersPage = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const users = [
+  const [users, setUsers] = useState([
     {
       id: 1,
       initials: 'OO',
@@ -17,6 +17,7 @@ const AdminUsersPage = () => {
       role: 'Farmer',
       nin: 'NIN -8932145',
       status: 'Verified',
+      verificationStatus: 'verified',
       dateJoined: 'Oct 12, 2023'
     },
     {
@@ -27,6 +28,7 @@ const AdminUsersPage = () => {
       role: 'Farmer',
       nin: 'BVN - Pending',
       status: 'Pending Review',
+      verificationStatus: 'not_verified',
       dateJoined: 'Nov 02, 2023'
     },
     {
@@ -37,6 +39,7 @@ const AdminUsersPage = () => {
       role: 'Customer (B2B)',
       nin: '-',
       status: 'Active',
+      verificationStatus: 'verified',
       dateJoined: 'Aug 15, 2023'
     },
     {
@@ -47,6 +50,7 @@ const AdminUsersPage = () => {
       role: 'Farmer',
       nin: 'NIN - 4451299',
       status: 'Suspended',
+      verificationStatus: 'not_verified',
       dateJoined: 'Jan 10, 2022'
     },
     {
@@ -57,6 +61,7 @@ const AdminUsersPage = () => {
       role: 'Customer',
       nin: '-',
       status: 'Active',
+      verificationStatus: 'verified',
       dateJoined: 'Sep 23, 2023'
     },
     {
@@ -67,6 +72,7 @@ const AdminUsersPage = () => {
       role: 'Farmer',
       nin: 'NIN - 7234891',
       status: 'Verified',
+      verificationStatus: 'verified',
       dateJoined: 'Jul 08, 2023'
     },
     {
@@ -77,6 +83,7 @@ const AdminUsersPage = () => {
       role: 'Customer (B2B)',
       nin: '-',
       status: 'Active',
+      verificationStatus: 'verified',
       dateJoined: 'Oct 30, 2023'
     },
     {
@@ -87,6 +94,7 @@ const AdminUsersPage = () => {
       role: 'Farmer',
       nin: 'BVN - Pending',
       status: 'Pending Review',
+      verificationStatus: 'not_verified',
       dateJoined: 'Nov 15, 2023'
     },
     {
@@ -97,6 +105,7 @@ const AdminUsersPage = () => {
       role: 'Customer',
       nin: '-',
       status: 'Active',
+      verificationStatus: 'verified',
       dateJoined: 'Jun 12, 2023'
     },
     {
@@ -107,9 +116,10 @@ const AdminUsersPage = () => {
       role: 'Farmer',
       nin: 'NIN - 5567234',
       status: 'Verified',
+      verificationStatus: 'verified',
       dateJoined: 'Aug 28, 2023'
     }
-  ];
+  ]);
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
@@ -147,6 +157,28 @@ const AdminUsersPage = () => {
     const colors = ['#059669', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
     const code = initials.charCodeAt(0) + initials.charCodeAt(1);
     return colors[code % colors.length];
+  };
+
+  const handleVerifyUser = (userId, action) => {
+    setUsers(users.map(user => {
+      if (user.id === userId) {
+        if (action === 'verify') {
+          return {
+            ...user,
+            verificationStatus: 'verified',
+            status: 'Verified'
+          };
+        } else if (action === 'reject') {
+          return {
+            ...user,
+            verificationStatus: 'not_verified',
+            status: 'Suspended'
+          };
+        }
+      }
+      return user;
+    }));
+    alert(`User ${action === 'verify' ? 'verified' : 'rejected'} successfully!`);
   };
 
   return (
@@ -234,6 +266,7 @@ const AdminUsersPage = () => {
                 <th>Role</th>
                 <th>ID / NIN</th>
                 <th>Status</th>
+                <th>Verification</th>
                 <th>Date Joined</th>
                 <th>Actions</th>
               </tr>
@@ -262,9 +295,30 @@ const AdminUsersPage = () => {
                       {user.status}
                     </span>
                   </td>
+                  <td>
+                    <span className={`verification-badge ${user.verificationStatus}`}>
+                      {user.verificationStatus === 'verified' && '✓ Verified'}
+                      {user.verificationStatus === 'not_verified' && '❌ Not Verified'}
+                    </span>
+                  </td>
                   <td className="date-cell">{user.dateJoined}</td>
                   <td className="actions-cell">
-                    {user.status === 'Pending Review' ? (
+                    {user.role.includes('Farmer') && user.verificationStatus === 'not_verified' ? (
+                      <div className="verification-actions">
+                        <button 
+                          className="btn-verify"
+                          onClick={() => handleVerifyUser(user.id, 'verify')}
+                        >
+                          ✓ Verify
+                        </button>
+                        <button 
+                          className="btn-reject"
+                          onClick={() => handleVerifyUser(user.id, 'reject')}
+                        >
+                          ❌ Reject
+                        </button>
+                      </div>
+                    ) : user.status === 'Pending Review' ? (
                       <button className="action-link review-link">Review Docs</button>
                     ) : (
                       <button className="action-link">View Profile</button>

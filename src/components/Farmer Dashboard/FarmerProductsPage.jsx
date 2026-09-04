@@ -17,7 +17,8 @@ const FarmerProductsPage = () => {
   const farmer = {
     name: 'Green Valley Farm',
     farmName: 'Premium Producer',
-    avatar: '/api/placeholder/48/48'
+    avatar: '/api/placeholder/48/48',
+    verificationStatus: 'verified' // This would come from the backend/context in real app
   };
 
   // Initial products with actual images from assets

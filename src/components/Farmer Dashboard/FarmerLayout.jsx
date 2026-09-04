@@ -34,6 +34,7 @@ const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifica
             onMobileMenuToggle={toggleSidebar}
             showSearch={showSearch}
             showNotifications={showNotifications}
+            farmer={farmer}
           />
         </div>
 

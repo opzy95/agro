@@ -340,6 +340,65 @@
   color: #991b1b;
 }
 
+/* Verification Badge */
+.verification-badge {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.verification-badge.verified {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.verification-badge.not_verified {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Verification Actions */
+.verification-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-verify {
+  padding: 0.4rem 0.75rem;
+  background: #059669;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-verify:hover {
+  background: #047857;
+}
+
+.btn-reject {
+  padding: 0.4rem 0.75rem;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reject:hover {
+  background: #b91c1c;
+}
+
 /* Actions Cell */
 .actions-cell {
   text-align: right;
