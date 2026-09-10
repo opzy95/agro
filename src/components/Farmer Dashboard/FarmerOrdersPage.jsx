@@ -42,7 +42,7 @@ const FarmerOrdersPage = () => {
     }
   ];
 
-  const orders = [
+  const [orders, setOrders] = useState([
     {
       id: '#HH1001',
       customer: 'John Ade',
@@ -71,15 +71,27 @@ const FarmerOrdersPage = () => {
       date: '9 Aug 2026',
       quantity: '3 bags',
       amount: '₦78,000',
-      status: 'Completed'
+      status: 'Delivered'
     }
-  ];
+  ]);
+
+  const nextStatus = {
+    Pending: 'Processing',
+    Processing: 'Shipped'
+  };
+
+  const updateOrderStatus = (orderId) => {
+    setOrders(currentOrders => currentOrders.map(order => {
+      if (order.id !== orderId || !nextStatus[order.status]) return order;
+      return { ...order, status: nextStatus[order.status] };
+    }));
+  };
 
   const tabs = [
     { id: 'all', label: 'All', count: orders.length },
     { id: 'pending', label: 'Pending', count: orders.filter(o => o.status === 'Pending').length },
     { id: 'processing', label: 'Processing', count: orders.filter(o => o.status === 'Processing').length },
-    { id: 'completed', label: 'Completed', count: orders.filter(o => o.status === 'Completed').length },
+    { id: 'shipped', label: 'Shipped', count: orders.filter(o => o.status === 'Shipped').length },
     { id: 'cancelled', label: 'Cancelled', count: 0 }
   ];
 
@@ -91,6 +103,8 @@ const FarmerOrdersPage = () => {
     switch (status) {
       case 'Completed': return 'completed';
       case 'Processing': return 'processing';
+      case 'Shipped': return 'shipped';
+      case 'Delivered': return 'delivered';
       case 'Pending': return 'pending';
       case 'Cancelled': return 'cancelled';
       default: return '';
@@ -114,10 +128,10 @@ const FarmerOrdersPage = () => {
             <div key={index} className={`order-stat-card ${stat.color}`}>
               <div className="stat-icon-wrapper">
                 <span className="stat-icon-bg">
-                  {stat.color === 'total' && <span className="stat-icon">📊</span>}
-                  {stat.color === 'pending' && <span className="stat-icon">⏳</span>}
-                  {stat.color === 'processing' && <span className="stat-icon">🚛</span>}
-                  {stat.color === 'completed' && <span className="stat-icon">✅</span>}
+                  {stat.color === 'total' && <span className="orders-stat-icon">📊</span>}
+                  {stat.color === 'pending' && <span className="orders-stat-icon">⏳</span>}
+                  {stat.color === 'processing' && <span className="orders-stat-icon">🚛</span>}
+                  {stat.color === 'completed' && <span className="orders-stat-icon">✅</span>}
                 </span>
               </div>
               <div className="stat-content">
@@ -183,12 +197,23 @@ const FarmerOrdersPage = () => {
                   <td>{order.quantity}</td>
                   <td className="amount">{order.amount}</td>
                   <td>
-                    <span className={`status-badge ${getStatusColor(order.status)}`}>
+                    <div className="order-status-actions">
+                      <span className={`status-badge ${getStatusColor(order.status)}`}>
                       {order.status === 'Pending' && '● '}
                       {order.status === 'Processing' && '● '}
-                      {order.status === 'Completed' && '● '}
+                      {order.status === 'Shipped' && '● '}
                       {order.status}
-                    </span>
+                      </span>
+                      {nextStatus[order.status] && (
+                        <button
+                          type="button"
+                          className="advance-status-btn"
+                          onClick={() => updateOrderStatus(order.id)}
+                        >
+                          Mark {nextStatus[order.status]}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

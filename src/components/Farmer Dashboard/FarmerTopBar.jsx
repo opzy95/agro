@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import VerificationBadge from '../VerificationBadge';
 import './FarmerTopBar.css';
 
@@ -8,6 +9,7 @@ const FarmerTopBar = ({
   showNotifications = true,
   farmer = {} 
 }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
 
@@ -143,8 +145,9 @@ const FarmerTopBar = ({
         <div className="profile-container">
           <button 
             className="profile-btn"
+            onClick={() => navigate('/farmer/settings')}
             aria-label="User profile"
-            title="Profile"
+            title="Open Settings"
           >
             <div className="profile-avatar">
               <span className="profile-fallback">👨‍🌾</span>

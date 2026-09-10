@@ -7,6 +7,99 @@ import './FarmerProductsPage.css';
 import tomatoImg from '../../assets/tomato.png';
 import bowlImg from '../../assets/bowl.png';
 
+const ProductCard = ({ product, getStatusColor, onOpen }) => {
+  const images = product.images?.length ? product.images : [product.image];
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  return (
+    <div className="product-card" onClick={() => onOpen(product)}>
+      <div className="product-image-wrapper">
+        <div className="product-image">
+          <img src={images[selectedImageIndex]} alt={product.name} />
+        </div>
+        <span className={`product-status ${getStatusColor(product.status)}`}>
+          {product.status === 'Active' && '● '}
+          {product.status}
+        </span>
+      </div>
+      {images.length > 1 && (
+        <div className="product-thumbnails" onClick={(event) => event.stopPropagation()}>
+          {images.map((image, index) => (
+            <button
+              key={`${product.id}-thumbnail-${index}`}
+              type="button"
+              className={`product-thumbnail ${index === selectedImageIndex ? 'selected' : ''}`}
+              onClick={() => setSelectedImageIndex(index)}
+              aria-label={`Show image ${index + 1} of ${images.length}`}
+            >
+              <img src={image} alt="" />
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="product-details">
+        <h3 className="product-name">{product.name}</h3>
+        <p className="product-category">{product.category}</p>
+        <div className="product-price-section">
+          <div className="product-price-info">
+            <p className="product-label">Price</p>
+            <p className="product-price">{product.price}<span className="price-unit">/ {product.unit}</span></p>
+          </div>
+          <div className="product-available-info">
+            <p className="product-label">Available</p>
+            <p className="product-available">{product.available}</p>
+          </div>
+        </div>
+      </div>
+      <button className="product-menu" type="button" onClick={(event) => event.stopPropagation()}>⋮</button>
+    </div>
+  );
+};
+
+const ProductDetailsModal = ({ product, getStatusColor, onClose }) => {
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  if (!product) return null;
+
+  const images = product.images?.length ? product.images : [product.image];
+
+  return (
+    <div className="product-details-overlay" onClick={onClose}>
+      <div className="product-details-modal" role="dialog" aria-modal="true" aria-labelledby="product-details-title" onClick={(event) => event.stopPropagation()}>
+        <button className="product-details-close" type="button" onClick={onClose} aria-label="Close product details">×</button>
+        <div className="product-details-gallery">
+          <div className="product-details-main-image">
+            <img src={images[selectedImageIndex]} alt={product.name} />
+          </div>
+          <div className="product-details-thumbnails">
+            {images.map((image, index) => (
+              <button
+                key={`details-thumbnail-${index}`}
+                type="button"
+                className={`product-details-thumbnail ${index === selectedImageIndex ? 'selected' : ''}`}
+                onClick={() => setSelectedImageIndex(index)}
+              >
+                <img src={image} alt={`${product.name} view ${index + 1}`} />
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="product-details-content">
+          <span className={`product-status ${getStatusColor(product.status)}`}>{product.status}</span>
+          <h2 id="product-details-title">{product.name}</h2>
+          <p className="product-details-category">{product.category}</p>
+          <p className="product-details-description">{product.description || 'Fresh produce supplied directly from Green Valley Farm.'}</p>
+          <div className="product-details-summary">
+            <div><span>Price</span><strong>{product.price} / {product.unit}</strong></div>
+            <div><span>Available</span><strong>{product.available}</strong></div>
+          </div>
+          {product.sku && <p className="product-details-meta"><strong>SKU:</strong> {product.sku}</p>}
+          {product.farmLocation && <p className="product-details-meta"><strong>Location:</strong> {product.farmLocation}</p>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const FarmerProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
@@ -28,6 +121,7 @@ const FarmerProductsPage = () => {
       name: 'Roma Tomatoes',
       category: 'Vegetables',
       image: tomatoImg,
+      images: [tomatoImg],
       status: 'Active',
       price: '₦12,500',
       unit: 'basket',
@@ -38,6 +132,7 @@ const FarmerProductsPage = () => {
       name: 'Fresh Produce Bowl',
       category: 'Vegetables',
       image: bowlImg,
+      images: [bowlImg],
       status: 'Active',
       price: '₦35,000',
       unit: 'basket',
@@ -48,6 +143,7 @@ const FarmerProductsPage = () => {
       name: 'Sweet Maize',
       category: 'Grains',
       image: tomatoImg,
+      images: [tomatoImg],
       status: 'Active',
       price: '₦8,000',
       unit: 'bag',
@@ -58,6 +154,7 @@ const FarmerProductsPage = () => {
       name: 'Ofada Rice',
       category: 'Grains',
       image: bowlImg,
+      images: [bowlImg],
       status: 'Active',
       price: '₦9,500',
       unit: 'bag',
@@ -68,6 +165,7 @@ const FarmerProductsPage = () => {
       name: 'Fresh Lettuce',
       category: 'Vegetables',
       image: tomatoImg,
+      images: [tomatoImg],
       status: 'Active',
       price: '₦2,500',
       unit: 'bunch',
@@ -78,6 +176,7 @@ const FarmerProductsPage = () => {
       name: 'Green Peppers',
       category: 'Vegetables',
       image: bowlImg,
+      images: [bowlImg],
       status: 'Active',
       price: '₦3,500',
       unit: 'kg',
@@ -88,6 +187,7 @@ const FarmerProductsPage = () => {
       name: 'Bitter Leaf',
       category: 'Vegetables',
       image: tomatoImg,
+      images: [tomatoImg],
       status: 'Out of Stock',
       price: '₦1,500',
       unit: 'bunch',
@@ -98,6 +198,7 @@ const FarmerProductsPage = () => {
       name: 'Carrots',
       category: 'Vegetables',
       image: bowlImg,
+      images: [bowlImg],
       status: 'Draft',
       price: '₦4,000',
       unit: 'kg',
@@ -107,6 +208,7 @@ const FarmerProductsPage = () => {
 
   // State for products - allows adding new products
   const [products, setProducts] = useState(initialProducts);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const productStats = [
     {
@@ -164,7 +266,11 @@ const FarmerProductsPage = () => {
       id: Math.max(...products.map(p => p.id), 0) + 1,
       name: productData.productName,
       category: productData.category,
-      image: productData.images[0] || tomatoImg, // Use first uploaded image or default
+      image: productData.images[0] || tomatoImg,
+      images: productData.images.length ? productData.images : [tomatoImg],
+      description: productData.description,
+      sku: productData.sku,
+      farmLocation: productData.farmLocation,
       status: productData.isDraft ? 'Draft' : 'Active',
       price: `₦${productData.price}`,
       unit: productData.unit,
@@ -264,38 +370,7 @@ const FarmerProductsPage = () => {
         <div className="products-grid">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
-              <div key={product.id} className="product-card">
-                <div className="product-image-wrapper">
-                  <div className="product-image">
-                    {typeof product.image === 'string' && product.image.startsWith('data:') ? (
-                      <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : typeof product.image === 'string' && !product.image.startsWith('data:') ? (
-                      <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <span>{product.image}</span>
-                    )}
-                  </div>
-                  <span className={`product-status ${getStatusColor(product.status)}`}>
-                    {product.status === 'Active' && '● '}
-                    {product.status}
-                  </span>
-                </div>
-                <div className="product-details">
-                  <h3 className="product-name">{product.name}</h3>
-                  <p className="product-category">{product.category}</p>
-                  <div className="product-price-section">
-                    <div className="product-price-info">
-                      <p className="product-label">Price</p>
-                      <p className="product-price">{product.price}<span className="price-unit">/ {product.unit}</span></p>
-                    </div>
-                    <div className="product-available-info">
-                      <p className="product-label">Available</p>
-                      <p className="product-available">{product.available}</p>
-                    </div>
-                  </div>
-                </div>
-                <button className="product-menu">⋮</button>
-              </div>
+              <ProductCard key={product.id} product={product} getStatusColor={getStatusColor} onOpen={setSelectedProduct} />
             ))
           ) : (
             <div className="no-products">
@@ -310,6 +385,7 @@ const FarmerProductsPage = () => {
           onClose={() => setShowAddProductModal(false)}
           onSave={handleAddProduct}
         />
+        <ProductDetailsModal product={selectedProduct} getStatusColor={getStatusColor} onClose={() => setSelectedProduct(null)} />
       </div>
     </FarmerLayout>
   );

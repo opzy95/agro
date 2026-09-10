@@ -18,8 +18,8 @@ const FarmerSettingsPage = () => {
     profileImage: null,
     nin: '12345678901',
     ninDocument: null,
-    isVerified: false, // Admin sets this after document verification
-    verificationStatus: 'not_verified' // verified, not_verified
+    isVerified: true,
+    verificationStatus: 'verified'
   });
 
   const [bankAccounts, setBankAccounts] = useState([

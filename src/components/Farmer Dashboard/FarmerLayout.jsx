@@ -6,6 +6,14 @@ import './FarmerLayout.css';
 const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifications = true }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const layoutFarmer = {
+    name: 'Green Valley Farm',
+    farmName: 'Premium Producer',
+    verificationStatus: 'verified',
+    ...farmer,
+    verificationStatus: 'verified'
+  };
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -18,7 +26,7 @@ const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifica
     <div className="farmer-layout">
       {/* Sidebar */}
       <aside className={`farmer-layout-sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <FarmerSidebar farmer={farmer} />
+        <FarmerSidebar farmer={layoutFarmer} />
       </aside>
 
       {/* Sidebar Overlay for Mobile */}
@@ -34,7 +42,7 @@ const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifica
             onMobileMenuToggle={toggleSidebar}
             showSearch={showSearch}
             showNotifications={showNotifications}
-            farmer={farmer}
+            farmer={layoutFarmer}
           />
         </div>
 
