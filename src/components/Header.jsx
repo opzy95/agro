@@ -68,8 +68,6 @@ const Header = () => {
             <li><Link to={ROUTES.HOME} className="nav-link" onClick={closeMenu}>Home</Link></li>
             <li><Link to={ROUTES.SHOP} className="nav-link" onClick={closeMenu}>Shop</Link></li>
             <li><Link to={ROUTES.CATEGORIES} className="nav-link" onClick={closeMenu}>Categories</Link></li>
-            <li><a href="#about" className="nav-link" onClick={closeMenu}>About</a></li>
-            <li><a href="#contact" className="nav-link" onClick={closeMenu}>Contact</a></li>
           </ul>
           
           {/* Mobile Auth Buttons */}

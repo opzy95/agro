@@ -122,7 +122,7 @@ const LandingPage = () => {
       </section>
 
       {/* About Section */}
-      <section className="about-section">
+      <section id="about" className="about-section">
         <div className="container">
           <div className="about-content">
             <div className="about-text">
@@ -241,6 +241,35 @@ const LandingPage = () => {
                 <span>Family Customer</span>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className="contact-section">
+        <div className="container">
+          <div className="contact-content">
+            <div className="contact-text">
+              <h2>Get in Touch</h2>
+              <p>
+                Have a question about our products, delivery, or partner farms? Our team
+                is here to help you make every fresh choice with confidence.
+              </p>
+              <div className="contact-details">
+                <p><strong>Email:</strong> hello@agrofresh.com</p>
+                <p><strong>Phone:</strong> +1 (555) 123-4567</p>
+                <p><strong>Hours:</strong> Monday - Saturday, 8:00 AM - 6:00 PM</p>
+              </div>
+            </div>
+            <form className="contact-form">
+              <label htmlFor="contact-name">Name</label>
+              <input id="contact-name" type="text" placeholder="Your name" />
+              <label htmlFor="contact-email">Email</label>
+              <input id="contact-email" type="email" placeholder="you@example.com" />
+              <label htmlFor="contact-message">Message</label>
+              <textarea id="contact-message" rows="4" placeholder="How can we help?" />
+              <button type="submit" className="btn btn-primary">Send Message</button>
+            </form>
           </div>
         </div>
       </section>

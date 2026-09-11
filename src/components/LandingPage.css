@@ -17,6 +17,7 @@
   text-align: center;
   margin-bottom: 3rem;
   color: #2d5016;
+  margin-bottom: 20px !important;
 }
 
 /* Common Button Styles */
@@ -284,9 +285,86 @@
   display: block;
 }
 
+/* Contact Section */
+.contact-section {
+  padding: 5rem 0;
+  background: rgb(232,240,229);
+}
+
+.contact-section .container {
+  padding: 0 2rem;
+}
+
+.contact-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.contact-text h2 {
+  font-size: 2.5rem;
+  color: #2d5016;
+  margin-bottom: 1.5rem;
+}
+
+.contact-text > p,
+.contact-details p {
+  color: #666;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.contact-details {
+  margin-top: 2rem;
+}
+
+.contact-details strong {
+  color: #2d5016;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.contact-form label {
+  color: #2d5016;
+  font-weight: 600;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid #d8e0d5;
+  border-radius: 8px;
+  font: inherit;
+  color: #333;
+  background: #f8f9fa;
+  resize: vertical;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: #4a7c59;
+  box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.12);
+}
+
+.contact-form .btn {
+  align-self: flex-start;
+  margin-top: 0.75rem;
+}
+
 /* How It Works Section */
 .how-it-works-section {
-  padding: 5rem 0;
+  /* padding: 5rem 0; */
   background-color: rgb(255,255,255);
 }
 
@@ -351,6 +429,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
+  margin-top: 30px;
 }
 
 .partner-card {
@@ -492,6 +571,11 @@
     gap: 2rem;
   }
 
+  .contact-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
   .category-grid,
   .features-grid,
   .steps-grid,
@@ -499,6 +583,7 @@
   .testimonials-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+    /* margin-top: 20px !important; */
   }
 
   .container {
