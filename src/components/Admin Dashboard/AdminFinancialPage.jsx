@@ -34,6 +34,8 @@ const AdminFinancialPage = () => {
       id: 'FRM-8921',
       farmer: 'Oakridge Farms',
       initials: 'OF',
+      bankName: 'GreenField Bank',
+      accountNumber: '**** 8921',
       balance: '$12,450.00',
       fee: '$622.50 (5%)',
       status: 'Pending',
@@ -43,6 +45,8 @@ const AdminFinancialPage = () => {
       id: 'FRM-4432',
       farmer: 'Valley Veggies',
       initials: 'VV',
+      bankName: 'Harvest Trust',
+      accountNumber: '**** 4432',
       balance: '$8,120.00',
       fee: '$486.00 (5%)',
       status: 'Pending',
@@ -52,6 +56,8 @@ const AdminFinancialPage = () => {
       id: 'FRM-1109',
       farmer: 'Sunrise Orchards',
       initials: 'SO',
+      bankName: 'Farmers First Bank',
+      accountNumber: '**** 1109',
       balance: '$4,500.00',
       fee: '$225.00 (5%)',
       status: 'Cleared',
@@ -161,6 +167,8 @@ const AdminFinancialPage = () => {
                 <thead>
                   <tr>
                     <th>Farmer/Vendor</th>
+                    <th>Bank Name</th>
+                    <th>Account Number</th>
                     <th>Available Balance</th>
                     <th>Platform Fee</th>
                     <th>Status</th>
@@ -179,6 +187,8 @@ const AdminFinancialPage = () => {
                           </div>
                         </div>
                       </td>
+                      <td className="bank-cell">{payout.bankName}</td>
+                      <td className="account-cell">{payout.accountNumber}</td>
                       <td className="balance-cell">{payout.balance}</td>
                       <td className="fee-cell">{payout.fee}</td>
                       <td>
