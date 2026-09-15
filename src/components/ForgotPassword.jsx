@@ -10,12 +10,36 @@ const ForgotPassword = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetError, setResetError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Password reset requested for:', email);
+    setVerificationCode('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setResetError('');
     setIsSubmitted(true);
-    // Handle password reset logic here
+  };
+
+  const handleResetPassword = (e) => {
+    e.preventDefault();
+
+    if (!/^\d{6}$/.test(verificationCode)) {
+      setResetError('Enter the 6-digit code sent to your email.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setResetError('Passwords do not match.');
+      return;
+    }
+
+    console.log('Password reset completed for:', email);
+    navigate(ROUTES.LOGIN);
   };
 
   return (
@@ -70,7 +94,7 @@ const ForgotPassword = () => {
                         name="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="farmer@harvesthub.com"
+                        // placeholder="farmer@harvesthub.com"
                         required
                       />
                     </div>
@@ -91,26 +115,86 @@ const ForgotPassword = () => {
               </>
             ) : (
               <>
-                <div className="success-icon">📧</div>
-                <h3>Check Your Email</h3>
+                <div className="success-icon">🔐</div>
+                <h3>Reset Your Password</h3>
                 <p className="form-subtitle">
-                  We've sent a password reset link to <strong>{email}</strong>. 
-                  Please check your email and follow the instructions to reset your password.
+                  Enter the 6-digit code sent to <strong>{email}</strong>, then create a new password.
                 </p>
-                
-                <div className="success-actions">
-                  <button type="button" onClick={() => navigate(ROUTES.LOGIN)} className="reset-btn">
-                    Back to Login
+
+                <form onSubmit={handleResetPassword}>
+                  <div className="form-group">
+                    <label htmlFor="verificationCode">Verification Code</label>
+                    <div className="input-wrapper">
+                      {/* <span className="input-icon">#</span> */}
+                      <input
+                        type="text"
+                        id="verificationCode"
+                        name="verificationCode"
+                        value={verificationCode}
+                        onChange={(e) => {
+                          setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6));
+                          setResetError('');
+                        }}
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="Enter 6-digit code"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="newPassword">New Password</label>
+                    <div className="input-wrapper">
+                      {/* <span className="input-icon">●</span> */}
+                      <input
+                        type="password"
+                        id="newPassword"
+                        name="newPassword"
+                        value={newPassword}
+                        onChange={(e) => {
+                          setNewPassword(e.target.value);
+                          setResetError('');
+                        }}
+                        placeholder="Enter new password"
+                        minLength={8}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="confirmPassword">Confirm Password</label>
+                    <div className="input-wrapper">
+                      {/* <span className="input-icon">●</span> */}
+                      <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        value={confirmPassword}
+                        onChange={(e) => {
+                          setConfirmPassword(e.target.value);
+                          setResetError('');
+                        }}
+                        placeholder="Confirm new password"
+                        minLength={8}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {resetError && <p className="form-error">{resetError}</p>}
+
+                  <button type="submit" className="reset-btn">
+                    Save New Password
                   </button>
-                  
-                  <button 
-                    type="button" 
-                    onClick={() => setIsSubmitted(false)} 
-                    className="try-again-link"
-                  >
-                    Try another email
-                  </button>
-                </div>
+
+                  <div className="back-to-login">
+                    <button type="button" onClick={() => navigate(ROUTES.LOGIN)} className="back-link">
+                      ← Back to Login
+                    </button>
+                  </div>
+                </form>
               </>
             )}
           </div>
