@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ROUTES } from '../routes/routeUtils';
-import { login } from '../services/authService';
+import { login, resendVerificationCode } from '../services/authService';
 import './Login.css';
 
 // Import your background images
@@ -16,7 +16,9 @@ const Login = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showVerificationRecovery, setShowVerificationRecovery] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -29,6 +31,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
+    setShowVerificationRecovery(false);
     setIsSubmitting(true);
 
     try {
@@ -48,8 +51,32 @@ const Login = () => {
       navigate(dashboardPath);
     } catch (error) {
       setErrorMessage(error.message || 'Unable to connect to the server.');
+      setShowVerificationRecovery(
+        error.code === 'EMAIL_NOT_VERIFIED' ||
+        error.emailVerified === false ||
+        /verify your email|email.*verif/i.test(error.message || '')
+      );
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!formData.email) {
+      setErrorMessage('Enter your email address first.');
+      return;
+    }
+
+    setErrorMessage('');
+    setIsResending(true);
+
+    try {
+      await resendVerificationCode(formData.email);
+      navigate(ROUTES.VERIFY_ACCOUNT, { state: { email: formData.email } });
+    } catch (error) {
+      setErrorMessage(error.message || 'Unable to send a new verification code.');
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -156,6 +183,17 @@ const Login = () => {
             </div>
 
             {errorMessage && <p className="login-error" role="alert">{errorMessage}</p>}
+
+            {showVerificationRecovery && (
+              <button
+                type="button"
+                className="resend-verification-btn"
+                onClick={handleResendVerification}
+                disabled={isResending}
+              >
+                {isResending ? 'Sending verification email...' : 'Resend verification email'}
+              </button>
+            )}
 
             {/* Sign In Button */}
             <button type="submit" className="sign-in-btn" disabled={isSubmitting}>

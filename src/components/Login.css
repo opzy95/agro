@@ -265,6 +265,23 @@
   margin: -1rem 0 1rem;
 }
 
+.resend-verification-btn {
+  width: 100%;
+  margin: -0.5rem 0 1rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid #4a7c59;
+  border-radius: 8px;
+  background: white;
+  color: #4a7c59;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.resend-verification-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 .sign-in-btn:disabled {
   cursor: not-allowed;
   opacity: 0.7;

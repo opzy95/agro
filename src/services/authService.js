@@ -13,7 +13,9 @@ const request = async (path, options = {}) => {
   const result = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(result.message || 'The server could not complete the request.');
+    const error = new Error(result.message || 'The server could not complete the request.');
+    Object.assign(error, result);
+    throw error;
   }
 
   return result;
@@ -31,6 +33,27 @@ export const login = async ({ email, password, rememberMe }) => {
   }
 
   return result;
+};
+
+export const register = async ({ userType, ...registrationData }) => {
+  return request('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({ role: userType, ...registrationData })
+  });
+};
+
+export const verifyEmail = async ({ email, code }) => {
+  return request('/auth/verify-email', {
+    method: 'POST',
+    body: JSON.stringify({ email, code })
+  });
+};
+
+export const resendVerificationCode = async (email) => {
+  return request('/auth/resend-verification', {
+    method: 'POST',
+    body: JSON.stringify({ email })
+  });
 };
 
 export const requestPasswordReset = async (email) => {
