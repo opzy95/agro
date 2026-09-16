@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../routes/routeUtils';
+import { logout } from '../../services/authService';
 import './DashboardSidebar.css';
 
 const DashboardSidebar = ({ user }) => {
@@ -15,8 +16,7 @@ const DashboardSidebar = ({ user }) => {
     .toUpperCase();
 
   const handleLogout = () => {
-    // Clear any session/auth data if needed
-    // For now, just navigate to login
+    logout();
     navigate(ROUTES.LOGIN);
   };
 

@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import LandingPage from '../components/LandingPage';
 import Login from '../components/Login';
 import Registration from '../components/Registration';
+import VerifyAccount from '../components/VerifyAccount';
 import ForgotPassword from '../components/ForgotPassword';
 import CategoriesPage from '../components/CategoriesPage';
 import ShopPage from '../components/ShopPage';
@@ -119,6 +120,7 @@ const AppRoutes = () => {
       {/* Authentication Routes - No Header/Footer */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Registration />} />
+      <Route path="/verify-account" element={<VerifyAccount />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       
       {/* Catch all route - redirect to home */}

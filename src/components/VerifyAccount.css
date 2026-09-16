@@ -1,0 +1,142 @@
+.verify-account-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #edf7ef 0%, #f8faf9 55%, #e4f0e6 100%);
+}
+
+.verify-account-panel {
+  width: 100%;
+  max-width: 460px;
+  padding: 3rem;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid rgba(45, 80, 22, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(45, 80, 22, 0.12);
+  box-sizing: border-box;
+}
+
+.verify-account-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2.25rem;
+  color: #4a7c59;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.verify-account-logo-icon {
+  font-size: 1.8rem;
+}
+
+.verify-account-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  border-radius: 50%;
+  background: #e8f4ea;
+  color: #2d5016;
+  font-size: 1.7rem;
+}
+
+.verify-account-panel h1 {
+  margin: 0 0 0.75rem;
+  color: #2d3748;
+  font-size: 1.8rem;
+  letter-spacing: 0;
+}
+
+.verify-account-subtitle {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.verify-account-form {
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.verify-account-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.verify-account-form input {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  box-sizing: border-box;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  color: #111827;
+  background: #f9fafb;
+  font-size: 1.25rem;
+  letter-spacing: 0.35rem;
+  text-align: center;
+}
+
+.verify-account-form input:focus {
+  outline: none;
+  border-color: #4a7c59;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.1);
+}
+
+.verify-account-form input::placeholder {
+  color: #cbd5e1;
+  letter-spacing: 0.35rem;
+}
+
+.verify-account-button {
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 0;
+  border-radius: 10px;
+  color: #ffffff;
+  background: #4a7c59;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.verify-account-button:hover {
+  background: #2d5016;
+}
+
+.verify-account-login-link {
+  margin-top: 1.5rem;
+  padding: 0;
+  border: 0;
+  color: #4a7c59;
+  background: transparent;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.verify-account-login-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .verify-account-container {
+    padding: 1rem;
+  }
+
+  .verify-account-panel {
+    padding: 2rem 1.25rem;
+  }
+}

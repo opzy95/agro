@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import VerificationBadge from '../VerificationBadge';
+import { logout } from '../../services/authService';
 import './FarmerSidebar.css';
 
 const FarmerSidebar = ({ farmer }) => {
@@ -8,6 +9,7 @@ const FarmerSidebar = ({ farmer }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    logout();
     navigate('/login');
   };
 

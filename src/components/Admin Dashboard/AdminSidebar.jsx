@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { logout } from '../../services/authService';
 import './AdminSidebar.css';
 
 const AdminSidebar = ({ activeMenu }) => {
@@ -16,6 +17,11 @@ const AdminSidebar = ({ activeMenu }) => {
 
   const handleMenuClick = (path) => {
     navigate(path);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -50,7 +56,7 @@ const AdminSidebar = ({ activeMenu }) => {
           <span className="menu-icon">❓</span>
           <span className="menu-label">Support</span>
         </button>
-        <button className="menu-item logout">
+        <button className="menu-item logout" onClick={handleLogout}>
           <span className="menu-icon">🚪</span>
           <span className="menu-label">Logout</span>
         </button>

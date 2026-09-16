@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../routes/routeUtils';
+import { requestPasswordReset, resetPassword } from '../services/authService';
 import './ForgotPassword.css';
 
 // Import your background images
@@ -14,18 +15,27 @@ const ForgotPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetError, setResetError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Password reset requested for:', email);
-    setVerificationCode('');
-    setNewPassword('');
-    setConfirmPassword('');
     setResetError('');
-    setIsSubmitted(true);
+
+    try {
+      setIsSubmitting(true);
+      await requestPasswordReset(email);
+      setVerificationCode('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setIsSubmitted(true);
+    } catch (error) {
+      setResetError(error.message || 'Unable to send the reset code.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleResetPassword = (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
 
     if (!/^\d{6}$/.test(verificationCode)) {
@@ -38,8 +48,20 @@ const ForgotPassword = () => {
       return;
     }
 
-    console.log('Password reset completed for:', email);
-    navigate(ROUTES.LOGIN);
+    try {
+      setIsSubmitting(true);
+      await resetPassword({
+        email,
+        code: verificationCode,
+        password: newPassword,
+        confirmPassword
+      });
+      navigate(ROUTES.LOGIN);
+    } catch (error) {
+      setResetError(error.message || 'Unable to reset your password.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -100,9 +122,10 @@ const ForgotPassword = () => {
                     </div>
                   </div>
 
-                  {/* Send Reset Link Button */}
-                  <button type="submit" className="reset-btn">
-                    Send Reset Link
+                  {resetError && <p className="form-error">{resetError}</p>}
+
+                  <button type="submit" className="reset-btn" disabled={isSubmitting}>
+                    {isSubmitting ? 'Sending...' : 'Send Reset Link'}
                   </button>
 
                   {/* Back to Login */}
@@ -185,8 +208,8 @@ const ForgotPassword = () => {
 
                   {resetError && <p className="form-error">{resetError}</p>}
 
-                  <button type="submit" className="reset-btn">
-                    Save New Password
+                  <button type="submit" className="reset-btn" disabled={isSubmitting}>
+                    {isSubmitting ? 'Saving...' : 'Save New Password'}
                   </button>
 
                   <div className="back-to-login">

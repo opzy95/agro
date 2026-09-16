@@ -43,16 +43,9 @@ const Registration = () => {
 
     console.log('Registration data:', { userType, ...formData });
     
-    // Simulate successful registration - replace with actual registration logic
-    // For now, we'll just navigate to dashboard based on user type
-    // In real app, you'd send registration data to server first
-    
-    // Redirect based on user type
-    if (userType === 'farmer') {
-      navigate('/farmer/dashboard');
-    } else {
-      navigate('/customer/dashboard');
-    }
+    navigate(ROUTES.VERIFY_ACCOUNT, {
+      state: { email: formData.email, userType }
+    });
   };
 
   return (

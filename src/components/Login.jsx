@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ROUTES } from '../routes/routeUtils';
+import { login } from '../services/authService';
 import './Login.css';
 
 // Import your background images
@@ -11,10 +12,11 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    rememberMe: false,
-    userType: 'customer' // customer or farmer
+    rememberMe: false
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -24,18 +26,30 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login data:', formData);
-    
-    // Simulate login success - replace with actual authentication logic
-    // For now, we'll just navigate to dashboard based on user type
-    
-    // Redirect based on user type
-    if (formData.userType === 'farmer') {
-      navigate('/farmer/dashboard');
-    } else {
-      navigate('/customer/dashboard');
+    setErrorMessage('');
+    setIsSubmitting(true);
+
+    try {
+      const result = await login(formData);
+
+      const dashboardRoutes = {
+        admin: '/admin/overview',
+        farmer: '/farmer/dashboard',
+        customer: '/customer/dashboard'
+      };
+      const dashboardPath = result.dashboardPath || dashboardRoutes[result.user?.role || result.role];
+
+      if (!dashboardPath || !Object.values(dashboardRoutes).includes(dashboardPath)) {
+        throw new Error('Login succeeded, but the backend did not provide a valid dashboard.');
+      }
+
+      navigate(dashboardPath);
+    } catch (error) {
+      setErrorMessage(error.message || 'Unable to connect to the server.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -77,23 +91,6 @@ const Login = () => {
           </div>
 
           <form onSubmit={handleSubmit}>
-            {/* User Type Selection */}
-            <div className="form-group">
-              <label htmlFor="userType">Login as</label>
-              <div className="input-wrapper">
-                <select
-                  id="userType"
-                  name="userType"
-                  value={formData.userType}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="customer">Customer</option>
-                  <option value="farmer">Farmer</option>
-                </select>
-              </div>
-            </div>
-
             {/* Email Field */}
             <div className="form-group">
               <label htmlFor="email">Email</label>
@@ -158,9 +155,11 @@ const Login = () => {
               <Link to={ROUTES.FORGOT_PASSWORD} className="forgot-link">Forgot Password?</Link>
             </div>
 
+            {errorMessage && <p className="login-error" role="alert">{errorMessage}</p>}
+
             {/* Sign In Button */}
-            <button type="submit" className="sign-in-btn">
-              Sign In →
+            <button type="submit" className="sign-in-btn" disabled={isSubmitting}>
+              {isSubmitting ? 'Signing In...' : 'Sign In →'}
             </button>
 
             {/* Social Login */}
