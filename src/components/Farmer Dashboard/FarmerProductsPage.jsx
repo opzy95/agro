@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import FarmerLayout from './FarmerLayout';
 import AddProductModal from './AddProductModal';
+import { getMyProducts } from '../../services/productService';
 import './FarmerProductsPage.css';
 
 // Import images from assets
 import tomatoImg from '../../assets/tomato.png';
-import bowlImg from '../../assets/bowl.png';
 
 const ProductCard = ({ product, getStatusColor, onOpen }) => {
   const images = product.images?.length ? product.images : [product.image];
@@ -106,6 +106,7 @@ const FarmerProductsPage = () => {
   const [selectedStatus, setSelectedStatus] = useState('All Status');
   const [sortBy, setSortBy] = useState('Newest');
   const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const farmer = {
     name: 'Green Valley Farm',
@@ -114,101 +115,53 @@ const FarmerProductsPage = () => {
     verificationStatus: 'verified' // This would come from the backend/context in real app
   };
 
-  // Initial products with actual images from assets
-  const initialProducts = [
-    {
-      id: 1,
-      name: 'Roma Tomatoes',
-      category: 'Vegetables',
-      image: tomatoImg,
-      images: [tomatoImg],
-      status: 'Active',
-      price: '₦12,500',
-      unit: 'basket',
-      available: '45 baskets'
-    },
-    {
-      id: 2,
-      name: 'Fresh Produce Bowl',
-      category: 'Vegetables',
-      image: bowlImg,
-      images: [bowlImg],
-      status: 'Active',
-      price: '₦35,000',
-      unit: 'basket',
-      available: '30 baskets'
-    },
-    {
-      id: 3,
-      name: 'Sweet Maize',
-      category: 'Grains',
-      image: tomatoImg,
-      images: [tomatoImg],
-      status: 'Active',
-      price: '₦8,000',
-      unit: 'bag',
-      available: '120 bags'
-    },
-    {
-      id: 4,
-      name: 'Ofada Rice',
-      category: 'Grains',
-      image: bowlImg,
-      images: [bowlImg],
-      status: 'Active',
-      price: '₦9,500',
-      unit: 'bag',
-      available: '80 bags'
-    },
-    {
-      id: 5,
-      name: 'Fresh Lettuce',
-      category: 'Vegetables',
-      image: tomatoImg,
-      images: [tomatoImg],
-      status: 'Active',
-      price: '₦2,500',
-      unit: 'bunch',
-      available: '60 bunches'
-    },
-    {
-      id: 6,
-      name: 'Green Peppers',
-      category: 'Vegetables',
-      image: bowlImg,
-      images: [bowlImg],
-      status: 'Active',
-      price: '₦3,500',
-      unit: 'kg',
-      available: '35 kg'
-    },
-    {
-      id: 7,
-      name: 'Bitter Leaf',
-      category: 'Vegetables',
-      image: tomatoImg,
-      images: [tomatoImg],
-      status: 'Out of Stock',
-      price: '₦1,500',
-      unit: 'bunch',
-      available: '0 bunches'
-    },
-    {
-      id: 8,
-      name: 'Carrots',
-      category: 'Vegetables',
-      image: bowlImg,
-      images: [bowlImg],
-      status: 'Draft',
-      price: '₦4,000',
-      unit: 'kg',
-      available: 'Not set'
-    }
-  ];
-
-  // State for products - allows adding new products
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const normalizeProduct = (backendProduct) => {
+    const imageList = backendProduct.images?.length
+      ? backendProduct.images.map((image) => typeof image === 'string' ? image : image.url).filter(Boolean)
+      : [];
+    const imageUrl = backendProduct.image || imageList[0] || tomatoImg;
+    const availableQuantity = backendProduct.availableQuantity ?? backendProduct.quantity ?? 0;
+    const status = backendProduct.status === 'draft'
+      ? 'Draft'
+      : backendProduct.status === 'published' || backendProduct.status === 'active'
+        ? 'Active'
+        : backendProduct.status || 'Draft';
+
+    return {
+      id: backendProduct._id || backendProduct.id,
+      name: backendProduct.name || backendProduct.productName || 'Unnamed product',
+      category: backendProduct.category || 'Uncategorized',
+      image: imageUrl,
+      images: imageList.length ? imageList : [imageUrl],
+      description: backendProduct.description,
+      sku: backendProduct.sku,
+      farmLocation: backendProduct.farmLocation,
+      status,
+      price: `₦${Number(backendProduct.price || 0).toLocaleString()}`,
+      unit: backendProduct.unit || 'unit',
+      available: `${availableQuantity} ${backendProduct.unit || 'unit'}${availableQuantity === 1 ? '' : 's'}`
+    };
+  };
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await getMyProducts();
+        const backendProducts = response?.products || response?.data?.products || response?.data || response || [];
+        setProducts((Array.isArray(backendProducts) ? backendProducts : []).map(normalizeProduct));
+      } catch (error) {
+        console.error('Failed to fetch farmer products:', error);
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const productStats = [
     {
@@ -263,25 +216,7 @@ const FarmerProductsPage = () => {
   // Handle adding new product to the list
   const handleAddProduct = (productData) => {
     const backendProduct = productData.product || productData;
-    const imageUrl = backendProduct.image || (backendProduct.images && backendProduct.images[0] && (typeof backendProduct.images[0] === 'string' ? backendProduct.images[0] : backendProduct.images[0].url)) || tomatoImg;
-    const imageList = backendProduct.images && backendProduct.images.length
-      ? backendProduct.images.map((image) => typeof image === 'string' ? image : image.url)
-      : [imageUrl];
-
-    const newProduct = {
-      id: backendProduct._id || backendProduct.id || Math.max(...products.map(p => p.id), 0) + 1,
-      name: backendProduct.name || backendProduct.productName,
-      category: backendProduct.category,
-      image: imageUrl,
-      images: imageList,
-      description: backendProduct.description,
-      sku: backendProduct.sku,
-      farmLocation: backendProduct.farmLocation,
-      status: backendProduct.status === 'draft' ? 'Draft' : 'Active',
-      price: `₦${Number(backendProduct.price || 0).toLocaleString()}`,
-      unit: backendProduct.unit || 'per lb',
-      available: `${backendProduct.availableQuantity ?? backendProduct.quantity ?? 0} ${backendProduct.unit || 'unit'}${(backendProduct.availableQuantity ?? backendProduct.quantity ?? 0) === 1 ? '' : 's'}`
-    };
+    const newProduct = normalizeProduct(backendProduct);
 
     setProducts(prevProducts => [...prevProducts, newProduct]);
     setShowAddProductModal(false);
@@ -373,7 +308,11 @@ const FarmerProductsPage = () => {
 
         {/* Products Grid */}
         <div className="products-grid">
-          {filteredProducts.length > 0 ? (
+          {isLoading ? (
+            <div className="no-products">
+              <p>Loading products...</p>
+            </div>
+          ) : filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} getStatusColor={getStatusColor} onOpen={setSelectedProduct} />
             ))

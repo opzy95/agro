@@ -84,6 +84,17 @@ export const getMyProducts = async () => {
   return request('/products/my');
 };
 
+export const addProductReview = async (productId, rating) => {
+  return request(`/products/${productId}/reviews`, {
+    method: 'POST',
+    body: JSON.stringify({ rating })
+  });
+};
+
+export const getProductReviews = async (productId) => {
+  return request(`/products/${productId}/reviews`);
+};
+
 export const createProduct = async (productData, files = []) => {
   const payload = formatProductPayload(productData);
 
@@ -168,6 +179,8 @@ export default {
   getProducts,
   getProductById,
   getMyProducts,
+  addProductReview,
+  getProductReviews,
   createProduct,
   updateProduct,
   deleteProduct

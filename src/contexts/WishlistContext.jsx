@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import * as wishlistService from '../services/wishlistService';
 
 // Wishlist Action Types
 const WISHLIST_ACTIONS = {
@@ -12,6 +13,28 @@ const WISHLIST_ACTIONS = {
 const initialWishlistState = {
   items: [],
   totalItems: 0
+};
+
+const normalizeWishlistProduct = (product = {}) => {
+  const imageList = (product.images || [])
+    .map(image => typeof image === 'string' ? image : image?.url)
+    .filter(Boolean);
+  const image = product.image || imageList[0] || '';
+  const farmer = product.farmer;
+
+  return {
+    ...product,
+    id: product._id || product.id,
+    name: product.name || product.productName || 'Unnamed product',
+    price: Number(product.price || 0),
+    unit: product.unit || 'unit',
+    image,
+    images: imageList.length ? imageList : [image],
+    seller: product.seller || farmer?.farmName || farmer?.businessName || 'Local Farmer',
+    verified: Boolean(farmer?.verificationStatus === 'verified' || farmer?.isVerified),
+    badges: product.isOrganic ? ['organic'] : [],
+    rating: Number(product.rating || 0)
+  };
 };
 
 // Wishlist reducer function
@@ -35,6 +58,9 @@ const wishlistReducer = (state, action) => {
     }
 
     case WISHLIST_ACTIONS.REMOVE_FROM_WISHLIST: {
+      const itemExists = state.items.some(item => item.id === action.payload);
+      if (!itemExists) return state;
+
       const updatedItems = state.items.filter(item => item.id !== action.payload);
       
       return {
@@ -62,35 +88,51 @@ const WishlistContext = createContext();
 export const WishlistProvider = ({ children }) => {
   const [wishlistState, dispatch] = useReducer(wishlistReducer, initialWishlistState);
 
-  // Load wishlist from localStorage on mount
   useEffect(() => {
-    const savedWishlist = localStorage.getItem('harvestHub_wishlist');
-    if (savedWishlist) {
+    const loadWishlist = async () => {
       try {
-        const parsedWishlist = JSON.parse(savedWishlist);
-        dispatch({ type: WISHLIST_ACTIONS.LOAD_WISHLIST, payload: parsedWishlist });
+        const response = await wishlistService.getWishlist();
+        const products = response?.wishlist?.products || response?.products || [];
+        const items = products.map(normalizeWishlistProduct);
+        dispatch({
+          type: WISHLIST_ACTIONS.LOAD_WISHLIST,
+          payload: { items, totalItems: items.length }
+        });
       } catch (error) {
-        console.error('Error loading wishlist from localStorage:', error);
+        console.error('Error loading wishlist from backend:', error);
       }
-    }
+    };
+
+    loadWishlist();
   }, []);
 
-  // Save wishlist to localStorage whenever wishlist state changes
-  useEffect(() => {
-    localStorage.setItem('harvestHub_wishlist', JSON.stringify(wishlistState));
-  }, [wishlistState]);
-
-  // Wishlist action functions
-  const addToWishlist = (product) => {
-    dispatch({ type: WISHLIST_ACTIONS.ADD_TO_WISHLIST, payload: product });
+  const addToWishlist = async (product) => {
+    try {
+      const response = await wishlistService.addToWishlist(product.id);
+      const products = response?.wishlist?.products || [];
+      const savedProduct = products.find(item => String(item.id) === String(product.id));
+      dispatch({ type: WISHLIST_ACTIONS.ADD_TO_WISHLIST, payload: normalizeWishlistProduct(savedProduct || product) });
+    } catch (error) {
+      console.error('Error adding product to wishlist:', error);
+    }
   };
 
-  const removeFromWishlist = (productId) => {
-    dispatch({ type: WISHLIST_ACTIONS.REMOVE_FROM_WISHLIST, payload: productId });
+  const removeFromWishlist = async (productId) => {
+    try {
+      await wishlistService.removeFromWishlist(productId);
+      dispatch({ type: WISHLIST_ACTIONS.REMOVE_FROM_WISHLIST, payload: productId });
+    } catch (error) {
+      console.error('Error removing product from wishlist:', error);
+    }
   };
 
-  const clearWishlist = () => {
-    dispatch({ type: WISHLIST_ACTIONS.CLEAR_WISHLIST });
+  const clearWishlist = async () => {
+    try {
+      await wishlistService.clearWishlist();
+      dispatch({ type: WISHLIST_ACTIONS.CLEAR_WISHLIST });
+    } catch (error) {
+      console.error('Error clearing wishlist:', error);
+    }
   };
 
   const isInWishlist = (productId) => {

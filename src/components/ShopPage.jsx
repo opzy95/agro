@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
+import { addProductReview, getProducts } from '../services/productService';
 import { ROUTES } from '../routes/routeUtils';
 import './ShopPage.css';
 
@@ -13,6 +14,67 @@ import background2 from '../assets/Background (2).png';
 import background from '../assets/Background.png';
 import heroImg from '../assets/hero.png';
 
+const ProductDetailsModal = ({ product, onClose, onAddToCart, getItemQuantity }) => {
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  if (!product) return null;
+
+  const images = product.images?.length ? product.images : [product.image];
+  const displayUnit = product.unit.replace(/^per\s+/i, '');
+
+  return (
+    <div className="shop-details-overlay" onClick={onClose}>
+      <div className="shop-details-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="shop-details-close" onClick={onClose} aria-label="Close product details">
+          ×
+        </button>
+        <div className="shop-details-gallery">
+          <img className="shop-details-main-image" src={images[selectedImageIndex]} alt={product.name} />
+          {images.length > 1 && (
+            <div className="shop-details-thumbnails">
+              {images.map((image, index) => (
+                <button
+                  type="button"
+                  key={`${product.id}-detail-image-${index}`}
+                  className={`shop-details-thumbnail ${index === selectedImageIndex ? 'selected' : ''}`}
+                  onClick={() => setSelectedImageIndex(index)}
+                >
+                  <img src={image} alt={`${product.name} view ${index + 1}`} />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="shop-details-content">
+          <p className="shop-details-category">{product.category}</p>
+          <h2>{product.name}</h2>
+          <div className="shop-details-rating">
+            {'★★★★★'.split('').map((star, index) => (
+              <span key={index} className={index < Math.floor(product.rating) ? 'filled' : ''}>{star}</span>
+            ))}
+            <span>{product.rating} {product.ratingCount ? `(${product.ratingCount} reviews)` : ''}</span>
+          </div>
+          <p className="shop-details-description">{product.description || 'Fresh produce supplied directly from a local farmer.'}</p>
+          <div className="shop-details-meta">
+            <span>Price</span><strong>${product.price.toFixed(2)} / {displayUnit}</strong>
+            <span>Available</span><strong>{product.availableQuantity} {displayUnit}</strong>
+            {product.farmLocation && <><span>Location</span><strong>{product.farmLocation}</strong></>}
+            <span>Seller</span><strong>{product.seller}</strong>
+          </div>
+          <button
+            type="button"
+            className="add-to-cart shop-details-cart-button"
+            onClick={() => onAddToCart(product)}
+            disabled={!product.inStock}
+          >
+            {getItemQuantity(product.id) > 0 ? `${getItemQuantity(product.id)} in cart` : 'Add to cart'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ShopPage = () => {
   const { addToCart, getItemQuantity } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -21,13 +83,13 @@ const ShopPage = () => {
   const [filters, setFilters] = useState({
     categories: {
       vegetables: false,
-      fruits: true,
+      fruits: false,
       dairy: false
     }
   });
 
-  // Product data
-  const products = [
+  // Fallback catalog shape retained for the existing card layout until the API responds.
+  const fallbackProducts = [
     {
       id: 1,
       name: 'Heirloom Organic Carrots',
@@ -366,8 +428,89 @@ const ShopPage = () => {
     }
   ];
 
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [reviewingProductId, setReviewingProductId] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const normalizeProduct = (backendProduct) => {
+    const imageList = (backendProduct.images || [])
+      .map((image) => typeof image === 'string' ? image : image?.url)
+      .filter(Boolean);
+    const image = backendProduct.image || imageList[0] || background1;
+    const quantity = Number(backendProduct.availableQuantity ?? backendProduct.quantity ?? 0);
+    const farmer = backendProduct.farmer;
+    const seller = typeof farmer === 'string'
+      ? farmer
+      : farmer?.farmName || farmer?.businessName || [farmer?.firstName, farmer?.lastName].filter(Boolean).join(' ') || 'Local Farmer';
+    const status = String(backendProduct.status || '').toLowerCase();
+
+    return {
+      id: backendProduct._id || backendProduct.id,
+      name: backendProduct.name || backendProduct.productName || 'Unnamed product',
+      price: Number(backendProduct.price || 0),
+      unit: backendProduct.unit || 'unit',
+      image,
+      images: imageList.length ? imageList : [image],
+      seller,
+      verified: Boolean(farmer?.verificationStatus === 'verified' || farmer?.isVerified),
+      badges: backendProduct.isOrganic ? ['organic'] : [],
+      rating: Number(backendProduct.rating || 0),
+      ratingCount: Number(backendProduct.ratingCount || 0),
+      inStock: quantity > 0 && status !== 'draft' && status !== 'inactive',
+      category: String(backendProduct.category || 'other').trim().toLowerCase(),
+      isOrganic: Boolean(backendProduct.isOrganic),
+      availableQuantity: quantity,
+      farmLocation: backendProduct.farmLocation,
+      description: backendProduct.description
+    };
+  };
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await getProducts();
+        const backendProducts = response?.products || response?.data?.products || response?.data || response || [];
+        setProducts((Array.isArray(backendProducts) ? backendProducts : []).map(normalizeProduct));
+      } catch (error) {
+        console.error('Failed to fetch shop products:', error);
+        setLoadError(error.message || 'Unable to load products.');
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   const handleAddToCart = (product) => {
     addToCart(product);
+  };
+
+  const handleProductRating = async (product, rating) => {
+    setReviewingProductId(product.id);
+
+    try {
+      const response = await addProductReview(product.id, rating);
+      const reviewedProduct = response?.product || response?.data?.product;
+
+      setProducts((currentProducts) => currentProducts.map((currentProduct) => (
+        currentProduct.id === product.id && reviewedProduct
+          ? {
+              ...currentProduct,
+              rating: Number(reviewedProduct.rating ?? rating),
+              ratingCount: Number(reviewedProduct.ratingCount ?? currentProduct.ratingCount ?? 0)
+            }
+          : currentProduct
+      )));
+    } catch (error) {
+      console.error('Failed to submit product rating:', error);
+      window.alert(error.message || 'Unable to submit rating.');
+    } finally {
+      setReviewingProductId(null);
+    }
   };
 
   const handleWishlistToggle = (product) => {
@@ -425,13 +568,11 @@ const ShopPage = () => {
 
   const clearFilters = () => {
     setFilters({
-      categories: {
-        vegetables: false,
-        fruits: false,
-        dairy: false
-      }
+      categories: {}
     });
   };
+
+  const categoryOptions = [...new Set(products.map((product) => product.category))].sort();
 
   return (
     <main className="shop-page">
@@ -506,36 +647,18 @@ const ShopPage = () => {
                 {/* Categories Filter */}
                 <div className="filter-group">
                   <h4>CATEGORIES</h4>
-                  
-                  <label className="filter-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={filters.categories.vegetables}
-                      onChange={() => handleCategoryFilter('vegetables')}
-                    />
-                    <span className="checkbox-custom"></span>
-                    Vegetables ({products.filter(p => p.category === 'vegetables').length})
-                  </label>
 
-                  <label className="filter-checkbox checked">
-                    <input
-                      type="checkbox"
-                      checked={filters.categories.fruits}
-                      onChange={() => handleCategoryFilter('fruits')}
-                    />
-                    <span className="checkbox-custom"></span>
-                    Fruits ({products.filter(p => p.category === 'fruits').length})
-                  </label>
-
-                  <label className="filter-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={filters.categories.dairy}
-                      onChange={() => handleCategoryFilter('dairy')}
-                    />
-                    <span className="checkbox-custom"></span>
-                    Dairy & Eggs ({products.filter(p => p.category === 'dairy').length})
-                  </label>
+                  {categoryOptions.map((category) => (
+                    <label className="filter-checkbox" key={category}>
+                      <input
+                        type="checkbox"
+                        checked={Boolean(filters.categories[category])}
+                        onChange={() => handleCategoryFilter(category)}
+                      />
+                      <span className="checkbox-custom"></span>
+                      {category.replace(/\b\w/g, (letter) => letter.toUpperCase())} ({products.filter((product) => product.category === category).length})
+                    </label>
+                  ))}
                 </div>
 
               </div>
@@ -565,8 +688,20 @@ const ShopPage = () => {
               {/* Products Grid */}
               <div className="products-section">
                 <div className="products-grid">
-                  {sortedProducts.map((product) => (
-                    <div key={product.id} className="product-card">
+                  {isLoading ? (
+                    <div className="no-products">
+                      <p>Loading products...</p>
+                    </div>
+                  ) : loadError ? (
+                    <div className="no-products">
+                      <p>{loadError}</p>
+                    </div>
+                  ) : sortedProducts.length === 0 ? (
+                    <div className="no-products">
+                      <p>No products are currently available.</p>
+                    </div>
+                  ) : sortedProducts.map((product) => (
+                    <div key={product.id} className="product-card" onClick={() => setSelectedProduct(product)}>
                       <div className="shop-product-image">
                         <img src={product.image} alt={product.name} />
                         {product.badges.map((badge, index) => (
@@ -576,7 +711,7 @@ const ShopPage = () => {
                         ))}
                         <button 
                           className={`wishlist-btn ${isInWishlist(product.id) ? 'in-wishlist' : ''}`}
-                          onClick={() => handleWishlistToggle(product)}
+                          onClick={(event) => { event.stopPropagation(); handleWishlistToggle(product); }}
                           title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
                         >
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2">
@@ -585,17 +720,21 @@ const ShopPage = () => {
                         </button>
                       </div>
                       <div className="shop-product-info">
-                        <div className="product-rating">
+                        <div className="product-rating" aria-label={`Product rating: ${product.rating} out of 5`}>
                           <div className="stars">
                             {[1, 2, 3, 4, 5].map((star) => (
-                              <span 
+                              <button
                                 key={star} 
+                                type="button"
                                 className={`star ${star <= Math.floor(product.rating) ? 'filled' : ''}`}
+                                onClick={(event) => { event.stopPropagation(); handleProductRating(product, star); }}
+                                disabled={reviewingProductId === product.id}
+                                aria-label={`Rate ${product.name} ${star} out of 5 stars`}
                               >
                                 ★
-                              </span>
+                              </button>
                             ))}
-                            <span className="rating-number">{product.rating}</span>
+                            <span className="rating-number">{product.ratingCount ? `${product.rating} (${product.ratingCount})` : product.rating}</span>
                           </div>
                         </div>
                         <h3 className="shop-product-name">{product.name}</h3>
@@ -609,7 +748,7 @@ const ShopPage = () => {
                           <span className="shop-product-unit">/ {product.unit}</span>
                           <button 
                             className={`add-to-cart ${getItemQuantity(product.id) > 0 ? 'in-cart' : ''}`}
-                            onClick={() => handleAddToCart(product)}
+                            onClick={(event) => { event.stopPropagation(); handleAddToCart(product); }}
                             disabled={!product.inStock}
                           >
                             {getItemQuantity(product.id) > 0 ? (
@@ -624,21 +763,17 @@ const ShopPage = () => {
                   ))}
                 </div>
 
-                {/* Pagination */}
-                <div className="pagination">
-                  <button className="pagination-btn prev">‹</button>
-                  <button className="pagination-btn active">1</button>
-                  <button className="pagination-btn">2</button>
-                  <button className="pagination-btn">3</button>
-                  <span className="pagination-dots">...</span>
-                  <button className="pagination-btn">8</button>
-                  <button className="pagination-btn next">›</button>
-                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
+      <ProductDetailsModal
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        onAddToCart={handleAddToCart}
+        getItemQuantity={getItemQuantity}
+      />
     </main>
   );
 };
