@@ -1,54 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import FarmerLayout from './FarmerLayout';
+import { getCurrentUser, getMyBankAccounts, addBankAccount, deleteBankAccount, updateProfile, resubmitDocument } from '../../services/userService';
 import './FarmerSettingsPage.css';
 
 const FarmerSettingsPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [showAddBankModal, setShowAddBankModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [ninDocumentFile, setNinDocumentFile] = useState(null);
+  const ninDocumentInputRef = useRef(null);
   const [farmInfo, setFarmInfo] = useState({
-    firstName: 'Samuel',
-    lastName: 'Green',
-    farmName: 'Green Valley Farm',
-    description: 'Premium Producer',
-    location: 'Lagos, Nigeria',
-    phone: '+234 801 234 5678',
-    email: 'samuel.green@farm.com',
-    bio: 'Experienced farmer with over 15 years in sustainable agriculture',
-    website: 'www.greenvalleyfarm.ng',
+    firstName: '',
+    lastName: '',
+    farmName: '',
+    description: '',
+    location: '',
+    phone: '',
+    email: '',
+    bio: '',
+    website: '',
     profileImage: null,
-    nin: '12345678901',
+    nin: '',
     ninDocument: null,
-    isVerified: true,
-    verificationStatus: 'verified'
+    isVerified: false,
+    verificationStatus: 'not_verified'
   });
 
-  const [bankAccounts, setBankAccounts] = useState([
-    {
-      id: 1,
-      bankName: 'First Bank of Nigeria',
-      accountNumber: '3085672341',
-      accountName: 'Samuel Green',
-      isDefault: true,
-      dateAdded: '2023-01-15'
-    },
-    {
-      id: 2,
-      bankName: 'Guaranty Trust Bank',
-      accountNumber: '0123456789',
-      accountName: 'Green Valley Farm Ltd',
-      isDefault: false,
-      dateAdded: '2023-03-22'
-    },
-    {
-      id: 3,
-      bankName: 'United Bank for Africa',
-      accountNumber: '2087654321',
-      accountName: 'Samuel Green',
-      isDefault: false,
-      dateAdded: '2023-05-10'
-    }
-  ]);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const [response, bankResponse] = await Promise.all([
+          getCurrentUser(),
+          getMyBankAccounts()
+        ]);
+        const user = response?.user || response?.data?.user || response?.data || response || {};
+        const ninDocument = typeof user.ninDocument === 'string'
+          ? user.ninDocument
+          : user.ninDocument?.url || user.ninDocument?.secure_url || user.ninDocumentUrl || null;
+        const accounts = bankResponse?.bankAccounts || bankResponse?.accounts || bankResponse || [];
 
+        setBankAccounts((Array.isArray(accounts) ? accounts : []).map((account, index) => ({
+          ...account,
+          id: account._id || account.id || index,
+          bankName: account.bankName || account.bank || '',
+          accountNumber: account.accountNumber || account.number || '',
+          accountName: account.accountName || account.name || '',
+          isDefault: Boolean(account.isDefault || account.isPrimary || account.primary),
+          dateAdded: account.dateAdded || account.createdAt || new Date().toISOString()
+        })));
+
+        setFarmInfo({
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          farmName: user.farmName || user.businessName || '',
+          description: user.description || '',
+          location: user.location || '',
+          phone: user.phone || '',
+          email: user.email || '',
+          bio: user.bio || user.description || '',
+          website: user.website || '',
+          profileImage: user.profileImage || null,
+          nin: user.nin || '',
+          ninDocument,
+          isVerified: Boolean(user.isVerified ?? user.isVerifiedUser ?? false),
+          verificationStatus: user.verificationStatus || (user.isVerified ? 'verified' : 'not_verified')
+        });
+      } catch (error) {
+        console.error('Failed to load farmer profile:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const [bankAccounts, setBankAccounts] = useState([]);
   const [newBankAccount, setNewBankAccount] = useState({
     bankName: '',
     accountNumber: '',
@@ -56,10 +85,10 @@ const FarmerSettingsPage = () => {
   });
 
   const farmer = {
-    name: 'Green Valley Farm',
-    farmName: 'Premium Producer',
-    avatar: null,
-    verificationStatus: farmInfo.verificationStatus // Use the verification status from form data
+    name: [farmInfo.firstName, farmInfo.lastName].filter(Boolean).join(' ') || farmInfo.farmName || 'Green Valley Farm',
+    farmName: farmInfo.farmName || 'Premium Producer',
+    avatar: farmInfo.profileImage,
+    verificationStatus: farmInfo.verificationStatus || 'not_verified'
   };
 
   const tabs = [
@@ -70,37 +99,79 @@ const FarmerSettingsPage = () => {
     { id: 'security', label: 'Security', icon: '🔒' }
   ];
 
-  const handleSave = () => {
-    console.log('Settings saved:', farmInfo);
-    alert('Settings saved successfully!');
-  };
+  const handleSave = async () => {
+    setIsSaving(true);
 
-  const setDefaultAccount = (accountId) => {
-    setBankAccounts(accounts =>
-      accounts.map(account => ({
-        ...account,
-        isDefault: account.id === accountId
-      }))
-    );
-  };
+    try {
+      const payload = {
+        firstName: farmInfo.firstName,
+        lastName: farmInfo.lastName,
+        farmName: farmInfo.farmName,
+        bio: farmInfo.bio || farmInfo.description,
+        description: farmInfo.description || farmInfo.bio,
+        location: farmInfo.location,
+        phone: farmInfo.phone,
+        email: farmInfo.email,
+        website: farmInfo.website,
+        nin: farmInfo.nin
+      };
 
-  const deleteBankAccount = (accountId) => {
-    if (window.confirm('Are you sure you want to remove this bank account?')) {
-      setBankAccounts(accounts => accounts.filter(account => account.id !== accountId));
+      const files = [];
+
+      if (profileImageFile) {
+        profileImageFile.fieldName = 'image';
+        files.push(profileImageFile);
+      }
+
+      await updateProfile(payload, files);
+
+      if (ninDocumentFile) {
+        await resubmitDocument(ninDocumentFile);
+      }
+
+      alert('Settings saved successfully!');
+    } catch (error) {
+      console.error('Failed to save farmer profile:', error);
+      alert(error?.message || 'Unable to save settings right now.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const addBankAccount = () => {
-    if (newBankAccount.bankName && newBankAccount.accountNumber && newBankAccount.accountName) {
-      const newAccount = {
-        id: Date.now(),
-        ...newBankAccount,
-        isDefault: bankAccounts.length === 0,
-        dateAdded: new Date().toISOString().split('T')[0]
-      };
-      setBankAccounts([...bankAccounts, newAccount]);
+  const handleAddBankAccount = async () => {
+    if (!newBankAccount.bankName || !newBankAccount.accountNumber || !newBankAccount.accountName) {
+      alert('Please complete all bank account fields.');
+      return;
+    }
+
+    try {
+      const response = await addBankAccount(newBankAccount);
+      const account = response?.bankAccount || response?.account || response;
+      setBankAccounts((accounts) => [...accounts, {
+        ...account,
+        id: account._id || account.id,
+        bankName: account.bankName || newBankAccount.bankName,
+        accountNumber: account.accountNumber || newBankAccount.accountNumber,
+        accountName: account.accountName || newBankAccount.accountName,
+        dateAdded: account.dateAdded || account.createdAt || new Date().toISOString()
+      }]);
       setNewBankAccount({ bankName: '', accountNumber: '', accountName: '' });
       setShowAddBankModal(false);
+    } catch (error) {
+      alert(error?.message || 'Unable to add bank account.');
+    }
+  };
+
+  const handleDeleteBankAccount = async (accountId) => {
+    if (!window.confirm('Are you sure you want to remove this bank account?')) {
+      return;
+    }
+
+    try {
+      await deleteBankAccount(accountId);
+      setBankAccounts((accounts) => accounts.filter((account) => account.id !== accountId));
+    } catch (error) {
+      alert(error?.message || 'Unable to remove bank account.');
     }
   };
 
@@ -143,6 +214,7 @@ const FarmerSettingsPage = () => {
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (file) {
+                    setProfileImageFile(file);
                     const reader = new FileReader();
                     reader.onloadend = () => {
                       setFarmInfo({...farmInfo, profileImage: reader.result});
@@ -156,14 +228,72 @@ const FarmerSettingsPage = () => {
                 Change Photo
               </label>
               <div className="profile-info">
-                <h3>{farmInfo.firstName} {farmInfo.lastName}</h3>
-                <p>{farmInfo.farmName}</p>
+                <h3>{farmInfo.firstName || 'Farmer'} {farmInfo.lastName}</h3>
+                <p>{farmInfo.farmName || 'Farm Profile'}</p>
                 <div className={`verified-badge ${farmInfo.verificationStatus}`}>
                   {farmInfo.verificationStatus === 'verified' && <span className="checkmark">✓</span>}
                   {farmInfo.verificationStatus === 'not_verified' && <span className="checkmark">❌</span>}
                   {farmInfo.verificationStatus === 'verified' && 'Verified Farmer'}
                   {farmInfo.verificationStatus === 'not_verified' && 'Not Verified'}
                 </div>
+
+                {showAddBankModal && (
+                  <div className="modal-overlay" onClick={() => setShowAddBankModal(false)}>
+                    <div className="modal-content" onClick={(event) => event.stopPropagation()}>
+                      <div className="modal-header">
+                        <h3>Add Bank Account</h3>
+                        <button
+                          type="button"
+                          className="modal-close"
+                          onClick={() => setShowAddBankModal(false)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div className="modal-body">
+                        <div className="form-group">
+                          <label>Bank Name</label>
+                          <input
+                            type="text"
+                            value={newBankAccount.bankName}
+                            onChange={(event) => setNewBankAccount({ ...newBankAccount, bankName: event.target.value })}
+                            placeholder="Enter bank name"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Account Number</label>
+                          <input
+                            type="text"
+                            value={newBankAccount.accountNumber}
+                            onChange={(event) => setNewBankAccount({ ...newBankAccount, accountNumber: event.target.value })}
+                            placeholder="Enter account number"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Account Name</label>
+                          <input
+                            type="text"
+                            value={newBankAccount.accountName}
+                            onChange={(event) => setNewBankAccount({ ...newBankAccount, accountName: event.target.value })}
+                            placeholder="Enter account name"
+                          />
+                        </div>
+                      </div>
+                      <div className="modal-footer">
+                        <button
+                          type="button"
+                          className="btn-outline"
+                          onClick={() => setShowAddBankModal(false)}
+                        >
+                          Cancel
+                        </button>
+                        <button type="button" className="btn-primary" onClick={handleAddBankAccount}>
+                          Add Account
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -230,7 +360,7 @@ const FarmerSettingsPage = () => {
                     />
                   </div>
 
-                  <div className="form-row">
+                  {/* <div className="form-row">
                     <div className="form-group">
                       <label>Location</label>
                       <input
@@ -248,7 +378,7 @@ const FarmerSettingsPage = () => {
                         placeholder="https://your-farm-website.com"
                       />
                     </div>
-                  </div>
+                  </div> */}
 
                   <div className="form-group">
                     <label>NIN (National Identification Number)</label>
@@ -274,13 +404,17 @@ const FarmerSettingsPage = () => {
                             <div className="document-overlay">
                               <button 
                                 className="change-document-btn"
-                                onClick={() => document.getElementById('ninDocumentInput').click()}
+                                type="button"
+                                onClick={() => ninDocumentInputRef.current?.click()}
                               >
                                 Change
                               </button>
                               <button 
                                 className="remove-document-btn"
-                                onClick={() => setFarmInfo({...farmInfo, ninDocument: null})}
+                                  onClick={() => {
+                                    setNinDocumentFile(null);
+                                    setFarmInfo({...farmInfo, ninDocument: null});
+                                  }}
                               >
                                 Remove
                               </button>
@@ -299,10 +433,12 @@ const FarmerSettingsPage = () => {
                       <input
                         type="file"
                         id="ninDocumentInput"
+                        ref={ninDocumentInputRef}
                         accept="image/*"
                         onChange={(e) => {
                           const file = e.target.files[0];
                           if (file) {
+                            setNinDocumentFile(file);
                             const reader = new FileReader();
                             reader.onloadend = () => {
                               setFarmInfo({...farmInfo, ninDocument: reader.result});
@@ -312,9 +448,13 @@ const FarmerSettingsPage = () => {
                         }}
                         className="document-input"
                       />
-                      <label htmlFor="ninDocumentInput" className="upload-document-button">
+                      <button
+                        type="button"
+                        className="upload-document-button"
+                        onClick={() => ninDocumentInputRef.current?.click()}
+                      >
                         Upload NIN Document
-                      </label>
+                      </button>
                     </div>
                   </div>
 
@@ -365,7 +505,7 @@ const FarmerSettingsPage = () => {
                 <div className="section-header">
                   <h2>Bank Accounts</h2>
                   <p>Manage your payment accounts for receiving earnings</p>
-                  <button 
+                  <button
                     className="btn-primary"
                     onClick={() => setShowAddBankModal(true)}
                   >
@@ -384,24 +524,12 @@ const FarmerSettingsPage = () => {
                           </p>
                           <p className="account-name">{account.accountName}</p>
                         </div>
-                        <div className="bank-actions">
-                          {account.isDefault ? (
-                            <span className="default-badge">Default</span>
-                          ) : (
-                            <button 
-                              className="btn-outline"
-                              onClick={() => setDefaultAccount(account.id)}
-                            >
-                              Set as Default
-                            </button>
-                          )}
-                          <button 
-                            className="btn-danger-outline"
-                            onClick={() => deleteBankAccount(account.id)}
-                          >
-                            Remove
-                          </button>
-                        </div>
+                        <button
+                          className="btn-danger-outline"
+                          onClick={() => handleDeleteBankAccount(account.id)}
+                        >
+                          Remove
+                        </button>
                       </div>
                       <div className="bank-footer">
                         <span className="date-added">Added {new Date(account.dateAdded).toLocaleDateString()}</span>
@@ -419,9 +547,9 @@ const FarmerSettingsPage = () => {
                 {bankAccounts.length === 0 && (
                   <div className="empty-state">
                     <div className="empty-icon">🏦</div>
-                    <h3>No Bank Accounts Added</h3>
-                    <p>Add your first bank account to start receiving payments</p>
-                    <button 
+                    <h3>No Bank Account Found</h3>
+                    <p>No bank account is currently available from the backend.</p>
+                    <button
                       className="btn-primary"
                       onClick={() => setShowAddBankModal(true)}
                     >
@@ -571,79 +699,13 @@ const FarmerSettingsPage = () => {
             {/* Action Buttons */}
             <div className="settings-actions">
               <button className="btn-outline">Cancel</button>
-              <button className="btn-primary" onClick={handleSave}>
-                Save Changes
+              <button className="btn-primary" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Add Bank Account Modal */}
-        {showAddBankModal && (
-          <div className="modal-overlay" onClick={() => setShowAddBankModal(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>Add Bank Account</h3>
-                <button 
-                  className="modal-close"
-                  onClick={() => setShowAddBankModal(false)}
-                >
-                  ×
-                </button>
-              </div>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Bank Name</label>
-                  <select
-                    value={newBankAccount.bankName}
-                    onChange={(e) => setNewBankAccount({...newBankAccount, bankName: e.target.value})}
-                  >
-                    <option value="">Select Bank</option>
-                    <option value="First Bank of Nigeria">First Bank of Nigeria</option>
-                    <option value="Guaranty Trust Bank">Guaranty Trust Bank</option>
-                    <option value="United Bank for Africa">United Bank for Africa</option>
-                    <option value="Access Bank">Access Bank</option>
-                    <option value="Zenith Bank">Zenith Bank</option>
-                    <option value="Fidelity Bank">Fidelity Bank</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Account Number</label>
-                  <input
-                    type="text"
-                    value={newBankAccount.accountNumber}
-                    onChange={(e) => setNewBankAccount({...newBankAccount, accountNumber: e.target.value})}
-                    placeholder="Enter 10-digit account number"
-                    maxLength="10"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Account Name</label>
-                  <input
-                    type="text"
-                    value={newBankAccount.accountName}
-                    onChange={(e) => setNewBankAccount({...newBankAccount, accountName: e.target.value})}
-                    placeholder="Account holder name"
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button 
-                  className="btn-outline"
-                  onClick={() => setShowAddBankModal(false)}
-                >
-                  Cancel
-                </button>
-                <button 
-                  className="btn-primary"
-                  onClick={addBankAccount}
-                >
-                  Add Account
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </FarmerLayout>
   );

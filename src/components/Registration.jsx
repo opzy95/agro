@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../routes/routeUtils';
+import { register } from '../services/authService';
 import './Registration.css';
 
 const Registration = () => {
@@ -8,6 +9,8 @@ const Registration = () => {
   const [userType, setUserType] = useState('customer');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -27,25 +30,37 @@ const Registration = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setErrorMessage('');
+
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match!');
+      setErrorMessage('Passwords do not match!');
       return;
     }
 
     if (!formData.agreeToTerms) {
-      alert('Please agree to the Terms of Service and Privacy Policy.');
+      setErrorMessage('Please agree to the Terms of Service and Privacy Policy.');
       return;
     }
 
-    console.log('Registration data:', { userType, ...formData });
-    
-    navigate(ROUTES.VERIFY_ACCOUNT, {
-      state: { email: formData.email, userType }
-    });
+    setIsSubmitting(true);
+
+    try {
+      await register({
+        userType,
+        ...formData
+      });
+
+      navigate(ROUTES.VERIFY_ACCOUNT, {
+        state: { email: formData.email, userType }
+      });
+    } catch (error) {
+      setErrorMessage(error.message || 'Unable to create your account right now.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -268,9 +283,13 @@ const Registration = () => {
               </label>
             </div>
 
+            {errorMessage && (
+              <p className="login-error" role="alert">{errorMessage}</p>
+            )}
+
             {/* Submit Button */}
-            <button type="submit" className="create-account-btn">
-              Create Account →
+            <button type="submit" className="create-account-btn" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating Account...' : 'Create Account →'}
             </button>
 
             {/* Social Login */}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createProduct } from '../../services/productService';
 import './AddProductModal.css';
 
 const AddProductModal = ({ isOpen, onClose, onSave }) => {
@@ -11,7 +12,7 @@ const AddProductModal = ({ isOpen, onClose, onSave }) => {
     unit: 'per lb',
     quantity: '',
     minimumOrder: '1',
-    farmLocation: 'Main Farm (Green Valley)',
+    farmLocation: '',
     shippingMethods: {
       farmPickup: true,
       localDelivery: true,
@@ -22,7 +23,9 @@ const AddProductModal = ({ isOpen, onClose, onSave }) => {
 
   const [errors, setErrors] = useState({});
   const [uploadedImages, setUploadedImages] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -50,6 +53,8 @@ const AddProductModal = ({ isOpen, onClose, onSave }) => {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
+    setUploadedFiles(prev => [...prev, ...files]);
+
     files.forEach(file => {
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -61,6 +66,7 @@ const AddProductModal = ({ isOpen, onClose, onSave }) => {
 
   const removeImage = (index) => {
     setUploadedImages(prev => prev.filter((_, i) => i !== index));
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const validateForm = () => {
@@ -69,10 +75,11 @@ const AddProductModal = ({ isOpen, onClose, onSave }) => {
     if (!formData.category) newErrors.category = 'Category is required';
     if (!formData.price) newErrors.price = 'Price is required';
     if (!formData.quantity) newErrors.quantity = 'Quantity is required';
+    if (!formData.farmLocation.trim()) newErrors.farmLocation = 'Farm location is required';
     return newErrors;
   };
 
-  const handleSubmit = (e, isDraft = false) => {
+  const handleSubmit = async (e, isDraft = false) => {
     e.preventDefault();
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
@@ -80,11 +87,37 @@ const AddProductModal = ({ isOpen, onClose, onSave }) => {
       return;
     }
 
-    onSave({
-      ...formData,
-      images: uploadedImages,
-      isDraft
-    });
+    setIsSubmitting(true);
+
+    try {
+      const selectedShippingMethods = Object.entries(formData.shippingMethods)
+        .filter(([, value]) => value)
+        .map(([key]) => key);
+
+      const productPayload = {
+        name: formData.productName,
+        category: formData.category,
+        sku: formData.sku,
+        description: formData.description,
+        price: Number(formData.price),
+        unit: formData.unit,
+        availableQuantity: Number(formData.quantity),
+        minimumOrderQuantity: Number(formData.minimumOrder || 1),
+        farmLocation: formData.farmLocation,
+        shippingMethods: selectedShippingMethods,
+        status: isDraft ? 'draft' : 'published'
+      };
+
+      const result = await createProduct(productPayload, uploadedFiles);
+      onSave(result.product || result);
+    } catch (error) {
+      setErrors(prev => ({
+        ...prev,
+        submit: error.message || 'Unable to create the product.'
+      }));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
@@ -97,7 +130,7 @@ const AddProductModal = ({ isOpen, onClose, onSave }) => {
       unit: 'per lb',
       quantity: '',
       minimumOrder: '1',
-      farmLocation: 'Main Farm (Green Valley)',
+      farmLocation: '',
       shippingMethods: {
         farmPickup: true,
         localDelivery: true,
@@ -106,7 +139,9 @@ const AddProductModal = ({ isOpen, onClose, onSave }) => {
       images: []
     });
     setUploadedImages([]);
+    setUploadedFiles([]);
     setErrors({});
+    setIsSubmitting(false);
     onClose();
   };
 
@@ -377,14 +412,22 @@ const AddProductModal = ({ isOpen, onClose, onSave }) => {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Farm Location</label>
+                    <label className="form-label">Farm Location <span className="required">*</span></label>
                     <div className="location-display">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                         <circle cx="12" cy="10" r="3"/>
                       </svg>
-                      <span>{formData.farmLocation}</span>
+                      <input
+                        type="text"
+                        name="farmLocation"
+                        value={formData.farmLocation}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Ibadan, Oyo State"
+                        className={`form-input ${errors.farmLocation ? 'error' : ''}`}
+                      />
                     </div>
+                    {errors.farmLocation && <span className="error-text">{errors.farmLocation}</span>}
                   </div>
 
                   <div className="form-group">
@@ -427,11 +470,16 @@ const AddProductModal = ({ isOpen, onClose, onSave }) => {
             </div>
 
             {/* Form Actions */}
+            {errors.submit && (
+              <p className="error-text" style={{ marginBottom: '12px' }}>{errors.submit}</p>
+            )}
+
             <div className="form-actions">
               <button
                 type="button"
                 onClick={handleCancel}
                 className="btn btn-secondary"
+                disabled={isSubmitting}
               >
                 Cancel
               </button>
@@ -439,15 +487,17 @@ const AddProductModal = ({ isOpen, onClose, onSave }) => {
                 type="button"
                 onClick={(e) => handleSubmit(e, true)}
                 className="btn btn-secondary"
+                disabled={isSubmitting}
               >
-                Save as Draft
+                {isSubmitting ? 'Saving...' : 'Save as Draft'}
               </button>
               <button
                 type="submit"
                 onClick={(e) => handleSubmit(e, false)}
                 className="btn btn-primary"
+                disabled={isSubmitting}
               >
-                <span>✓</span> Publish Product
+                <span>✓</span> {isSubmitting ? 'Publishing...' : 'Publish Product'}
               </button>
             </div>
           </form>

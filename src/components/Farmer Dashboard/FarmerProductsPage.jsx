@@ -262,23 +262,28 @@ const FarmerProductsPage = () => {
 
   // Handle adding new product to the list
   const handleAddProduct = (productData) => {
+    const backendProduct = productData.product || productData;
+    const imageUrl = backendProduct.image || (backendProduct.images && backendProduct.images[0] && (typeof backendProduct.images[0] === 'string' ? backendProduct.images[0] : backendProduct.images[0].url)) || tomatoImg;
+    const imageList = backendProduct.images && backendProduct.images.length
+      ? backendProduct.images.map((image) => typeof image === 'string' ? image : image.url)
+      : [imageUrl];
+
     const newProduct = {
-      id: Math.max(...products.map(p => p.id), 0) + 1,
-      name: productData.productName,
-      category: productData.category,
-      image: productData.images[0] || tomatoImg,
-      images: productData.images.length ? productData.images : [tomatoImg],
-      description: productData.description,
-      sku: productData.sku,
-      farmLocation: productData.farmLocation,
-      status: productData.isDraft ? 'Draft' : 'Active',
-      price: `₦${productData.price}`,
-      unit: productData.unit,
-      available: `${productData.quantity} ${productData.unit}s`
+      id: backendProduct._id || backendProduct.id || Math.max(...products.map(p => p.id), 0) + 1,
+      name: backendProduct.name || backendProduct.productName,
+      category: backendProduct.category,
+      image: imageUrl,
+      images: imageList,
+      description: backendProduct.description,
+      sku: backendProduct.sku,
+      farmLocation: backendProduct.farmLocation,
+      status: backendProduct.status === 'draft' ? 'Draft' : 'Active',
+      price: `₦${Number(backendProduct.price || 0).toLocaleString()}`,
+      unit: backendProduct.unit || 'per lb',
+      available: `${backendProduct.availableQuantity ?? backendProduct.quantity ?? 0} ${backendProduct.unit || 'unit'}${(backendProduct.availableQuantity ?? backendProduct.quantity ?? 0) === 1 ? '' : 's'}`
     };
-    
-    // Add new product to products list
-    setProducts([...products, newProduct]);
+
+    setProducts(prevProducts => [...prevProducts, newProduct]);
     setShowAddProductModal(false);
   };
 
