@@ -61,6 +61,15 @@ const ProductDetailsModal = ({ product, getStatusColor, onClose }) => {
   if (!product) return null;
 
   const images = product.images?.length ? product.images : [product.image];
+  const displayUnit = product.unit.replace(/^per\s+/i, '');
+  const availableQuantity = product.availableQuantity ?? (Number.parseInt(product.available, 10) || 0);
+  const availableUnit = availableQuantity === 1
+    ? displayUnit
+    : displayUnit === 'piece'
+      ? 'pieces'
+      : displayUnit.endsWith('s')
+        ? displayUnit
+        : `${displayUnit}s`;
 
   return (
     <div className="product-details-overlay" onClick={onClose}>
@@ -89,8 +98,8 @@ const ProductDetailsModal = ({ product, getStatusColor, onClose }) => {
           <p className="product-details-category">{product.category}</p>
           <p className="product-details-description">{product.description || 'Fresh produce supplied directly from Green Valley Farm.'}</p>
           <div className="product-details-summary">
-            <div><span>Price</span><strong>{product.price} / {product.unit}</strong></div>
-            <div><span>Available</span><strong>{product.available}</strong></div>
+            <div><span>Price</span><strong>{product.price} / {displayUnit}</strong></div>
+            <div><span>Available</span><strong>{availableQuantity} {availableUnit}</strong></div>
           </div>
           {product.sku && <p className="product-details-meta"><strong>SKU:</strong> {product.sku}</p>}
           {product.farmLocation && <p className="product-details-meta"><strong>Location:</strong> {product.farmLocation}</p>}
@@ -123,7 +132,8 @@ const FarmerProductsPage = () => {
       ? backendProduct.images.map((image) => typeof image === 'string' ? image : image.url).filter(Boolean)
       : [];
     const imageUrl = backendProduct.image || imageList[0] || tomatoImg;
-    const availableQuantity = backendProduct.availableQuantity ?? backendProduct.quantity ?? 0;
+    const availableQuantity = Number(backendProduct.availableQuantity ?? backendProduct.quantity ?? 0);
+    const unit = String(backendProduct.unit || 'unit').replace(/^per\s+/i, '');
     const status = backendProduct.status === 'draft'
       ? 'Draft'
       : backendProduct.status === 'published' || backendProduct.status === 'active'
@@ -141,8 +151,9 @@ const FarmerProductsPage = () => {
       farmLocation: backendProduct.farmLocation,
       status,
       price: `₦${Number(backendProduct.price || 0).toLocaleString()}`,
-      unit: backendProduct.unit || 'unit',
-      available: `${availableQuantity} ${backendProduct.unit || 'unit'}${availableQuantity === 1 ? '' : 's'}`
+      unit,
+      availableQuantity,
+      available: `${availableQuantity} ${availableQuantity === 1 ? unit : unit === 'piece' ? 'pieces' : unit.endsWith('s') ? unit : `${unit}s`}`
     };
   };
 

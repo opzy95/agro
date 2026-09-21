@@ -79,10 +79,18 @@ const DashboardSidebar = ({ user }) => {
               src={user.avatar}
               alt={`${profileName}'s avatar`}
               className="sidebar-avatar-image"
+              onError={(event) => {
+                event.currentTarget.style.display = 'none';
+                event.currentTarget.nextElementSibling.style.display = 'inline';
+              }}
             />
-          ) : (
-            <span className="sidebar-avatar-initials">{profileInitials}</span>
-          )}
+          ) : null}
+          <span
+            className="sidebar-avatar-initials"
+            style={{ display: user?.avatar && !user.avatar.includes('/api/placeholder/') ? 'none' : 'inline' }}
+          >
+            {profileInitials}
+          </span>
         </div>
         <div className="profile-info">
           <h3 className="profile-welcome">Welcome back</h3>

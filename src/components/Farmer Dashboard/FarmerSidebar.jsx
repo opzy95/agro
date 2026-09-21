@@ -73,7 +73,18 @@ const FarmerSidebar = ({ farmer }) => {
       {/* Farmer Profile */}
       <div className="sidebar-profile">
         <div className="profile-avata">
-          <div className="avatar-fallback">👨‍🌾</div>
+          {farmer?.profileImage || farmer?.avatar ? (
+            <img
+              src={farmer.profileImage || farmer.avatar}
+              alt="Farmer profile"
+              className="avatar-image"
+              onError={(event) => {
+                event.currentTarget.style.display = 'none';
+                event.currentTarget.nextSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <div className="avatar-fallback" style={{ display: farmer?.profileImage || farmer?.avatar ? 'none' : 'flex' }}>👨‍🌾</div>
         </div>
         <div className="profile-info">
           <h3 className="profile-welcome">{farmer?.name || 'Green Valley Farm'}</h3>

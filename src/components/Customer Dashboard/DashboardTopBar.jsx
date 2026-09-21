@@ -1,39 +1,68 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
+import { getMyNotifications, markAllNotificationsAsRead, markNotificationAsRead } from '../../services/notificationService';
 import './DashboardTopBar.css';
 
 const DashboardTopBar = ({ 
   onMobileMenuToggle,
   showSearch = true,
-  showNotifications = true 
+  showNotifications = true,
+  user = {}
 }) => {
   const { totalItems: cartItems } = useCart();
   const { totalItems: wishlistItems } = useWishlist();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const notifications = [
-    {
-      id: 1,
-      type: 'order',
-      title: 'Order Delivered',
-      message: 'Your order #12345 has been delivered',
-      time: '5 min ago',
-      unread: true
-    },
-    {
-      id: 2,
-      type: 'promotion',
-      title: 'Special Offer',
-      message: '20% off on fresh vegetables this week',
-      time: '1 hour ago',
-      unread: false
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await getMyNotifications();
+        setNotifications(response?.notifications || response?.data?.notifications || []);
+        setUnreadCount(Number(response?.unreadCount || response?.data?.unreadCount || 0));
+      } catch (error) {
+        console.error('Failed to fetch customer notifications:', error);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  const formatNotificationTime = (date) => {
+    if (!date) return '';
+    return new Date(date).toLocaleString();
+  };
+
+  const handleNotificationClick = async (notification) => {
+    if (notification.readAt) return;
+
+    try {
+      const notificationId = notification._id || notification.id;
+      await markNotificationAsRead(notificationId);
+      setNotifications((items) => items.map((item) => (
+        (item._id || item.id) === notificationId
+          ? { ...item, readAt: new Date().toISOString() }
+          : item
+      )));
+      setUnreadCount((count) => Math.max(0, count - 1));
+    } catch (error) {
+      console.error('Failed to mark customer notification as read:', error);
     }
-  ];
+  };
 
-  const unreadCount = notifications.filter(n => n.unread).length;
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllNotificationsAsRead();
+      setNotifications((items) => items.map((item) => ({ ...item, readAt: item.readAt || new Date().toISOString() })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Failed to mark all customer notifications as read:', error);
+    }
+  };
 
   return (
     <header className="dashboard-topbar">
@@ -100,31 +129,32 @@ const DashboardTopBar = ({
                 <div className="notification-dropdown">
                   <div className="notification-header">
                     <h3 className="notification-title">Notifications</h3>
-                    <button 
+                    <button
                       className="mark-all-read"
-                      onClick={() => setShowNotificationDropdown(false)}
+                      onClick={handleMarkAllAsRead}
                     >
-                      ×
+                      Mark all read
                     </button>
                   </div>
                   <div className="notification-list">
                     {notifications.map((notification) => (
                       <div 
-                        key={notification.id} 
-                        className={`notification-item ${notification.unread ? 'unread' : ''}`}
+                        key={notification._id || notification.id}
+                        className={`notification-item ${!notification.readAt ? 'unread' : ''}`}
+                        onClick={() => handleNotificationClick(notification)}
                       >
-                        {notification.unread && <div className="notification-dot"></div>}
+                        {!notification.readAt && <div className="notification-dot"></div>}
                         <div className="notification-content">
                           <h4 className="notification-item-title">{notification.title}</h4>
                           <p className="notification-message">{notification.message}</p>
-                          <span className="notification-time">{notification.time}</span>
+                          <span className="notification-time">{formatNotificationTime(notification.createdAt)}</span>
                         </div>
                       </div>
                     ))}
                   </div>
                   <div className="notification-footer">
-                    <button className="view-all-notifications">
-                      View All Notifications
+                    <button className="view-all-notifications" onClick={() => setShowNotificationDropdown(false)}>
+                      Close Notifications
                     </button>
                   </div>
                 </div>
@@ -163,16 +193,18 @@ const DashboardTopBar = ({
         <div className="profile-container">
           <Link to="/customer/settings" className="profile-btn" aria-label="Profile">
             <div className="profile-avatar">
-              <img 
-                src="/api/placeholder/36/36" 
+              {user.avatar ? (
+                <img
+                src={user.avatar}
                 alt="Profile" 
                 className="profile-avatar-img"
                 onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling.style.display = 'flex';
                 }}
-              />
-              <div className="profile-fallback" style={{ display: 'none' }}>
+                />
+              ) : null}
+              <div className="profile-fallback" style={{ display: user.avatar ? 'none' : 'flex' }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>

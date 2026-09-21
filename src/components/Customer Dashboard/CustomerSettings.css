@@ -69,6 +69,16 @@
   overflow: hidden;
 }
 
+.customer-profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.customer-photo-input {
+  display: none;
+}
+
 .photo-placeholder {
   display: flex;
   align-items: center;

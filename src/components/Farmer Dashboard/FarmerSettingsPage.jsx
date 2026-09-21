@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import FarmerLayout from './FarmerLayout';
-import { getCurrentUser, getMyBankAccounts, addBankAccount, deleteBankAccount, updateProfile, resubmitDocument } from '../../services/userService';
+import { getCurrentUser, getMyBankAccounts, addBankAccount, deleteBankAccount, updateProfile } from '../../services/userService';
 import './FarmerSettingsPage.css';
 
 const FarmerSettingsPage = () => {
@@ -38,7 +38,12 @@ const FarmerSettingsPage = () => {
         const user = response?.user || response?.data?.user || response?.data || response || {};
         const ninDocument = typeof user.ninDocument === 'string'
           ? user.ninDocument
-          : user.ninDocument?.url || user.ninDocument?.secure_url || user.ninDocumentUrl || null;
+          : user.ninDocument?.url
+            || user.ninDocument?.secure_url
+            || user.ninDocumentUrl
+            || user.ninDocumentURL
+            || user.verificationDocument
+            || null;
         const accounts = bankResponse?.bankAccounts || bankResponse?.accounts || bankResponse || [];
 
         setBankAccounts((Array.isArray(accounts) ? accounts : []).map((account, index) => ({
@@ -80,6 +85,7 @@ const FarmerSettingsPage = () => {
   const [bankAccounts, setBankAccounts] = useState([]);
   const [newBankAccount, setNewBankAccount] = useState({
     bankName: '',
+    bankCode: '',
     accountNumber: '',
     accountName: ''
   });
@@ -123,10 +129,19 @@ const FarmerSettingsPage = () => {
         files.push(profileImageFile);
       }
 
-      await updateProfile(payload, files);
-
       if (ninDocumentFile) {
-        await resubmitDocument(ninDocumentFile);
+        ninDocumentFile.fieldName = 'ninDocument';
+        files.push(ninDocumentFile);
+      }
+
+      const response = await updateProfile(payload, files);
+      const updatedUser = response?.user || response?.data?.user || response?.data || response || {};
+      const updatedNinDocument = typeof updatedUser.ninDocument === 'string'
+        ? updatedUser.ninDocument
+        : updatedUser.ninDocument?.url || updatedUser.ninDocument?.secure_url || updatedUser.ninDocumentUrl || null;
+
+      if (updatedNinDocument) {
+        setFarmInfo((currentInfo) => ({ ...currentInfo, ninDocument: updatedNinDocument }));
       }
 
       alert('Settings saved successfully!');
@@ -139,7 +154,7 @@ const FarmerSettingsPage = () => {
   };
 
   const handleAddBankAccount = async () => {
-    if (!newBankAccount.bankName || !newBankAccount.accountNumber || !newBankAccount.accountName) {
+    if (!newBankAccount.bankName || !newBankAccount.bankCode || !newBankAccount.accountNumber || !newBankAccount.accountName) {
       alert('Please complete all bank account fields.');
       return;
     }
@@ -151,11 +166,12 @@ const FarmerSettingsPage = () => {
         ...account,
         id: account._id || account.id,
         bankName: account.bankName || newBankAccount.bankName,
+        bankCode: account.bankCode || newBankAccount.bankCode,
         accountNumber: account.accountNumber || newBankAccount.accountNumber,
         accountName: account.accountName || newBankAccount.accountName,
         dateAdded: account.dateAdded || account.createdAt || new Date().toISOString()
       }]);
-      setNewBankAccount({ bankName: '', accountNumber: '', accountName: '' });
+      setNewBankAccount({ bankName: '', bankCode: '', accountNumber: '', accountName: '' });
       setShowAddBankModal(false);
     } catch (error) {
       alert(error?.message || 'Unable to add bank account.');
@@ -258,6 +274,15 @@ const FarmerSettingsPage = () => {
                             value={newBankAccount.bankName}
                             onChange={(event) => setNewBankAccount({ ...newBankAccount, bankName: event.target.value })}
                             placeholder="Enter bank name"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Bank Code</label>
+                          <input
+                            type="text"
+                            value={newBankAccount.bankCode}
+                            onChange={(event) => setNewBankAccount({ ...newBankAccount, bankCode: event.target.value })}
+                            placeholder="Enter bank code"
                           />
                         </div>
                         <div className="form-group">
@@ -434,9 +459,9 @@ const FarmerSettingsPage = () => {
                         type="file"
                         id="ninDocumentInput"
                         ref={ninDocumentInputRef}
-                        accept="image/*"
+                        accept="image/png,image/jpeg,image/jpg,image/webp"
                         onChange={(e) => {
-                          const file = e.target.files[0];
+                          const file = e.target.files?.[0];
                           if (file) {
                             setNinDocumentFile(file);
                             const reader = new FileReader();
@@ -451,7 +476,10 @@ const FarmerSettingsPage = () => {
                       <button
                         type="button"
                         className="upload-document-button"
-                        onClick={() => ninDocumentInputRef.current?.click()}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          ninDocumentInputRef.current?.click();
+                        }}
                       >
                         Upload NIN Document
                       </button>

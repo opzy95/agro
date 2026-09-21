@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import VerificationBadge from '../VerificationBadge';
+import { getMyNotifications, markAllNotificationsAsRead, markNotificationAsRead } from '../../services/notificationService';
 import './FarmerTopBar.css';
 
 const FarmerTopBar = ({ 
@@ -12,35 +13,53 @@ const FarmerTopBar = ({
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const notifications = [
-    {
-      id: 1,
-      type: 'order',
-      title: 'New Order',
-      message: 'You have received a new order from a customer',
-      time: '5 min ago',
-      unread: true
-    },
-    {
-      id: 2,
-      type: 'message',
-      title: 'Customer Message',
-      message: 'A customer has sent you a message',
-      time: '1 hour ago',
-      unread: false
-    },
-    {
-      id: 3,
-      type: 'payment',
-      title: 'Payment Received',
-      message: 'Your payout has been processed',
-      time: '2 hours ago',
-      unread: false
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await getMyNotifications();
+        setNotifications(response?.notifications || response?.data?.notifications || []);
+        setUnreadCount(Number(response?.unreadCount || response?.data?.unreadCount || 0));
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  const formatNotificationTime = (date) => {
+    if (!date) return '';
+    return new Date(date).toLocaleString();
+  };
+
+  const handleNotificationClick = async (notification) => {
+    if (notification.readAt) return;
+
+    try {
+      await markNotificationAsRead(notification._id || notification.id);
+      setNotifications((items) => items.map((item) => (
+        (item._id || item.id) === (notification._id || notification.id)
+          ? { ...item, readAt: new Date().toISOString() }
+          : item
+      )));
+      setUnreadCount((count) => Math.max(0, count - 1));
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
     }
-  ];
+  };
 
-  const unreadCount = notifications.filter(n => n.unread).length;
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllNotificationsAsRead();
+      setNotifications((items) => items.map((item) => ({ ...item, readAt: item.readAt || new Date().toISOString() })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+    }
+  };
 
   return (
     <header className="farmer-topbar">
@@ -104,31 +123,32 @@ const FarmerTopBar = ({
                 <div className="notification-dropdown">
                   <div className="notification-header">
                     <h3 className="notification-title">Notifications</h3>
-                    <button 
+                    <button
                       className="mark-all-read"
-                      onClick={() => setShowNotificationDropdown(false)}
+                      onClick={handleMarkAllAsRead}
                     >
-                      ×
+                      Mark all read
                     </button>
                   </div>
                   <div className="notification-list">
                     {notifications.map((notification) => (
                       <div 
-                        key={notification.id} 
-                        className={`notification-item ${notification.unread ? 'unread' : ''}`}
+                        key={notification._id || notification.id}
+                        className={`notification-item ${!notification.readAt ? 'unread' : ''}`}
+                        onClick={() => handleNotificationClick(notification)}
                       >
-                        {notification.unread && <div className="notification-dot"></div>}
+                        {!notification.readAt && <div className="notification-dot"></div>}
                         <div className="notification-content">
                           <h4 className="notification-item-title">{notification.title}</h4>
                           <p className="notification-message">{notification.message}</p>
-                          <span className="notification-time">{notification.time}</span>
+                          <span className="notification-time">{formatNotificationTime(notification.createdAt)}</span>
                         </div>
                       </div>
                     ))}
                   </div>
                   <div className="notification-footer">
-                    <button className="view-all-notifications">
-                      View All Notifications
+                    <button className="view-all-notifications" onClick={() => setShowNotificationDropdown(false)}>
+                      Close Notifications
                     </button>
                   </div>
                 </div>
@@ -150,7 +170,18 @@ const FarmerTopBar = ({
             title="Open Settings"
           >
             <div className="profile-avatar">
-              <span className="profile-fallback">👨‍🌾</span>
+              {farmer?.profileImage || farmer?.avatar ? (
+                <img
+                  src={farmer.profileImage || farmer.avatar}
+                  alt="Farmer profile"
+                  className="profile-avatar-img"
+                  onError={(event) => {
+                    event.currentTarget.style.display = 'none';
+                    event.currentTarget.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <span className="profile-fallback" style={{ display: farmer?.profileImage || farmer?.avatar ? 'none' : 'flex' }}>👨‍🌾</span>
             </div>
             <div className="profile-details">
               <span className="profile-name">{farmer?.name || 'Green Valley Farm'}</span>

@@ -21,6 +21,15 @@ const ProductDetailsModal = ({ product, onClose, onAddToCart, getItemQuantity })
 
   const images = product.images?.length ? product.images : [product.image];
   const displayUnit = product.unit.replace(/^per\s+/i, '');
+  const availableUnit = product.availableQuantity === 1
+    ? displayUnit
+    : displayUnit === 'piece'
+      ? 'pieces'
+      : displayUnit === 'dozen'
+        ? 'dozen'
+        : displayUnit.endsWith('s')
+          ? displayUnit
+          : `${displayUnit}s`;
 
   return (
     <div className="shop-details-overlay" onClick={onClose}>
@@ -57,7 +66,7 @@ const ProductDetailsModal = ({ product, onClose, onAddToCart, getItemQuantity })
           <p className="shop-details-description">{product.description || 'Fresh produce supplied directly from a local farmer.'}</p>
           <div className="shop-details-meta">
             <span>Price</span><strong>${product.price.toFixed(2)} / {displayUnit}</strong>
-            <span>Available</span><strong>{product.availableQuantity} {displayUnit}</strong>
+            <span>Available</span><strong>{product.availableQuantity} {availableUnit}</strong>
             {product.farmLocation && <><span>Location</span><strong>{product.farmLocation}</strong></>}
             <span>Seller</span><strong>{product.seller}</strong>
           </div>

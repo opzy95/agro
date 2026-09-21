@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { getCurrentUser, updateProfile } from '../../services/userService';
 import './CustomerSettings.css';
 
 const CustomerSettings = () => {
   const [formData, setFormData] = useState({
-    firstName: 'Jane',
-    lastName: 'Doe',
-    email: 'jane.doe@example.com',
-    phone: '+1 (555) 019-2834',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    profileImage: null,
     language: 'English (US)',
     currency: 'USD ($)'
   });
@@ -16,6 +18,36 @@ const CustomerSettings = () => {
     marketing: false,
     securityAlerts: true
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const profileImageInputRef = useRef(null);
+
+  useEffect(() => {
+    const fetchCustomerProfile = async () => {
+      try {
+        const response = await getCurrentUser();
+        const user = response?.user || response?.data?.user || response?.data || response || {};
+
+        setFormData((currentData) => ({
+          ...currentData,
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          profileImage: typeof user.profileImage === 'string'
+            ? user.profileImage
+            : user.profileImage?.url || user.profileImage?.secure_url || null
+        }));
+      } catch (error) {
+        console.error('Failed to fetch customer profile:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCustomerProfile();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -32,14 +64,44 @@ const CustomerSettings = () => {
     }));
   };
 
-  const handleSaveChanges = () => {
-    console.log('Saving changes:', formData);
-    // Add save functionality here
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
+
+    try {
+      const files = profileImageFile ? [{
+        fieldName: 'image',
+        file: profileImageFile
+      }] : [];
+
+      await updateProfile({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        email: formData.email
+      }, files.map(({ fieldName, file }) => Object.assign(file, { fieldName })));
+      alert('Changes saved successfully!');
+    } catch (error) {
+      console.error('Failed to save customer profile:', error);
+      alert(error.message || 'Unable to save changes.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleChangePhoto = () => {
-    console.log('Change photo clicked');
-    // Add photo change functionality here
+    profileImageInputRef.current?.click();
+  };
+
+  const handlePhotoChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setProfileImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData((currentData) => ({ ...currentData, profileImage: reader.result }));
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -53,14 +115,26 @@ const CustomerSettings = () => {
           </div>
 
           <div className="profile-form">
+            {isLoading && <p className="section-subtitle">Loading your profile...</p>}
             {/* Profile Photo */}
             <div className="photo-section">
               <div className="current-photo">
-                <div className="photo-placeholder">
-                  <span className="photo-icon">📷</span>
-                </div>
+                {formData.profileImage ? (
+                  <img src={formData.profileImage} alt="Profile" className="customer-profile-image" />
+                ) : (
+                  <div className="photo-placeholder">
+                    <span className="photo-icon">📷</span>
+                  </div>
+                )}
               </div>
-              <button className="change-photo-btn" onClick={handleChangePhoto}>
+              <input
+                ref={profileImageInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="customer-photo-input"
+              />
+              <button type="button" className="change-photo-btn" onClick={handleChangePhoto}>
                 Change Photo
               </button>
             </div>
@@ -125,8 +199,8 @@ const CustomerSettings = () => {
 
             {/* Save Button */}
             <div className="form-actions">
-              <button className="save-btn" onClick={handleSaveChanges}>
-                Save Changes
+              <button className="save-btn" onClick={handleSaveChanges} disabled={isSaving || isLoading}>
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </div>

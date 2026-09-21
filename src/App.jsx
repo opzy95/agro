@@ -13,13 +13,13 @@ import './App.css';
 function App() {
   return (
     <div className="app">
-      <CartProvider>
-        <WishlistProvider>
-          <Router>
+      <Router>
+        <CartProvider>
+          <WishlistProvider>
             <AppRoutes />
-          </Router>
-        </WishlistProvider>
-      </CartProvider>
+          </WishlistProvider>
+        </CartProvider>
+      </Router>
     </div>
   );
 }

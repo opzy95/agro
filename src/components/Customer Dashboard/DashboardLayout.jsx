@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardSidebar from './DashboardSidebar';
 import DashboardTopBar from './DashboardTopBar';
+import { getCurrentUser } from '../../services/userService';
 import './DashboardLayout.css';
 
 const DashboardLayout = ({ 
@@ -10,13 +11,30 @@ const DashboardLayout = ({
   showNotifications = true 
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState({});
 
-  // Mock user data - replace with actual user data from context/state
-  const user = {
-    name: 'Jane Doe',
-    email: 'jane.doe@example.com',
-    avatar: '/api/placeholder/48/48'
-  };
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await getCurrentUser();
+        const profile = response?.user || response?.data?.user || response?.data || response || {};
+        const name = [profile.firstName, profile.lastName].filter(Boolean).join(' ') || profile.name || 'Customer';
+        const avatar = typeof profile.profileImage === 'string'
+          ? profile.profileImage
+          : profile.profileImage?.url
+            || profile.profileImage?.secure_url
+            || profile.profileImageUrl
+            || profile.image
+            || null;
+
+        setUser({ ...profile, name, avatar });
+      } catch (error) {
+        console.error('Failed to fetch customer dashboard user:', error);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -37,6 +55,7 @@ const DashboardLayout = ({
           onMobileMenuToggle={toggleSidebar}
           showSearch={showSearch}
           showNotifications={showNotifications}
+          user={user}
         />
 
         {/* Page Content */}

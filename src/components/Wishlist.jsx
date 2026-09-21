@@ -6,7 +6,7 @@ import { ROUTES } from '../routes/routeUtils';
 import './Wishlist.css';
 
 const Wishlist = () => {
-  const { items: wishlistItems, removeFromWishlist } = useWishlist();
+  const { items: wishlistItems, removeFromWishlist, clearWishlist } = useWishlist();
   const { addToCart } = useCart();
 
   const handleAddToCart = (product) => {
@@ -64,19 +64,6 @@ const Wishlist = () => {
                   </div>
 
                   <div className="item-details">
-                    <h3 className="item-name">{product.name}</h3>
-                    
-                    <div className="item-info">
-                      <span className="item-price">${product.price.toFixed(2)}</span>
-                      <span className="item-unit">/ {product.unit}</span>
-                    </div>
-
-                    <div className="item-seller">
-                      <span className="seller-icon">🏪</span>
-                      <span className="seller-name">{product.seller}</span>
-                      {product.verified && <span className="verified-badge">✓</span>}
-                    </div>
-
                     <div className="item-rating">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <span 
@@ -89,20 +76,48 @@ const Wishlist = () => {
                       <span className="rating-value">{product.rating}</span>
                     </div>
 
-                    <button 
-                      className="add-to-cart-btn"
-                      onClick={() => handleAddToCart(product)}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="9" cy="21" r="1"/>
-                        <circle cx="20" cy="21" r="1"/>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-                      </svg>
-                      Add to Cart
-                    </button>
+                    <h3 className="item-name">{product.name}</h3>
+
+                    <div className="item-seller">
+                      <span className="seller-icon">🏪</span>
+                      <span className="seller-name">{product.seller}</span>
+                      {product.verified && <span className="verified-badge">✓</span>}
+                    </div>
+
+                    <div className="item-purchase-row">
+                      <div className="item-info">
+                        <span className="item-price">${product.price.toFixed(2)}</span>
+                        <span className="item-unit">/ {product.unit}</span>
+                      </div>
+                      <button
+                        className="add-to-cart-btn"
+                        onClick={() => handleAddToCart(product)}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="9" cy="21" r="1"/>
+                          <circle cx="20" cy="21" r="1"/>
+                          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                        </svg>
+                        Add to cart
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className="wishlist-actions">
+              <button
+                type="button"
+                className="clear-wishlist-btn"
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to clear your wishlist?')) {
+                    clearWishlist();
+                  }
+                }}
+              >
+                Clear Wishlist
+              </button>
             </div>
           </>
         )}

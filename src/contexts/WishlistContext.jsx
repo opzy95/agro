@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import * as wishlistService from '../services/wishlistService';
 
 // Wishlist Action Types
@@ -19,7 +20,9 @@ const normalizeWishlistProduct = (product = {}) => {
   const imageList = (product.images || [])
     .map(image => typeof image === 'string' ? image : image?.url)
     .filter(Boolean);
-  const image = product.image || imageList[0] || '';
+  const image = typeof product.image === 'string'
+    ? product.image
+    : product.image?.url || product.image?.secure_url || imageList[0] || '';
   const farmer = product.farmer;
 
   return {
@@ -87,8 +90,15 @@ const WishlistContext = createContext();
 // Wishlist Provider component
 export const WishlistProvider = ({ children }) => {
   const [wishlistState, dispatch] = useReducer(wishlistReducer, initialWishlistState);
+  const { pathname } = useLocation();
+  const isCustomerRoute = pathname.startsWith('/customer');
 
   useEffect(() => {
+    if (!isCustomerRoute) {
+      dispatch({ type: WISHLIST_ACTIONS.CLEAR_WISHLIST });
+      return;
+    }
+
     const loadWishlist = async () => {
       try {
         const response = await wishlistService.getWishlist();
@@ -104,9 +114,11 @@ export const WishlistProvider = ({ children }) => {
     };
 
     loadWishlist();
-  }, []);
+  }, [isCustomerRoute]);
 
   const addToWishlist = async (product) => {
+    if (!isCustomerRoute) return;
+
     try {
       const response = await wishlistService.addToWishlist(product.id);
       const products = response?.wishlist?.products || [];
@@ -118,6 +130,8 @@ export const WishlistProvider = ({ children }) => {
   };
 
   const removeFromWishlist = async (productId) => {
+    if (!isCustomerRoute) return;
+
     try {
       await wishlistService.removeFromWishlist(productId);
       dispatch({ type: WISHLIST_ACTIONS.REMOVE_FROM_WISHLIST, payload: productId });
@@ -127,6 +141,8 @@ export const WishlistProvider = ({ children }) => {
   };
 
   const clearWishlist = async () => {
+    if (!isCustomerRoute) return;
+
     try {
       await wishlistService.clearWishlist();
       dispatch({ type: WISHLIST_ACTIONS.CLEAR_WISHLIST });

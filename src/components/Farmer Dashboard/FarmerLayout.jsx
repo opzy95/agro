@@ -24,6 +24,9 @@ const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifica
   const normalizedUser = currentUser || {};
   const fullName = [normalizedUser.firstName, normalizedUser.lastName].filter(Boolean).join(' ') || normalizedUser.name || 'Green Valley Farm';
   const farmName = normalizedUser.farmName || normalizedUser.businessName || normalizedUser.location || 'Premium Producer';
+  const profileImage = typeof normalizedUser.profileImage === 'string'
+    ? normalizedUser.profileImage
+    : normalizedUser.profileImage?.url || normalizedUser.profileImage?.secure_url || normalizedUser.profileImageUrl || null;
 
   const layoutFarmer = {
     name: 'Green Valley Farm',
@@ -33,6 +36,8 @@ const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifica
     ...normalizedUser,
     name: fullName,
     farmName: farmName,
+    profileImage,
+    avatar: profileImage,
     verificationStatus: normalizedUser.verificationStatus || 'verified'
   };
 
