@@ -1,101 +1,80 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import * as cartService from '../services/cartService';
+import { getProductById } from '../services/productService';
 
-// Cart Action Types
-const CART_ACTIONS = {
-  ADD_TO_CART: 'ADD_TO_CART',
-  REMOVE_FROM_CART: 'REMOVE_FROM_CART',
-  UPDATE_QUANTITY: 'UPDATE_QUANTITY',
-  CLEAR_CART: 'CLEAR_CART',
-  LOAD_CART: 'LOAD_CART'
-};
-
-// Initial cart state
 const initialCartState = {
   items: [],
   totalItems: 0,
   totalPrice: 0
 };
 
-// Cart reducer function
-const cartReducer = (state, action) => {
-  switch (action.type) {
-    case CART_ACTIONS.ADD_TO_CART: {
-      const existingItem = state.items.find(item => item.id === action.payload.id);
-      
-      if (existingItem) {
-        // If item exists, increase quantity
-        const updatedItems = state.items.map(item =>
-          item.id === action.payload.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-        
-        return {
-          ...state,
-          items: updatedItems,
-          totalItems: state.totalItems + 1,
-          totalPrice: state.totalPrice + action.payload.price
-        };
-      } else {
-        // If new item, add to cart
-        const newItem = { ...action.payload, quantity: 1 };
-        
-        return {
-          ...state,
-          items: [...state.items, newItem],
-          totalItems: state.totalItems + 1,
-          totalPrice: state.totalPrice + action.payload.price
-        };
-      }
+const unwrapCart = (response) => response?.cart || response?.data?.cart || response?.data || response;
+const isObjectId = (value) => typeof value === 'string' && /^[a-f\d]{24}$/i.test(value);
+
+const getSellerName = (value) => {
+  if (!value || isObjectId(value)) return '';
+  if (typeof value === 'string') return value;
+  return value.farmName || value.businessName || [value.firstName, value.lastName].filter(Boolean).join(' ');
+};
+
+const normalizeCart = (cart, sellerLookup = {}) => {
+  const cartData = unwrapCart(cart);
+  const items = (cartData?.items || []).map((item) => {
+    const product = item.product || {};
+    const farmer = item.farmer || product.farmer;
+    const productId = String(product._id || product.id || item.product?._id || item.product?.id || item.product);
+    const farmerName = getSellerName(farmer);
+
+    return {
+      ...product,
+      id: productId,
+      name: item.name || product.name,
+      price: Number(item.price ?? product.price ?? 0),
+      image: product.image || product.images?.[0],
+      badges: product.badges || [],
+      seller: getSellerName(item.seller) || getSellerName(product.seller) || farmerName || sellerLookup[productId] || '',
+      quantity: item.quantity,
+      subtotal: Number(item.subtotal ?? 0)
+    };
+  });
+
+  return {
+    items,
+    totalItems: items.reduce((total, item) => total + item.quantity, 0),
+    totalPrice: Number(cartData?.totalAmount ?? cartData?.total ?? items.reduce((total, item) => total + item.subtotal, 0))
+  };
+};
+
+const hydrateSellerNames = async (cartState, sellerLookup, rememberSeller) => {
+  const missingSellerItems = cartState.items.filter((item) => !item.seller && item.id);
+  if (missingSellerItems.length === 0) return cartState;
+
+  const resolvedSellers = await Promise.all(missingSellerItems.map(async (item) => {
+    try {
+      const response = await getProductById(item.id);
+      const product = response?.product || response?.data?.product || response?.data || response;
+      const farmer = product?.farmer;
+      const seller = getSellerName(product?.seller) || getSellerName(farmer);
+      return seller ? { id: item.id, seller } : null;
+    } catch {
+      return null;
     }
+  }));
 
-    case CART_ACTIONS.REMOVE_FROM_CART: {
-      const itemToRemove = state.items.find(item => item.id === action.payload);
-      if (!itemToRemove) return state;
+  const sellerMap = resolvedSellers.filter(Boolean).reduce((map, entry) => {
+    map[entry.id] = entry.seller;
+    return map;
+  }, { ...sellerLookup });
 
-      const updatedItems = state.items.filter(item => item.id !== action.payload);
-      
-      return {
-        ...state,
-        items: updatedItems,
-        totalItems: state.totalItems - itemToRemove.quantity,
-        totalPrice: state.totalPrice - (itemToRemove.price * itemToRemove.quantity)
-      };
-    }
+  resolvedSellers.filter(Boolean).forEach(({ id, seller }) => rememberSeller(id, seller));
 
-    case CART_ACTIONS.UPDATE_QUANTITY: {
-      const { id, quantity } = action.payload;
-      
-      if (quantity <= 0) {
-        // If quantity is 0 or less, remove item
-        return cartReducer(state, { type: CART_ACTIONS.REMOVE_FROM_CART, payload: id });
-      }
-
-      const existingItem = state.items.find(item => item.id === id);
-      if (!existingItem) return state;
-
-      const quantityDifference = quantity - existingItem.quantity;
-      const updatedItems = state.items.map(item =>
-        item.id === id ? { ...item, quantity } : item
-      );
-
-      return {
-        ...state,
-        items: updatedItems,
-        totalItems: state.totalItems + quantityDifference,
-        totalPrice: state.totalPrice + (existingItem.price * quantityDifference)
-      };
-    }
-
-    case CART_ACTIONS.CLEAR_CART:
-      return initialCartState;
-
-    case CART_ACTIONS.LOAD_CART:
-      return action.payload || initialCartState;
-
-    default:
-      return state;
-  }
+  return {
+    ...cartState,
+    items: cartState.items.map((item) => ({
+      ...item,
+      seller: item.seller || sellerMap[item.id] || ''
+    }))
+  };
 };
 
 // Create Cart Context
@@ -103,41 +82,66 @@ const CartContext = createContext();
 
 // Cart Provider component
 export const CartProvider = ({ children }) => {
-  const [cartState, dispatch] = useReducer(cartReducer, initialCartState);
+  const [cartState, setCartState] = useState(initialCartState);
+  const [cartError, setCartError] = useState('');
 
-  // Load cart from localStorage on mount
-  useEffect(() => {
-    const savedCart = localStorage.getItem('harvestHub_cart');
-    if (savedCart) {
-      try {
-        const parsedCart = JSON.parse(savedCart);
-        dispatch({ type: CART_ACTIONS.LOAD_CART, payload: parsedCart });
-      } catch (error) {
-        console.error('Error loading cart from localStorage:', error);
-      }
+  const getSellerLookup = () => {
+    try {
+      return JSON.parse(localStorage.getItem('harvestHub_sellers') || '{}');
+    } catch {
+      return {};
     }
+  };
+
+  const rememberSeller = (productOrId, sellerValue) => {
+    const productId = typeof productOrId === 'object' ? String(productOrId.id) : String(productOrId);
+    const seller = sellerValue || getSellerName(productOrId.seller);
+    if (!seller) return;
+
+    const sellers = { ...getSellerLookup(), [productId]: seller };
+    localStorage.setItem('harvestHub_sellers', JSON.stringify(sellers));
+  };
+
+  useEffect(() => {
+    if (!localStorage.getItem('authToken') && !sessionStorage.getItem('authToken')) return;
+    cartService.getCart()
+      .then((cart) => {
+        const sellerLookup = getSellerLookup();
+        const normalizedCart = normalizeCart(cart, sellerLookup);
+        return hydrateSellerNames(normalizedCart, sellerLookup, rememberSeller);
+      })
+      .then(setCartState)
+      .catch((error) => setCartError(error.message));
   }, []);
 
-  // Save cart to localStorage whenever cart state changes
-  useEffect(() => {
-    localStorage.setItem('harvestHub_cart', JSON.stringify(cartState));
-  }, [cartState]);
+  const syncCart = async (request) => {
+    setCartError('');
+    try {
+      const cart = await request();
+      const sellerLookup = getSellerLookup();
+      const normalizedCart = normalizeCart(cart, sellerLookup);
+      setCartState(await hydrateSellerNames(normalizedCart, sellerLookup, rememberSeller));
+    } catch (error) {
+      setCartError(error.message);
+      throw error;
+    }
+  };
 
-  // Cart action functions
   const addToCart = (product) => {
-    dispatch({ type: CART_ACTIONS.ADD_TO_CART, payload: product });
+    rememberSeller(product);
+    return syncCart(() => cartService.addToCart(product.id, 1));
   };
 
   const removeFromCart = (productId) => {
-    dispatch({ type: CART_ACTIONS.REMOVE_FROM_CART, payload: productId });
+    return syncCart(() => cartService.removeFromCart(productId));
   };
 
   const updateQuantity = (productId, quantity) => {
-    dispatch({ type: CART_ACTIONS.UPDATE_QUANTITY, payload: { id: productId, quantity } });
+    return syncCart(() => cartService.updateCartItem(productId, quantity));
   };
 
   const clearCart = () => {
-    dispatch({ type: CART_ACTIONS.CLEAR_CART });
+    return syncCart(() => cartService.clearCart());
   };
 
   const getItemQuantity = (productId) => {
@@ -155,6 +159,7 @@ export const CartProvider = ({ children }) => {
     removeFromCart,
     updateQuantity,
     clearCart,
+    cartError,
     getItemQuantity,
     isInCart
   };

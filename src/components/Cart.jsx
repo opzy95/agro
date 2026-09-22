@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import { createOrder } from '../services/orderService';
 import './Cart.css';
 
 const Cart = () => {
@@ -9,7 +10,9 @@ const Cart = () => {
     totalItems, 
     totalPrice: cartTotalPrice,
     updateQuantity, 
-    removeFromCart 
+    removeFromCart,
+    clearCart,
+    cartError
   } = useCart();
 
   const location = useLocation();
@@ -17,6 +20,15 @@ const Cart = () => {
   const shopLink = isInDashboard ? '/customer/shop' : '/shop';
 
   const [promoCode, setPromoCode] = useState('');
+  const [shippingAddress, setShippingAddress] = useState({
+    fullName: '',
+    phone: '',
+    address: ''
+  });
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
+  const [orderSuccess, setOrderSuccess] = useState('');
 
   const updateCartQuantity = (id, newQuantity) => {
     if (newQuantity <= 0) {
@@ -38,6 +50,37 @@ const Cart = () => {
   const applyPromoCode = () => {
     // Handle promo code application
     console.log('Apply promo code:', promoCode);
+  };
+
+  const updateShippingAddress = (event) => {
+    const { name, value } = event.target;
+    setShippingAddress((current) => ({ ...current, [name]: value }));
+  };
+
+  const submitOrder = async (event) => {
+    event.preventDefault();
+    setCheckoutError('');
+    setOrderSuccess('');
+    setIsSubmitting(true);
+
+    try {
+      const order = await createOrder({
+        items: cartItems.map((item) => ({
+          product: item.id,
+          quantity: item.quantity
+        })),
+        shippingAddress,
+        deliveryFee
+      });
+
+      clearCart();
+      setIsCheckoutOpen(false);
+      setOrderSuccess(`Order ${order.orderNumber || order._id || ''} was placed successfully.`.trim());
+    } catch (error) {
+      setCheckoutError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const subtotal = cartTotalPrice;
@@ -62,6 +105,8 @@ const Cart = () => {
 
       {/* Page Title */}
       <h1 className="cart-title">Your Cart</h1>
+
+      {cartError && <p className="checkout-error" role="alert">{cartError}</p>}
 
       <div className="cart-content">
         {/* Cart Items */}
@@ -226,12 +271,46 @@ const Cart = () => {
               <span>${total.toFixed(2)}</span>
             </div>
 
-            <button className="checkout-btn">
-              Proceed to Checkout
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="9,18 15,12 9,6"/>
-              </svg>
-            </button>
+            {orderSuccess && <p className="checkout-success" role="status">{orderSuccess}</p>}
+
+            {!isCheckoutOpen ? (
+              <button className="checkout-btn" onClick={() => setIsCheckoutOpen(true)}>
+                Proceed to Checkout
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9,18 15,12 9,6"/>
+                </svg>
+              </button>
+            ) : (
+              <form className="checkout-form" onSubmit={submitOrder}>
+                <h4>Delivery details</h4>
+                <input
+                  name="fullName"
+                  value={shippingAddress.fullName}
+                  onChange={updateShippingAddress}
+                  placeholder="Full name"
+                  required
+                />
+                <input
+                  name="phone"
+                  value={shippingAddress.phone}
+                  onChange={updateShippingAddress}
+                  placeholder="Phone number"
+                  required
+                />
+                <textarea
+                  name="address"
+                  value={shippingAddress.address}
+                  onChange={updateShippingAddress}
+                  placeholder="Delivery address"
+                  rows="3"
+                  required
+                />
+                {checkoutError && <p className="checkout-error" role="alert">{checkoutError}</p>}
+                <button className="checkout-btn" type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Placing order...' : 'Place order'}
+                </button>
+              </form>
+            )}
 
             <p className="tax-note">Taxes calculated at checkout.</p>
           </div>
