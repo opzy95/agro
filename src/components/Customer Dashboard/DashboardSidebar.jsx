@@ -22,31 +22,31 @@ const DashboardSidebar = ({ user }) => {
 
   const menuItems = [
     {
-      icon: '📊',
+      // icon: '📊',
       label: 'Dashboard',
       path: '/customer/dashboard',
       isActive: location.pathname === '/customer/dashboard'
     },
     {
-      icon: '📦',
+      // icon: '📦',
       label: 'My Orders',
       path: '/customer/orders',
       isActive: location.pathname === '/customer/orders'
     },
     {
-      icon: '💝',
+      // icon: '💝',
       label: 'Wishlist',
       path: '/customer/wishlist',
       isActive: location.pathname === '/customer/wishlist'
     },
     {
-      icon: '💳',
+      // icon: '💳',
       label: 'Payment Methods',
       path: '/customer/payment-methods',
       isActive: location.pathname === '/customer/payment-methods'
     },
     {
-      icon: '⚙️',
+      // icon: '⚙️',
       label: 'Settings',
       path: '/customer/settings',
       isActive: location.pathname === '/customer/settings'
@@ -55,7 +55,7 @@ const DashboardSidebar = ({ user }) => {
 
   const bottomMenuItems = [
     {
-      icon: '❓',
+      // icon: '❓',
       label: 'Help Center',
       path: '/help',
       isActive: false

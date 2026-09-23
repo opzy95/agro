@@ -30,6 +30,10 @@ export const login = async ({ email, password, rememberMe }) => {
   if (result.token) {
     const storage = rememberMe ? localStorage : sessionStorage;
     storage.setItem('authToken', result.token);
+
+    if (result.user) {
+      storage.setItem('user', JSON.stringify(result.user));
+    }
   }
 
   return result;

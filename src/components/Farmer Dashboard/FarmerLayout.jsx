@@ -1,45 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import FarmerSidebar from './FarmerSidebar';
 import FarmerTopBar from './FarmerTopBar';
-import { getCurrentUser } from '../../services/userService';
 import './FarmerLayout.css';
 
 const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifications = true }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const response = await getCurrentUser();
-        setCurrentUser(response?.user || response || null);
-      } catch (error) {
-        console.error('Failed to fetch current user:', error);
-      }
-    };
-
-    fetchCurrentUser();
-  }, []);
-
-  const normalizedUser = currentUser || {};
-  const fullName = [normalizedUser.firstName, normalizedUser.lastName].filter(Boolean).join(' ') || normalizedUser.name || 'Green Valley Farm';
-  const farmName = normalizedUser.farmName || normalizedUser.businessName || normalizedUser.location || 'Premium Producer';
-  const profileImage = typeof normalizedUser.profileImage === 'string'
-    ? normalizedUser.profileImage
-    : normalizedUser.profileImage?.url || normalizedUser.profileImage?.secure_url || normalizedUser.profileImageUrl || null;
-
-  const layoutFarmer = {
-    name: 'Green Valley Farm',
-    farmName: 'Premium Producer',
-    verificationStatus: 'verified',
-    ...farmer,
-    ...normalizedUser,
-    name: fullName,
-    farmName: farmName,
-    profileImage,
-    avatar: profileImage,
-    verificationStatus: normalizedUser.verificationStatus || 'verified'
-  };
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -53,7 +18,7 @@ const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifica
     <div className="farmer-layout">
       {/* Sidebar */}
       <aside className={`farmer-layout-sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <FarmerSidebar farmer={layoutFarmer} />
+        <FarmerSidebar farmer={farmer} />
       </aside>
 
       {/* Sidebar Overlay for Mobile */}
@@ -69,12 +34,12 @@ const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifica
             onMobileMenuToggle={toggleSidebar}
             showSearch={showSearch}
             showNotifications={showNotifications}
-            farmer={layoutFarmer}
           />
         </div>
 
         {/* Page Content - Children Render Here */}
         <main className="farmer-layout-content">
+          <div style={{color: 'red', fontSize: '24px', padding: '2rem'}}>DEBUG: Content Area Visible</div>
           {children}
         </main>
       </div>

@@ -10,8 +10,7 @@ const FarmerDashboardPage = () => {
   const farmer = {
     name: 'Green Valley Farm',
     farmName: 'Premium Producer',
-    avatar: null,
-    verificationStatus: 'verified' // This would come from the backend/context in real app
+    avatar: null
   };
 
   const stats = [

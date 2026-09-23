@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-import { createOrder } from '../services/orderService';
+import { initializePayment } from '../services/paymentService';
 import './Cart.css';
 
 const Cart = () => {
@@ -11,7 +11,6 @@ const Cart = () => {
     totalPrice: cartTotalPrice,
     updateQuantity, 
     removeFromCart,
-    clearCart,
     cartError
   } = useCart();
 
@@ -28,7 +27,6 @@ const Cart = () => {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
-  const [orderSuccess, setOrderSuccess] = useState('');
 
   const updateCartQuantity = (id, newQuantity) => {
     if (newQuantity <= 0) {
@@ -57,26 +55,50 @@ const Cart = () => {
     setShippingAddress((current) => ({ ...current, [name]: value }));
   };
 
+  const getAuthToken = () => {
+    return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+  };
+
   const submitOrder = async (event) => {
     event.preventDefault();
     setCheckoutError('');
-    setOrderSuccess('');
     setIsSubmitting(true);
 
+    const paymentWindow = window.open('', '_blank');
+
+    if (!paymentWindow) {
+      setCheckoutError('Please allow pop-ups to continue to payment.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    paymentWindow.document.title = 'Redirecting to Paystack...';
+
     try {
-      const order = await createOrder({
+      const payment = await initializePayment({
         items: cartItems.map((item) => ({
           product: item.id,
           quantity: item.quantity
         })),
         shippingAddress,
         deliveryFee
+      }, getAuthToken());
+
+      const authorizationUrl =
+        payment?.authorizationUrl || payment?.payment?.authorizationUrl;
+
+      console.log('[Cart] Payment authorization URL received', {
+        authorizationUrl,
+        hasPaymentResponse: Boolean(payment)
       });
 
-      clearCart();
-      setIsCheckoutOpen(false);
-      setOrderSuccess(`Order ${order.orderNumber || order._id || ''} was placed successfully.`.trim());
+      if (!authorizationUrl) {
+        throw new Error('Paystack did not return a valid payment session.');
+      }
+
+      paymentWindow.location.href = authorizationUrl;
     } catch (error) {
+      paymentWindow.close();
       setCheckoutError(error.message);
     } finally {
       setIsSubmitting(false);
@@ -270,8 +292,6 @@ const Cart = () => {
               <span>Total</span>
               <span>${total.toFixed(2)}</span>
             </div>
-
-            {orderSuccess && <p className="checkout-success" role="status">{orderSuccess}</p>}
 
             {!isCheckoutOpen ? (
               <button className="checkout-btn" onClick={() => setIsCheckoutOpen(true)}>

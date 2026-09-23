@@ -13,6 +13,7 @@ import ShopPage from '../components/ShopPage';
 import CartPage from '../components/CartPage';
 import Wishlist from '../components/Wishlist';
 import Footer from '../components/Footer';
+import PaymentCallback from '../components/PaymentCallback';
 
 // Customer Dashboard Components
 import CustomerDashboardPage from '../components/Customer Dashboard/CustomerDashboardPage';
@@ -79,6 +80,7 @@ const AppRoutes = () => {
 
       {/* Cart Route - with Header and Footer */}
       <Route path="/cart" element={<CartPage />} />
+      <Route path="/payment/callback" element={<PaymentCallback />} />
 
       {/* Wishlist Route - with Header and Footer */}
       <Route 

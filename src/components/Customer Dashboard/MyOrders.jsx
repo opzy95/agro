@@ -1,87 +1,54 @@
-import React, { useState } from 'react';
-import tomatoImg from '../../assets/tomato.png';
+import React, { useEffect, useState } from 'react';
 import bowlImg from '../../assets/bowl.png';
+import { getMyOrders } from '../../services/orderService';
 import './MyOrders.css';
 
 const MyOrders = () => {
   const [activeFilter, setActiveFilter] = useState('All Orders');
   const [searchTerm, setSearchTerm] = useState('');
+  const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState('');
 
-  // Mock orders data
-  const orders = [
-    {
-      id: 'HH-8923',
-      datePlaced: 'Oct 12, 2024',
-      status: 'Delivered',
-      total: 102.50,
-      items: [
-        {
-          id: 1,
-          name: 'Premium Hass Avocados (Box)',
-          source: 'Sourced from Valley Farms',
-          price: 42.00,
-          quantity: 2,
-          image: bowlImg
-        },
-        {
-          id: 2,
-          name: 'Heirloom Tomatoes Mix',
-          source: 'Sourced from Sunrise Acres',
-          price: 18.50,
-          quantity: 1,
-          image: tomatoImg
-        }
-      ]
-    },
-    {
-      id: 'HH-9041',
-      datePlaced: 'Oct 24, 2024',
-      status: 'In Transit',
-      total: 135.00,
-      items: [
-        {
-          id: 1,
-          name: 'Artisanal Coffee Beans (5kg)',
-          source: 'Sourced from Highland Roasters',
-          price: 120.00,
-          quantity: 1,
-          image: bowlImg
-        }
-      ]
-    },
-    {
-      id: 'HH-9102',
-      datePlaced: 'Oct 26, 2024',
-      status: 'Processing',
-      total: 55.00,
-      items: [
-        {
-          id: 1,
-          name: 'Bulk Organic Romaine',
-          source: 'Sourced from Green Leaf Farms',
-          price: 45.00,
-          quantity: 3,
-          image: tomatoImg
-        }
-      ]
-    },
-    {
-      id: 'HH-9158',
-      datePlaced: 'Oct 28, 2024',
-      status: 'Cancelled',
-      total: 28.00,
-      items: [
-        {
-          id: 1,
-          name: 'Fresh Garden Produce Box',
-          source: 'Sourced from Green Leaf Farms',
-          price: 28.00,
-          quantity: 1,
-          image: bowlImg
-        }
-      ]
-    }
-  ];
+  useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        const response = await getMyOrders();
+        const rawOrders = response?.orders || response?.data?.orders || response?.data || response || [];
+        const orderList = Array.isArray(rawOrders) ? rawOrders : [];
+
+        setOrders(orderList.map((order) => ({
+          id: order.orderNumber || order._id || order.id,
+          datePlaced: new Date(order.createdAt || order.datePlaced || Date.now()).toLocaleDateString(),
+          status: formatStatus(order.status || order.orderStatus || 'Processing'),
+          total: Number(order.totalAmount ?? order.total ?? order.grandTotal ?? 0),
+          items: (order.items || []).map((item, index) => {
+            const product = item.product || {};
+            return {
+              id: product._id || product.id || item._id || index,
+              name: item.name || product.name || 'Product',
+              source: product.farmer?.farmName || product.seller?.name || 'AgroFresh marketplace',
+              price: Number(item.price ?? product.price ?? 0),
+              quantity: Number(item.quantity || 0),
+              image: product.image || product.images?.[0] || bowlImg
+            };
+          })
+        })));
+      } catch (error) {
+        setOrdersError(error.message || 'Unable to load your orders.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadOrders();
+  }, []);
+
+  const formatStatus = (status) => {
+    return String(status)
+      .replace(/[_-]/g, ' ')
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  };
 
   const filterOptions = ['All Orders', 'Ongoing', 'Completed', 'Cancelled'];
 
@@ -201,7 +168,12 @@ const MyOrders = () => {
 
       {/* Orders List */}
       <div className="orders-list">
-        {filteredOrders.map((order) => (
+        {isLoading && <p className="orders-empty">Loading your orders...</p>}
+        {!isLoading && ordersError && <p className="orders-empty checkout-error" role="alert">{ordersError}</p>}
+        {!isLoading && !ordersError && filteredOrders.length === 0 && (
+          <p className="orders-empty">You have no orders yet.</p>
+        )}
+        {!isLoading && !ordersError && filteredOrders.map((order) => (
           <div key={order.id} className="order-card">
             {/* Order Header */}
             <div className="order-header">
