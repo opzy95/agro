@@ -24,6 +24,7 @@ const Cart = () => {
     phone: '',
     address: ''
   });
+  const [deliveryMethod, setDeliveryMethod] = useState('local_delivery');
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
@@ -75,13 +76,23 @@ const Cart = () => {
     paymentWindow.document.title = 'Redirecting to Paystack...';
 
     try {
+      const requiresAddress = deliveryMethod !== 'farm_pickup';
+      if (requiresAddress && (!shippingAddress.fullName.trim() || !shippingAddress.phone.trim() || !shippingAddress.address.trim())) {
+        throw new Error('Please provide your delivery details.');
+      }
+
       const payment = await initializePayment({
         items: cartItems.map((item) => ({
           product: item.id,
           quantity: item.quantity
         })),
-        shippingAddress,
-        deliveryFee
+        deliveryMethod,
+        shippingAddress: requiresAddress ? {
+          fullName: shippingAddress.fullName.trim(),
+          phone: shippingAddress.phone.trim(),
+          address: shippingAddress.address.trim()
+        } : null,
+        deliveryFee: requiresAddress ? deliveryFee : 0
       }, getAuthToken());
 
       const authorizationUrl =
@@ -106,7 +117,7 @@ const Cart = () => {
   };
 
   const subtotal = cartTotalPrice;
-  const deliveryFee = 4.99;
+  const deliveryFee = deliveryMethod === 'farm_pickup' ? 0 : 4.99;
   const discount = 0;
   const total = subtotal + deliveryFee - discount;
 
@@ -303,6 +314,42 @@ const Cart = () => {
             ) : (
               <form className="checkout-form" onSubmit={submitOrder}>
                 <h4>Delivery details</h4>
+                <div className="delivery-method-options">
+                  <label>
+                    <input
+                      type="radio"
+                      name="deliveryMethod"
+                      value="farm_pickup"
+                      checked={deliveryMethod === 'farm_pickup'}
+                      onChange={(event) => setDeliveryMethod(event.target.value)}
+                    />
+                    Farm pickup
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="deliveryMethod"
+                      value="local_delivery"
+                      checked={deliveryMethod === 'local_delivery'}
+                      onChange={(event) => setDeliveryMethod(event.target.value)}
+                    />
+                    Local delivery
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="deliveryMethod"
+                      value="national_courier"
+                      checked={deliveryMethod === 'national_courier'}
+                      onChange={(event) => setDeliveryMethod(event.target.value)}
+                    />
+                    National courier
+                  </label>
+                </div>
+                {deliveryMethod === 'farm_pickup' ? (
+                  <p className="pickup-note">No shipping address is needed for farm pickup.</p>
+                ) : (
+                  <>
                 <input
                   name="fullName"
                   value={shippingAddress.fullName}
@@ -325,6 +372,8 @@ const Cart = () => {
                   rows="3"
                   required
                 />
+                  </>
+                )}
                 {checkoutError && <p className="checkout-error" role="alert">{checkoutError}</p>}
                 <button className="checkout-btn" type="submit" disabled={isSubmitting}>
                   {isSubmitting ? 'Placing order...' : 'Place order'}

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminLayout from './AdminLayout';
+import { getAdminUsers, updateAdminUserVerification } from '../../services/adminService';
 import './AdminUsersPage.css';
 
 const AdminUsersPage = () => {
@@ -8,18 +9,27 @@ const AdminUsersPage = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      initials: 'OO',
-      name: 'Oluwaseun Oba',
-      email: 'olu.o@example.com',
-      role: 'Farmer',
-      nin: 'NIN -8932145',
-      status: 'Verified',
-      verificationStatus: 'verified',
-      dateJoined: 'Oct 12, 2023'
-    },
+  const [users, setUsers] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [usersError, setUsersError] = useState('');
+  useEffect(() => {
+    getAdminUsers()
+      .then((response) => {
+        const list = response?.users || response?.data?.users || response?.data || response || [];
+        setTotalUsers(Number(response?.count ?? response?.data?.count ?? (Array.isArray(list) ? list.length : 0)));
+        setUsers(Array.isArray(list) ? list.map((user) => {
+          const name = user.name || user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User';
+          const initials = name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase();
+          const rawVerificationStatus = user.verificationStatus || (user.isVerified ? 'verified' : 'pending');
+          const role = String(user.role || 'customer').replace(/\b\w/g, (letter) => letter.toUpperCase());
+          return { ...user, id: user._id || user.id, name, initials, email: user.email || '', role, nin: user.nin || user.bvn || '-', rawVerificationStatus, verificationStatus: rawVerificationStatus === 'verified' ? 'verified' : 'not_verified', status: user.status || (rawVerificationStatus === 'verified' ? 'Verified' : 'Pending Review'), dateJoined: new Date(user.createdAt || user.dateJoined || Date.now()).toLocaleDateString() };
+        }) : []);
+      })
+      .catch((error) => setUsersError(error.message))
+      .finally(() => setIsLoading(false));
+  }, []);
+  /*
     {
       id: 2,
       initials: 'AI',
@@ -119,7 +129,7 @@ const AdminUsersPage = () => {
       verificationStatus: 'verified',
       dateJoined: 'Aug 28, 2023'
     }
-  ]);
+  */
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
@@ -127,7 +137,7 @@ const AdminUsersPage = () => {
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.nin.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesRole = roleFilter === 'All' || user.role.includes(roleFilter);
+    const matchesRole = roleFilter === 'All' || user.role.toLowerCase().includes(roleFilter.toLowerCase());
     const matchesStatus = statusFilter === 'All' || user.status === statusFilter;
     
     return matchesSearch && matchesRole && matchesStatus;
@@ -160,7 +170,8 @@ const AdminUsersPage = () => {
   };
 
   const handleVerifyUser = (userId, action) => {
-    setUsers(users.map(user => {
+    updateAdminUserVerification(userId, action)
+      .then(() => setUsers(users.map(user => {
       if (user.id === userId) {
         if (action === 'verify') {
           return {
@@ -177,8 +188,8 @@ const AdminUsersPage = () => {
         }
       }
       return user;
-    }));
-    alert(`User ${action === 'verify' ? 'verified' : 'rejected'} successfully!`);
+      })))
+      .catch((error) => setUsersError(error.message));
   };
 
   return (
@@ -196,11 +207,11 @@ const AdminUsersPage = () => {
         <div className="stats-row">
           <div className="stat-box">
             <p className="stat-label">TOTAL USERS</p>
-            <p className="stat-value">12,450 <span className="stat-change">-4.2%</span></p>
+            <p className="stat-value">{totalUsers}</p>
           </div>
           <div className="stat-box">
             <p className="stat-label">PENDING VERIFICATION</p>
-            <p className="stat-value">48 <span className="stat-change-alert">Action Req</span></p>
+            <p className="stat-value">{users.filter((user) => user.role.toLowerCase() === 'farmer' && user.rawVerificationStatus === 'pending').length} <span className="stat-change-alert">Action Req</span></p>
           </div>
         </div>
 
@@ -211,7 +222,7 @@ const AdminUsersPage = () => {
             <div className="alert-content">
               <h3 className="alert-title">Farmers Awaiting NIN/BVN Review</h3>
               <p className="alert-description">
-                There are 48 newly registered farmers requiring manual document verification before platform access is granted.
+                There are {users.filter((user) => user.role.toLowerCase() === 'farmer' && user.rawVerificationStatus === 'pending').length} farmers requiring manual document verification before platform access is granted.
               </p>
             </div>
           </div>
@@ -272,6 +283,8 @@ const AdminUsersPage = () => {
               </tr>
             </thead>
             <tbody>
+                {isLoading && <tr><td colSpan="7">Loading users...</td></tr>}
+                {!isLoading && usersError && <tr><td colSpan="7" role="alert">{usersError}</td></tr>}
               {paginatedUsers.map((user) => (
                 <tr key={user.id}>
                   <td className="user-cell">

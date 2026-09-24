@@ -1,60 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import FarmerLayout from './FarmerLayout';
+import { getFarmerAnalyticsData } from '../../services/farmerService';
+import { getCurrentUser } from '../../services/userService';
 
 const FarmerAnalyticsPage = () => {
   const [timeRange, setTimeRange] = useState('30D');
 
-  const farmer = {
-    name: 'Green Valley Farm',
-    farmName: 'Premium Producer',
-    avatar: null,
-    verificationStatus: 'not_verified' // Demo: showing not verified status
-  };
+  const [farmer, setFarmer] = useState({ name: 'Farmer', farmName: 'Farm', avatar: null, verificationStatus: 'not_verified' });
+  const [analyticsData, setAnalyticsData] = useState({ stats: { revenue: 0, orders: 0 }, orders: [], topProducts: [], topCustomers: [] });
+  const [analyticsError, setAnalyticsError] = useState('');
+
+  useEffect(() => {
+    Promise.all([getFarmerAnalyticsData(), getCurrentUser()])
+      .then(([data, response]) => {
+        const user = response?.user || response?.data?.user || response?.data || response;
+        setAnalyticsData(data);
+        setFarmer({ name: [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.name || 'Farmer', farmName: user?.farmName || 'Farm', avatar: user?.profileImage || null, verificationStatus: user?.verificationStatus || (user?.isVerified ? 'verified' : 'not_verified') });
+      })
+      .catch((error) => setAnalyticsError(error.message || 'Unable to load analytics.'));
+  }, []);
 
   const analytics = [
-    {
-      title: 'Total Revenue',
-      value: '₦1,245,000',
-      trend: '+15.2%',
-      icon: '💰',
-      color: 'success'
-    },
-    {
-      title: 'Orders',
-      value: '342',
-      trend: '+8.1%',
-      icon: '📦',
-      color: 'info'
-    },
-    {
-      title: 'Customers',
-      value: '156',
-      trend: '+12.3%',
-      icon: '👥',
-      color: 'primary'
-    },
-    {
-      title: 'Products Sold',
-      value: '2,847',
-      trend: '+22.5%',
-      icon: '🛒',
-      color: 'warning'
-    }
+    { title: 'Total Revenue', value: `₦${Number(analyticsData.stats.revenue || 0).toLocaleString('en-NG')}`, trend: '', icon: '💰', color: 'success' },
+    { title: 'Orders', value: String(analyticsData.stats.orders || 0), trend: '', icon: '📦', color: 'info' },
+    { title: 'Customers', value: String(analyticsData.topCustomers.length), trend: '', icon: '👥', color: 'primary' },
+    { title: 'Products Sold', value: String(analyticsData.topProducts.reduce((total, product) => total + Number(product.orders || 0), 0)), trend: '', icon: '🛒', color: 'warning' }
   ];
 
-  const topProducts = [
-    { name: 'Roma Tomatoes', revenue: '₦185,000', orders: 45 },
-    { name: 'White Yams', revenue: '₦142,000', orders: 32 },
-    { name: 'Sweet Maize', revenue: '₦98,000', orders: 28 },
-    { name: 'Ofada Rice', revenue: '₦76,000', orders: 24 }
-  ];
-
-  const topCustomers = [
-    { name: 'Amina Bello', orders: 12, spent: '₦85,000' },
-    { name: 'Chukwudi Eze', orders: 8, spent: '₦72,000' },
-    { name: 'Fatima Yusuf', orders: 10, spent: '₦68,000' },
-    { name: 'Oluwaseun Ade', orders: 6, spent: '₦54,000' }
-  ];
+  const topProducts = analyticsData.topProducts.map((product) => ({ ...product, revenue: `₦${Number(product.revenue || 0).toLocaleString('en-NG')}` }));
+  const topCustomers = analyticsData.topCustomers.map((customer) => ({ ...customer, spent: `₦${Number(customer.spent || 0).toLocaleString('en-NG')}` }));
 
   return (
     <FarmerLayout farmer={farmer} showSearch={true} showNotifications={true}>
@@ -63,6 +37,7 @@ const FarmerAnalyticsPage = () => {
         padding: '2rem',
         minHeight: 'calc(100vh - 80px)'
       }}>
+        {analyticsError && <p role="alert" className="checkout-error">{analyticsError}</p>}
         {/* Header */}
         <div style={{
           display: 'flex',

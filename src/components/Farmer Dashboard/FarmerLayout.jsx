@@ -39,7 +39,6 @@ const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifica
 
         {/* Page Content - Children Render Here */}
         <main className="farmer-layout-content">
-          <div style={{color: 'red', fontSize: '24px', padding: '2rem'}}>DEBUG: Content Area Visible</div>
           {children}
         </main>
       </div>

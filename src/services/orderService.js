@@ -26,15 +26,29 @@ const request = async (path, options = {}) => {
   return result;
 };
 
-export const createOrder = async ({ items, shippingAddress, deliveryFee = 0 }) => {
+export const createOrder = async ({ items, deliveryMethod, shippingAddress, deliveryFee = 0 }) => {
   return request('/orders', {
     method: 'POST',
-    body: JSON.stringify({ items, shippingAddress, deliveryFee })
+    body: JSON.stringify({ items, deliveryMethod, shippingAddress, deliveryFee })
   });
 };
 
 export const getMyOrders = async () => {
   return request('/orders/my');
+};
+
+export const getFarmerOrders = async () => {
+  return request('/orders/farmer');
+};
+
+export const updateOrderStatus = async (orderId, productId, status) => {
+  return request(`/orders/${orderId}/item-status`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      productId,
+      status: String(status).toLowerCase()
+    })
+  });
 };
 
 export const getOrderById = async (orderId) => {
@@ -45,9 +59,22 @@ export const cancelOrder = async (orderId) => {
   return request(`/orders/${orderId}/cancel`, { method: 'PUT' });
 };
 
+export const confirmOrderReceived = async (orderId, productId) => {
+  return request(`/orders/${orderId}/confirm-delivery`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      productId,
+      status: 'processing'
+    })
+  });
+};
+
 export default {
   createOrder,
   getMyOrders,
+  getFarmerOrders,
+  updateOrderStatus,
   getOrderById,
-  cancelOrder
+  cancelOrder,
+  confirmOrderReceived
 };

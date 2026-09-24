@@ -1,6 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminLayout from './AdminLayout';
+import { getAdminProducts } from '../../services/adminService';
 import './AdminDashboardPage.css';
+
+const getProductImage = (product) => {
+  const firstImage = Array.isArray(product.images) ? product.images[0] : null;
+  const image = product.image || firstImage;
+  return typeof image === 'string' ? image : image?.url || image?.secure_url || '';
+};
+
+const ProductImage = ({ src, alt, className }) => (
+  src ? (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onError={(event) => {
+        event.currentTarget.style.display = 'none';
+        event.currentTarget.nextElementSibling.style.display = 'block';
+      }}
+    />
+  ) : null
+);
 
 const AdminDashboardPage = () => {
   const [activeTab, setActiveTab] = useState('all');
@@ -29,7 +50,31 @@ const AdminDashboardPage = () => {
     }
   ];
 
-  const products = [
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [productsError, setProductsError] = useState('');
+  useEffect(() => {
+    getAdminProducts()
+      .then((response) => {
+        const list = response?.products || response?.data?.products || response?.data || response || [];
+        setProducts(Array.isArray(list) ? list.map((product) => ({
+          ...product,
+          id: product._id || product.id,
+          name: product.name || product.productName || 'Unnamed product',
+          sku: product.sku || product._id || '-',
+          image: getProductImage(product),
+          category: product.category || 'Uncategorized',
+          stock: product.availableQuantity ?? product.quantity ?? 0,
+          price: `₦${Number(product.price || 0).toLocaleString()}`,
+          status: String(product.status || 'DRAFT').toUpperCase()
+        })) : []);
+      })
+      .catch((error) => setProductsError(error.message))
+      .finally(() => setIsLoading(false));
+  }, []);
+  const pendingApprovals = products.filter((product) => ['PENDING', 'PENDING_APPROVAL'].includes(product.status));
+  const categories = [...new Set(products.map((product) => product.category))].map((name) => ({ name, count: products.filter((product) => product.category === name).length, color: '#10b981' }));
+  /*
     {
       id: 1,
       name: 'Organic Heirloom Tomatoes',
@@ -72,7 +117,7 @@ const AdminDashboardPage = () => {
     }
   ];
 
-  const pendingApprovals = [
+  const legacyPendingApprovals = [
     {
       id: 1,
       product: 'Organic Carrots Bunch',
@@ -87,13 +132,13 @@ const AdminDashboardPage = () => {
     }
   ];
 
-  const categories = [
+  const legacyCategories = [
     { name: 'Vegetables', count: '4,512', color: '#10b981' },
     { name: 'Fruits', count: '3,105', color: '#3b82f6' },
     { name: 'Dairy & Eggs', count: '1,848', color: '#f59e0b' },
     { name: 'Meat & Poultry', count: '1,218', color: '#ef4444' },
     { name: 'Pantry & Other', count: '1,791', color: '#8b5cf6' }
-  ];
+  ]; */
 
   const handleAddProduct = () => {
     console.log('Add New Product clicked');
@@ -159,11 +204,16 @@ const AdminDashboardPage = () => {
                   </tr>
                 </thead>
                 <tbody>
+                  {isLoading && <tr><td colSpan="5">Loading products...</td></tr>}
+                  {!isLoading && productsError && <tr><td colSpan="5" role="alert">{productsError}</td></tr>}
                   {products.map((product) => (
                     <tr key={product.id}>
                       <td className="product-cell">
                         <div className="product-info">
-                          <div className="product-image">{product.image}</div>
+                          <div className="product-image">
+                            <ProductImage src={product.image} alt={product.name} className="product-image-img" />
+                            <span className="product-image-fallback" style={{ display: product.image ? 'none' : 'block' }}>📦</span>
+                          </div>
                           <div>
                             <p className="product-name">{product.name}</p>
                             <p className="product-sku">SKU: {product.sku}</p>

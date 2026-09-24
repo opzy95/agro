@@ -1,118 +1,59 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FarmerLayout from './FarmerLayout';
+import { getFarmerDashboardData } from '../../services/farmerService';
+import { getCurrentUser } from '../../services/userService';
 import './FarmerDashboardPage.css';
+
+const getFarmerStatus = (order) => {
+  const item = order.items?.[0] || {};
+  const farmer = item.farmer || item.product?.farmer;
+  const farmerKey = typeof farmer === 'string' ? farmer : farmer?._id || farmer?.id || farmer?.name;
+  const entry = (order.farmerStatuses || []).find((status) => {
+    const statusFarmer = status.farmer;
+    const statusKey = typeof statusFarmer === 'string' ? statusFarmer : statusFarmer?._id || statusFarmer?.id || statusFarmer?.name;
+    return String(statusKey || '') === String(farmerKey || '');
+  });
+  return entry?.status || item.status || 'pending';
+};
 
 const FarmerDashboardPage = () => {
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('1Y');
+  const [farmer, setFarmer] = useState({ name: 'Farmer', farmName: 'Farm', avatar: null, verificationStatus: 'not_verified' });
+  const [dashboardData, setDashboardData] = useState({ stats: { revenue: 0, orders: 0, activeProducts: 0, pendingOrders: 0 }, topProducts: [], orders: [] });
+  const [isLoading, setIsLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState('');
 
-  const farmer = {
-    name: 'Green Valley Farm',
-    farmName: 'Premium Producer',
-    avatar: null
-  };
+  useEffect(() => {
+    Promise.all([getFarmerDashboardData(), getCurrentUser()])
+      .then(([data, response]) => {
+        const user = response?.user || response?.data?.user || response?.data || response;
+        setDashboardData(data);
+        setFarmer({ name: [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.name || 'Farmer', farmName: user?.farmName || 'Farm', avatar: user?.profileImage || null, verificationStatus: user?.verificationStatus || (user?.isVerified ? 'verified' : 'not_verified') });
+      })
+      .catch((error) => setDashboardError(error.message || 'Unable to load dashboard data.'))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const stats = [
-    {
-      title: 'Total Sales',
-      value: '₦245,000',
-      icon: '💳',
-      trend: '+112% from last month',
-      color: 'default'
-    },
-    {
-      title: 'Total Orders',
-      value: '42',
-      icon: '📦',
-      trend: '+48% from last week',
-      color: 'default'
-    },
-    {
-      title: 'Active Products',
-      value: '18',
-      icon: '🥘',
-      subtitle: 'In your catalog',
-      color: 'default'
-    },
-    {
-      title: 'Pending Orders',
-      value: '7',
-      icon: '⚠️',
-      subtitle: 'Requires attention',
-      color: 'warning'
-    }
+    { title: 'Total Sales', value: `₦${dashboardData.stats.revenue.toLocaleString('en-NG')}`, icon: '💳', color: 'default' },
+    { title: 'Total Orders', value: String(dashboardData.stats.orders), icon: '📦', color: 'default' },
+    { title: 'Active Products', value: String(dashboardData.stats.activeProducts), icon: '🥘', subtitle: 'In your catalog', color: 'default' },
+    { title: 'Pending Orders', value: String(dashboardData.stats.pendingOrders), icon: '⚠️', subtitle: 'Requires attention', color: 'warning' }
   ];
 
-  const topProducts = [
-    {
-      id: 1,
-      name: 'Fresh Tomatoes',
-      price: '₦11,600',
-      sales: '124 Sales',
-      image: '🍅'
-    },
-    {
-      id: 2,
-      name: 'Yam Tubers',
-      price: '₦106,800',
-      sales: '89 Sales',
-      image: '🍠'
-    },
-    {
-      id: 3,
-      name: 'Maize (White)',
-      price: '₦12,320',
-      sales: '56 Sales',
-      image: '🌽'
-    },
-    {
-      id: 4,
-      name: 'Ofada Rice',
-      price: '₦48,720',
-      sales: '42 Sales',
-      image: '🍚'
-    }
-  ];
-
-  const recentOrders = [
-    {
-      id: '#ORD-092',
-      customer: 'Amina Bello',
-      product: 'Fresh Tomatoes (50kg)',
-      date: 'Today, 10:42 AM',
-      amount: '₦45,000',
-      status: 'Completed'
-    },
-    {
-      id: '#ORD-091',
-      customer: 'Chukwudi Eze',
-      product: 'Yam Tubers (100 pcs)',
-      date: 'Yesterday, 14:15 PM',
-      amount: '₦120,000',
-      status: 'Processing'
-    },
-    {
-      id: '#ORD-090',
-      customer: 'Fatima Yusuf',
-      product: 'Maize (Bag)',
-      date: 'Oct 24, 2023',
-      amount: '₦22,000',
-      status: 'Pending'
-    },
-    {
-      id: '#ORD-089',
-      customer: 'Oluwaseun Ade',
-      product: 'Ofada Rice (50kg)',
-      date: 'Oct 22, 2023',
-      amount: '₦58,000',
-      status: 'Cancelled'
-    }
-  ];
+  const topProducts = dashboardData.topProducts;
+  const recentOrders = dashboardData.orders.slice(0, 4).map((order) => {
+    const customer = order.customer || order.user || order.buyer || {};
+    const firstItem = order.items?.[0] || {};
+    return { id: order.orderNumber || order._id || order.id, customer: typeof customer === 'string' ? customer : customer.name || customer.fullName || `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || 'Customer', product: firstItem.name || firstItem.product?.name || 'Product', date: new Date(order.createdAt || order.date || Date.now()).toLocaleDateString(), amount: `₦${Number(order.totalAmount ?? order.total ?? order.grandTotal ?? 0).toLocaleString('en-NG')}`, status: String(getFarmerStatus(order)).replace(/[_-]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()) };
+  });
 
   return (
     <FarmerLayout farmer={farmer} showSearch={true} showNotifications={true}>
       <div className="farmer-dashboard-page">
+        {dashboardError && <p role="alert" className="checkout-error">{dashboardError}</p>}
 
         {/* Welcome Section */}
         <div className="welcome-section">
@@ -218,9 +159,9 @@ const FarmerDashboardPage = () => {
                   {/* <div className="product-image">{product.image}</div> */}
                   <div className="product-info">
                     <p className="product-name">{product.name}</p>
-                    <p className="product-sales">{product.sales}</p>
+                    <p className="product-sales">{product.sales} Sales</p>
                   </div>
-                  <div className="product-price">{product.price}</div>
+                  <div className="product-price">₦{Number(product.revenue || 0).toLocaleString('en-NG')}</div>
                 </div>
               ))}
               <button className="manage-btn">Manage Products</button>
@@ -256,7 +197,8 @@ const FarmerDashboardPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {recentOrders.map((order) => (
+                {isLoading && <tr><td colSpan="6">Loading orders...</td></tr>}
+                {!isLoading && recentOrders.map((order) => (
                   <tr key={order.id}>
                     <td className="order-id">{order.id}</td>
                     <td>{order.customer}</td>

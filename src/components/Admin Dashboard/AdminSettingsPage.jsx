@@ -1,51 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminLayout from './AdminLayout';
+import { getAdminSettings, updateAdminSettings } from '../../services/adminService';
 import './AdminSettingsPage.css';
 
 const AdminSettingsPage = () => {
-  const [settings, setSettings] = useState({
-    marketplaceFee: 12.5,
-    globalTaxRate: 8.0,
-    minimumPayoutThreshold: 50.00,
-    maintenanceMode: false
-  });
+  const [settings, setSettings] = useState({});
+  const [admins, setAdmins] = useState([]);
+  const [recentChanges, setRecentChanges] = useState([]);
+  const [settingsError, setSettingsError] = useState('');
 
-  const [admins, setAdmins] = useState([
-    {
-      id: 1,
-      name: 'Sarah Jenkins',
-      role: 'Super Admin',
-      lastActive: 'Today, 10:42 AM',
-      email: 'sarah@harvesthub.com'
-    },
-    {
-      id: 2,
-      name: 'Michael Chang',
-      role: 'Financial Admin',
-      lastActive: 'Yesterday, 4:15 PM',
-      email: 'michael@harvesthub.com'
-    }
-  ]);
+  useEffect(() => {
+    getAdminSettings().then((response) => {
+      const data = response?.data || response || {};
+      setSettings(data.settings || {});
+      setAdmins(data.admins || []);
+      setRecentChanges(data.recentChanges || []);
+    }).catch((error) => setSettingsError(error.message));
+  }, []);
 
   const [newAdmin, setNewAdmin] = useState({ name: '', email: '', role: 'Admin' });
   const [showAddAdmin, setShowAddAdmin] = useState(false);
-
-  const recentChanges = [
-    {
-      id: 1,
-      user: 'Sarah Jenkins',
-      action: 'updated Marketplace Fee to 12.5%.',
-      timestamp: '2 hours ago',
-      icon: '✓'
-    },
-    {
-      id: 2,
-      user: 'System',
-      action: 'initiated automated backup.',
-      timestamp: 'Yesterday, 11:00 PM',
-      icon: '✓'
-    }
-  ];
 
   const handleSettingChange = (key, value) => {
     setSettings(prev => ({
@@ -75,9 +49,13 @@ const AdminSettingsPage = () => {
     setAdmins(admins.filter(admin => admin.id !== id));
   };
 
-  const handleSaveChanges = () => {
-    console.log('Settings saved:', settings);
-    alert('Settings saved successfully!');
+  const handleSaveChanges = async () => {
+    try {
+      await updateAdminSettings(settings);
+      setSettingsError('');
+    } catch (error) {
+      setSettingsError(error.message);
+    }
   };
 
   return (

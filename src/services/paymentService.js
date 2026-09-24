@@ -13,6 +13,7 @@ export const initializeOrderPayment = async (orderData) => {
   console.log('[PaymentService] Sending payment initialization request', {
     itemCount: orderData.items?.length,
     amount: orderData.deliveryFee,
+    deliveryMethod: orderData.deliveryMethod,
     hasShippingAddress: Boolean(orderData.shippingAddress),
     hasAuthToken: Boolean(token)
   });

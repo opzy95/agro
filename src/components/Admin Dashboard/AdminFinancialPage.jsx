@@ -1,35 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminLayout from './AdminLayout';
+import { getAdminFinancials } from '../../services/adminService';
 import './AdminFinancialPage.css';
 
 const AdminFinancialPage = () => {
   const [timeRange, setTimeRange] = useState('7days');
 
-  const stats = [
-    {
-      title: 'PLATFORM COMMISSION',
-      value: '$124,500.00',
-      trend: '+12.45 vs last month',
-      icon: '💰',
-      color: 'default'
-    },
-    {
-      title: 'TOTAL PAYOUTS MTD',
-      value: '$842,100.50',
-      subtitle: '1,204 transactions completed',
-      icon: '💸',
-      color: 'default'
-    },
-    {
-      title: 'PENDING BALANCES',
-      value: '$45,230.00',
-      subtitle: '34 farmers awaiting payout',
-      icon: '⏳',
-      color: 'warning'
-    }
-  ];
+  const [financialData, setFinancialData] = useState({ stats: [], payoutQueue: [], transactions: [], chartData: [] });
+  useEffect(() => {
+    getAdminFinancials(timeRange).then((response) => {
+      const data = response?.data || response || {};
+      setFinancialData({ stats: data.stats || [], payoutQueue: data.payoutQueue || [], transactions: data.transactions || [], chartData: data.chartData || [] });
+    }).catch(() => setFinancialData({ stats: [], payoutQueue: [], transactions: [], chartData: [] }));
+  }, [timeRange]);
 
-  const payoutQueue = [
+  const { stats, payoutQueue, transactions, chartData } = financialData;
+  /*
+  const legacyPayoutQueue = [
     {
       id: 'FRM-8921',
       farmer: 'Oakridge Farms',
@@ -65,7 +52,7 @@ const AdminFinancialPage = () => {
     }
   ];
 
-  const transactions = [
+  const legacyTransactions = [
     {
       id: '#TX-99281',
       date: 'Oct 24, 14:30',
@@ -95,7 +82,7 @@ const AdminFinancialPage = () => {
     }
   ];
 
-  const chartData = [
+  const legacyChartData = [
     { month: 'Jan', value: 15 },
     { month: 'Feb', value: 25 },
     { month: 'Mar', value: 18 },
@@ -104,7 +91,9 @@ const AdminFinancialPage = () => {
     { month: 'Jun', value: 42 }
   ];
 
-  const maxValue = 45;
+  ]; */
+
+  const maxValue = Math.max(...chartData.map((data) => data.value), 1);
 
   const getStatusColor = (status) => {
     switch (status) {

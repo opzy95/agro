@@ -189,12 +189,14 @@
   background: white;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   margin-bottom: 1.5rem;
 }
 
 .orders-table {
   width: 100%;
+  min-width: 1450px;
   border-collapse: collapse;
 }
 
@@ -269,6 +271,12 @@
   font-family: 'Courier New', monospace;
 }
 
+.shipping-address {
+  min-width: 220px;
+  max-width: 300px;
+  line-height: 1.4;
+}
+
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -331,6 +339,23 @@
 
 .advance-status-btn:hover {
   background: #059669;
+  color: white;
+}
+
+.cancel-order-btn {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cancel-order-btn:hover {
+  background: #dc2626;
   color: white;
 }
 
@@ -424,7 +449,7 @@
   }
 
   .orders-table {
-    min-width: 600px;
+    min-width: 1450px;
   }
 
   .orders-table th,

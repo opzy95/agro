@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import FarmerLayout from './FarmerLayout';
 import AddProductModal from './AddProductModal';
 import { getMyProducts } from '../../services/productService';
+import { getCurrentUser } from '../../services/userService';
 import './FarmerProductsPage.css';
 
 // Import images from assets
@@ -117,12 +118,12 @@ const FarmerProductsPage = () => {
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const farmer = {
+  const [farmer, setFarmer] = useState({
     name: 'Green Valley Farm',
     farmName: 'Premium Producer',
-    avatar: '/api/placeholder/48/48',
-    verificationStatus: 'verified' // This would come from the backend/context in real app
-  };
+    avatar: null,
+    verificationStatus: 'not_verified'
+  });
 
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -158,6 +159,18 @@ const FarmerProductsPage = () => {
   };
 
   useEffect(() => {
+    getCurrentUser()
+      .then((response) => {
+        const user = response?.user || response?.data?.user || response?.data || response;
+        setFarmer({
+          name: [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.name || 'Green Valley Farm',
+          farmName: user?.farmName || 'Premium Producer',
+          avatar: user?.profileImage || null,
+          verificationStatus: user?.verificationStatus || (user?.isVerified ? 'verified' : 'not_verified')
+        });
+      })
+      .catch(() => {});
+
     const fetchProducts = async () => {
       try {
         const response = await getMyProducts();

@@ -1,102 +1,53 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import FarmerLayout from './FarmerLayout';
+import { getCurrentUser } from '../../services/userService';
+import { getFarmerEarningsData } from '../../services/farmerService';
 import './FarmerEarningsPage.css';
 
 const FarmerEarningsPage = () => {
-  const farmer = {
+  const [farmer, setFarmer] = useState({
     name: 'Green Valley Farm',
     farmName: 'Premium Producer',
-    avatar: '/api/placeholder/48/48',
-    verificationStatus: 'verified' // This would come from the backend/context in real app
-  };
+    avatar: null,
+    verificationStatus: 'not_verified'
+  });
+  const [earningsData, setEarningsData] = useState({ orders: [], wallet: {}, totalRevenue: 0 });
+  const [isLoading, setIsLoading] = useState(true);
+  const [earningsError, setEarningsError] = useState('');
+
+  useEffect(() => {
+    getCurrentUser()
+      .then((response) => {
+        const user = response?.user || response?.data?.user || response?.data || response;
+        setFarmer({
+          name: [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.name || 'Green Valley Farm',
+          farmName: user?.farmName || 'Premium Producer',
+          avatar: user?.profileImage || null,
+          verificationStatus: user?.verificationStatus || (user?.isVerified ? 'verified' : 'not_verified')
+        });
+      })
+      .catch(() => {});
+    getFarmerEarningsData()
+      .then(setEarningsData)
+      .catch((error) => setEarningsError(error.message || 'Unable to load earnings.'))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const earningsStats = [
-    {
-      title: 'Total Revenue',
-      amount: '₦850,000',
-      icon: '💳',
-      color: 'default'
-    },
-    {
-      title: 'Available Balance',
-      amount: '₦120,000',
-      icon: '💰',
-      color: 'primary',
-      action: 'Withdraw'
-    },
-    {
-      title: 'Pending Payouts',
-      amount: '₦45,000',
-      icon: '⏳',
-      color: 'warning'
-    },
-    {
-      title: 'Last Payout',
-      amount: '₦150,000',
-      date: 'Oct 15, 2023',
-      icon: '✓',
-      color: 'success'
-    }
+    { title: 'Total Revenue', amount: `₦${earningsData.totalRevenue.toLocaleString('en-NG')}`, icon: '💳', color: 'default' },
+    { title: 'Available Balance', amount: `₦${Number(earningsData.wallet.availableBalance ?? earningsData.wallet.balance ?? 0).toLocaleString('en-NG')}`, icon: '💰', color: 'primary', action: 'Withdraw' },
+    { title: 'Pending Payouts', amount: `₦${Number(earningsData.wallet.pendingBalance ?? earningsData.wallet.pendingPayouts ?? 0).toLocaleString('en-NG')}`, icon: '⏳', color: 'warning' },
+    { title: 'Last Payout', amount: `₦${Number(earningsData.wallet.lastPayout?.amount ?? 0).toLocaleString('en-NG')}`, date: earningsData.wallet.lastPayout?.createdAt ? new Date(earningsData.wallet.lastPayout.createdAt).toLocaleDateString() : '', icon: '✓', color: 'success' }
   ];
 
-  const recentPayouts = [
-    {
-      id: 1,
-      type: 'Bank Transfer',
-      amount: '₦150,000',
-      date: 'Oct 15, 2023',
-      status: 'Processed'
-    },
-    {
-      id: 2,
-      type: 'Bank Transfer',
-      amount: '₦45,000',
-      date: 'Oct 28, 2023',
-      status: 'Pending'
-    },
-    {
-      id: 3,
-      type: 'Bank Transfer',
-      amount: '₦210,000',
-      date: 'Sep 30, 2023',
-      status: 'Processed'
-    }
-  ];
+  const recentPayouts = (earningsData.wallet.payouts || earningsData.wallet.withdrawals || []).slice(0, 5).map((payout, index) => ({ id: payout._id || payout.id || index, type: payout.type || 'Bank Transfer', amount: `₦${Number(payout.amount || 0).toLocaleString('en-NG')}`, date: new Date(payout.createdAt || payout.date || Date.now()).toLocaleDateString(), status: String(payout.status || 'Pending').replace(/\b\w/g, (letter) => letter.toUpperCase()) }));
 
-  const transactionHistory = [
-    {
-      id: 1,
-      date: 'Oct 28, 2023',
-      description: 'Sale - Order #HH1004',
-      type: 'Credit',
-      amount: '+₦45,000'
-    },
-    {
-      id: 2,
-      date: 'Oct 15, 2023',
-      description: 'Withdrawal - Bank Transfer',
-      type: 'Debit',
-      amount: '-₦150,000'
-    },
-    {
-      id: 3,
-      date: 'Oct 12, 2023',
-      description: 'Sale - Order #HH1003',
-      type: 'Credit',
-      amount: '+₦65,000'
-    },
-    {
-      id: 4,
-      date: 'Oct 05, 2023',
-      description: 'Sale - Order #HH1002',
-      type: 'Credit',
-      amount: '+₦120,000'
-    }
-  ];
+  const transactionHistory = earningsData.orders.slice(0, 10).map((order, index) => ({ id: order._id || order.id || index, date: new Date(order.createdAt || Date.now()).toLocaleDateString(), description: `Sale - Order #${order.orderNumber || order._id || order.id}`, type: 'Credit', amount: `+₦${Number(order.totalAmount ?? order.total ?? order.grandTotal ?? 0).toLocaleString('en-NG')}` }));
 
   return (
     <FarmerLayout farmer={farmer} showSearch={true}>
       <div className="earnings-page">
+        {earningsError && <p role="alert" className="checkout-error">{earningsError}</p>}
         {/* Page Header */}
         <div className="page-header">
           <h1 className="page-title">Earnings</h1>
@@ -175,7 +126,8 @@ const FarmerEarningsPage = () => {
               <a href="#" className="view-all">View All</a>
             </div>
             <div className="payouts-list">
-              {recentPayouts.map((payout) => (
+              {isLoading && <p>Loading payouts...</p>}
+              {!isLoading && recentPayouts.map((payout) => (
                 <div key={payout.id} className="payout-item">
                   <div className="payout-icon">🏦</div>
                   <div className="payout-details">
@@ -207,7 +159,8 @@ const FarmerEarningsPage = () => {
               <div className="col-type">TYPE</div>
               <div className="col-amount">AMOUNT</div>
             </div>
-            {transactionHistory.map((transaction) => (
+            {isLoading && <div className="table-row">Loading transactions...</div>}
+            {!isLoading && transactionHistory.map((transaction) => (
               <div key={transaction.id} className="table-row">
                 <div className="col-date">{transaction.date}</div>
                 <div className="col-description">{transaction.description}</div>

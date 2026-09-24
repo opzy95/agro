@@ -20,8 +20,11 @@ const FarmerTopBar = ({
     const fetchNotifications = async () => {
       try {
         const response = await getMyNotifications();
-        setNotifications(response?.notifications || response?.data?.notifications || []);
-        setUnreadCount(Number(response?.unreadCount || response?.data?.unreadCount || 0));
+        const responseNotifications = response?.notifications || response?.data?.notifications || response?.data || response || [];
+        const notificationList = Array.isArray(responseNotifications) ? responseNotifications : [];
+        const responseUnreadCount = response?.unreadCount ?? response?.data?.unreadCount;
+        setNotifications(notificationList);
+        setUnreadCount(Number(responseUnreadCount ?? notificationList.filter((notification) => !notification.readAt).length));
       } catch (error) {
         console.error('Failed to fetch notifications:', error);
       }
@@ -131,6 +134,9 @@ const FarmerTopBar = ({
                     </button>
                   </div>
                   <div className="notification-list">
+                    {notifications.length === 0 && (
+                      <p className="notification-message">No notifications yet.</p>
+                    )}
                     {notifications.map((notification) => (
                       <div 
                         key={notification._id || notification.id}

@@ -1,107 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminLayout from './AdminLayout';
-import { orders } from '../../data/orders';
+import { getAdminOverview } from '../../services/adminService';
 import './AdminOverviewPage.css';
 
 const AdminOverviewPage = () => {
   const [timeRange, setTimeRange] = useState('monthly');
-  const totalRevenue = orders
-    .filter((order) => order.status !== 'Cancelled')
-    .reduce((sum, order) => sum + order.total, 0);
+  const [dashboardData, setDashboardData] = useState({ metrics: [], quickActions: [], activities: [], chartData: [] });
 
-  const metrics = [
-    {
-      title: 'Total Revenue',
-      value: `₦${totalRevenue.toLocaleString('en-NG')}`,
-      trend: '+12.5%',
-      icon: '💵',
-      positive: true
-    },
-    {
-      title: 'Total Active Users',
-      value: '42.8k',
-      subtitle: '3k Farmers / 39k Customers',
-      trend: '+4.2%',
-      icon: '👥',
-      positive: true
-    },
-    {
-      title: 'Total Orders',
-      value: '14,290',
-      trend: '+8.1%',
-      icon: '🛒',
-      positive: true
-    },
-    {
-      title: 'System Health',
-      value: '99.99%',
-      subtitle: 'Uptime',
-      icon: '🟢',
-      positive: true,
-      status: true
-    }
-  ];
+  useEffect(() => {
+    getAdminOverview().then((response) => {
+      const data = response?.data || response || {};
+      setDashboardData({
+        metrics: data.metrics || [],
+        quickActions: data.quickActions || [],
+        activities: data.activities || data.platformActivities || [],
+        chartData: data.chartData || []
+      });
+    }).catch(() => setDashboardData({ metrics: [], quickActions: [], activities: [], chartData: [] }));
+  }, []);
 
-  const quickActions = [
-    {
-      icon: '👨‍🌾',
-      title: 'Verify Pending Farmers',
-      subtitle: '12 Requires Attention',
-      color: 'orange'
-    },
-    {
-      icon: '📊',
-      title: 'Generate Revenue Report',
-      subtitle: 'Last run 2 days ago',
-      color: 'blue'
-    },
-    {
-      icon: '⚠️',
-      title: 'Review Dispute Tickets',
-      subtitle: '3 Critical',
-      color: 'red'
-    }
-  ];
-
-  const platformActivities = [
-    {
-      icon: '✅',
-      title: 'New Farmer Registered',
-      description: 'Green Acres Farm completed onboarding',
-      time: '2 mins ago',
-      color: 'success'
-    },
-    {
-      icon: '⭐',
-      title: 'High-value Order Placed',
-      description: 'Order #9928 for $1,250 processed.',
-      time: '15 mins ago',
-      color: 'warning'
-    },
-    {
-      icon: '⚠️',
-      title: 'Payment Gateway Issue',
-      description: 'Minor latency detected in Stripe API.',
-      time: '1 hour ago',
-      color: 'danger'
-    },
-    {
-      icon: '🔄',
-      title: 'Bulk Inventory Update',
-      description: 'System auto-synced 500+ SKUs.',
-      time: '3 hours ago',
-      color: 'info'
-    }
-  ];
-
-  const chartData = [
-    { month: 'Jan', value: 45 },
-    { month: 'Feb', value: 60 },
-    { month: 'Mar', value: 75 },
-    { month: 'Apr', value: 55 },
-    { month: 'May', value: 90 },
-    { month: 'Jun', value: 110 }
-  ];
+  const { metrics, quickActions, activities: platformActivities, chartData } = dashboardData;
 
   const maxValue = Math.max(...chartData.map(d => d.value));
 

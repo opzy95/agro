@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import bowlImg from '../../assets/bowl.png';
-import { getMyOrders } from '../../services/orderService';
+import { confirmOrderReceived, getMyOrders } from '../../services/orderService';
 import './MyOrders.css';
 
 const MyOrders = () => {
@@ -9,31 +9,129 @@ const MyOrders = () => {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [ordersError, setOrdersError] = useState('');
+  const [confirmingOrderId, setConfirmingOrderId] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const normalizeDeliveryMethod = (value) => String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[ -]+/g, '_');
+
+  const getFarmName = (item, product) => {
+    const farmer = item.farmer || product.farmer || item.seller || product.seller || {};
+    if (typeof farmer === 'string') return farmer;
+    return farmer.farmName
+      || farmer.businessName
+      || farmer.farm_name
+      || farmer.name
+      || [farmer.firstName, farmer.lastName].filter(Boolean).join(' ')
+      || 'Farmer';
+  };
+
+  const getProductId = (order) => {
+    const item = order?.items?.[0] || order?.orderItems?.[0] || order?.products?.[0];
+    const product = item?.product;
+    return order?.productId
+      || order?.productID
+      || item?.productId
+      || item?.productID
+      || product?._id
+      || product?.id
+      || (typeof product === 'string' ? product : null);
+  };
+
+  const getItemProductId = (item) => {
+    const product = item?.product;
+    return item?.productId
+      || item?.productID
+      || product?._id
+      || product?.id
+      || (typeof product === 'string' ? product : null);
+  };
+
+  const getFarmerKey = (item, product) => {
+    const farmer = item?.farmer || product?.farmer || item?.seller || product?.seller;
+    if (!farmer) return 'unknown-farmer';
+    if (typeof farmer === 'string') return farmer;
+    return String(farmer._id || farmer.id || getFarmName(item, product));
+  };
+
+  const getFarmerStatus = (order, farmerKey, items) => {
+    const statusEntry = (order.farmerStatuses || []).find((entry) => {
+      const farmer = entry.farmer;
+      const key = typeof farmer === 'string' ? farmer : farmer?._id || farmer?.id || farmer?.name;
+      return String(key || 'unknown-farmer') === farmerKey;
+    });
+    return formatStatus(statusEntry?.status || items.find((item) => item.status)?.status || 'pending');
+  };
+
+  const getConfirmablePickupItem = (order) => {
+    const items = order?.items || order?.orderItems || order?.products || [];
+    return items.find((item) => {
+      const status = String(item.status || item.itemStatus || item.fulfillmentStatus || item.deliveryStatus || '').toLowerCase();
+      const method = normalizeDeliveryMethod(item.deliveryMethod || item.deliveryType || item.shippingMethod || order.deliveryMethod || order.delivery?.method);
+      return status === 'processing' && method === 'farm_pickup';
+    });
+  };
 
   useEffect(() => {
     const loadOrders = async () => {
+      setIsLoading(true);
       try {
         const response = await getMyOrders();
         const rawOrders = response?.orders || response?.data?.orders || response?.data || response || [];
         const orderList = Array.isArray(rawOrders) ? rawOrders : [];
 
-        setOrders(orderList.map((order) => ({
-          id: order.orderNumber || order._id || order.id,
-          datePlaced: new Date(order.createdAt || order.datePlaced || Date.now()).toLocaleDateString(),
-          status: formatStatus(order.status || order.orderStatus || 'Processing'),
-          total: Number(order.totalAmount ?? order.total ?? order.grandTotal ?? 0),
-          items: (order.items || []).map((item, index) => {
+        setOrders(orderList.flatMap((order) => {
+          const rawItems = order.items || order.orderItems || order.products || [];
+          const mappedItems = rawItems.map((item, index) => {
             const product = item.product || {};
             return {
-              id: product._id || product.id || item._id || index,
+              id: product._id || product.id || item.productId || item._id || index,
+              productId: getItemProductId(item),
               name: item.name || product.name || 'Product',
-              source: product.farmer?.farmName || product.seller?.name || 'AgroFresh marketplace',
+              source: getFarmName(item, product),
               price: Number(item.price ?? product.price ?? 0),
               quantity: Number(item.quantity || 0),
+              status: formatStatus(item.status || item.itemStatus || item.fulfillmentStatus || item.deliveryStatus || ''),
               image: product.image || product.images?.[0] || bowlImg
             };
-          })
-        })));
+          });
+          const groups = new Map();
+          mappedItems.forEach((item, index) => {
+            const rawItem = rawItems[index] || {};
+            const product = rawItem.product || {};
+            const key = getFarmerKey(rawItem, product);
+            const group = groups.get(key) || { items: [], farmer: item.source };
+            group.items.push({ ...item, deliveryMethod: normalizeDeliveryMethod(rawItem.deliveryMethod || rawItem.deliveryType || rawItem.shippingMethod || order.deliveryMethod || order.delivery?.method || 'farm_pickup') });
+            groups.set(key, group);
+          });
+
+          const orderId = order.orderNumber || order._id || order.id;
+          return Array.from(groups.values()).map((group, groupIndex) => {
+            const groupItems = group.items;
+            const deliveredCount = groupItems.filter((item) => item.status === 'Delivered').length;
+            const status = getFarmerStatus(order, getFarmerKey(groupItems[0], rawItems[0]?.product), groupItems);
+            const pickupItem = groupItems.find((item) => item.status === 'Processing' && item.deliveryMethod === 'farm_pickup');
+
+            return {
+              id: `${orderId}-${getFarmerKey(groupItems[0], rawItems[0]?.product)}-${groupIndex}`,
+              orderId,
+              farmer: group.farmer,
+              overallStatus: formatStatus(order.orderStatus || 'pending'),
+              productId: groupItems[0]?.productId || getProductId(order),
+              productIds: groupItems.map((item) => item.productId).filter(Boolean),
+              datePlaced: new Date(order.createdAt || order.datePlaced || Date.now()).toLocaleDateString(),
+              status,
+              itemStatus: pickupItem?.status || status,
+              itemDeliveryMethod: pickupItem?.deliveryMethod || groupItems[0]?.deliveryMethod,
+              confirmablePickupProductId: pickupItem?.productId,
+              deliveryMethod: groupItems[0]?.deliveryMethod || 'farm_pickup',
+              total: groupItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+              items: groupItems
+            };
+          });
+        }));
       } catch (error) {
         setOrdersError(error.message || 'Unable to load your orders.');
       } finally {
@@ -42,7 +140,7 @@ const MyOrders = () => {
     };
 
     loadOrders();
-  }, []);
+  }, [reloadKey]);
 
   const formatStatus = (status) => {
     return String(status)
@@ -90,12 +188,10 @@ const MyOrders = () => {
             Reorder
           </button>
         );
+      case 'Shipped':
+        return null;
       case 'In Transit':
-        return (
-          <button className="action-btn track-btn">
-            Track Order
-          </button>
-        );
+        return <button className="action-btn track-btn">Track Order</button>;
       case 'Processing':
         return (
           <button className="action-btn view-btn">
@@ -108,6 +204,24 @@ const MyOrders = () => {
             View Details
           </button>
         );
+    }
+  };
+
+  const handleConfirmReceived = async (orderId) => {
+    try {
+      setOrdersError('');
+      setConfirmingOrderId(orderId);
+      const order = orders.find((item) => item.id === orderId);
+      if (!order?.productId) {
+        throw new Error('This order is missing its product ID, so delivery cannot be confirmed.');
+      }
+
+      await confirmOrderReceived(order.orderId, order.productId);
+      setReloadKey((value) => value + 1);
+    } catch (error) {
+      setOrdersError(error.message || 'Unable to confirm that this order was received.');
+    } finally {
+      setConfirmingOrderId('');
     }
   };
 
@@ -188,10 +302,25 @@ const MyOrders = () => {
                 </div>
               </div>
               <div className="order-status">
+                <span className={`status-badge ${getStatusClass(order.overallStatus)}`}>
+                  Overall: {order.overallStatus}
+                </span>
                 <span className={`status-badge ${getStatusClass(order.status)}`}>
                   <span className="status-icon">{getStatusIcon(order.status)}</span>
-                  {order.status}
+                  {order.farmer}: {order.status}
                 </span>
+                {((order.status === 'Shipped' && order.deliveryMethod !== 'farm_pickup') ||
+                  (order.confirmablePickupProductId && order.itemStatus === 'Processing' && order.itemDeliveryMethod === 'farm_pickup')) && (
+                  <button
+                    className="delivered-btn"
+                    onClick={() => handleConfirmReceived(order.id)}
+                    disabled={confirmingOrderId === order.id}
+                  >
+                    {confirmingOrderId === order.id
+                      ? 'Confirming...'
+                      : order.deliveryMethod === 'farm_pickup' ? 'Confirm Pickup' : 'Mark Delivered'}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -199,7 +328,7 @@ const MyOrders = () => {
             <div className="order-content">
               {/* Items Section */}
               <div className="items-section">
-                <h4 className="items-title">ITEMS IN ORDER</h4>
+                <h4 className="items-title">ITEMS FROM {order.farmer}</h4>
                 <div className="items-list">
                   {order.items.map((item) => (
                     <div key={item.id} className="order-item">
