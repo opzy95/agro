@@ -144,6 +144,7 @@
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
   margin-bottom: 2rem;
+  min-width: 0;
 }
 
 /* Payout Section */
@@ -152,6 +153,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 2rem;
+  min-width: 0;
 }
 
 .section-header {
@@ -179,12 +181,16 @@
 
 /* Tables */
 .table-wrapper {
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .payout-table,
 .transactions-table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
   font-size: 0.9rem;
 }
@@ -339,12 +345,15 @@
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 2rem;
+  min-width: 0;
 }
 
 .chart-container {
   display: flex;
   flex-direction: column;
   height: 280px;
+  width: 100%;
+  min-width: 0;
   position: relative;
 }
 
@@ -355,6 +364,7 @@
   height: 200px;
   gap: 1rem;
   margin-bottom: 1rem;
+  min-width: 0;
 }
 
 .bar-item {
@@ -395,6 +405,10 @@
   font-size: 0.8rem;
   color: #6b7280;
   font-weight: 500;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .chart-axis {
@@ -523,6 +537,13 @@
 
   .chart-bars {
     height: 150px;
+    gap: 0.5rem;
+  }
+
+  .chart-axis {
+    padding-left: 0;
+    padding-right: 0;
+    font-size: 0.65rem;
   }
 }
 
@@ -572,5 +593,14 @@
 
   .chart-bars {
     height: 120px;
+    gap: 0.35rem;
+  }
+
+  .chart-section {
+    padding: 1rem;
+  }
+
+  .bar-label {
+    font-size: 0.65rem;
   }
 }

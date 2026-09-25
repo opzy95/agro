@@ -30,7 +30,7 @@ const AdminLayout = ({ children, activeMenu, showSearch = true }) => {
       <div className="admin-layout-main">
         {/* TopBar */}
         <div className="admin-layout-topbar">
-          <AdminTopBar showSearch={showSearch} />
+          <AdminTopBar onMobileMenuToggle={toggleSidebar} showSearch={showSearch} />
         </div>
 
         {/* Page Content */}

@@ -15,37 +15,37 @@ const FarmerSidebar = ({ farmer }) => {
 
   const menuItems = [
     {
-      // icon: '📊',
+      icon: '📊',
       label: 'Dashboard',
       path: '/farmer/dashboard',
       isActive: location.pathname === '/farmer/dashboard'
     },
     {
-      // icon: '📦',
+      icon: '📦',
       label: 'Products',
       path: '/farmer/products',
       isActive: location.pathname === '/farmer/products'
     },
     {
-      // icon: '🛒',
+      icon: '🛒',
       label: 'Orders',
       path: '/farmer/orders',
       isActive: location.pathname === '/farmer/orders'
     },
     {
-      // icon: '💰',
+      icon: '💰',
       label: 'Earnings',
       path: '/farmer/earnings',
       isActive: location.pathname === '/farmer/earnings'
     },
     {
-      // icon: '📈',
+      icon: '📈',
       label: 'Analytics',
       path: '/farmer/analytics',
       isActive: location.pathname === '/farmer/analytics'
     },
     {
-      // icon: '⚙️',
+      icon: '⚙️',
       label: 'Settings',
       path: '/farmer/settings',
       isActive: location.pathname === '/farmer/settings'
@@ -54,7 +54,7 @@ const FarmerSidebar = ({ farmer }) => {
 
   const bottomMenuItems = [
     {
-      // icon: '❓',
+      icon: '❓',
       label: 'Help Center',
       path: '/help',
       isActive: false

@@ -109,7 +109,7 @@
     display: block;
   }
 
-  .farmer-layout-sidebar.open ~ .sidebar-overlay {
+  .farmer-layout-sidebar.open + .sidebar-overlay {
     display: block;
   }
 

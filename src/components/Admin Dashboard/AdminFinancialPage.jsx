@@ -3,6 +3,25 @@ import AdminLayout from './AdminLayout';
 import { getAdminFinancials } from '../../services/adminService';
 import './AdminFinancialPage.css';
 
+
+const getPersonName = (person) => {
+  if (!person) return 'Unknown farmer';
+  if (typeof person === 'string') return person;
+  return person.name
+    || person.fullName
+    || `${person.firstName || ''} ${person.lastName || ''}`.trim()
+    || person.email
+    || 'Unknown farmer';
+};
+
+const getInitials = (name) => String(name || 'UF')
+  .split(' ')
+  .filter(Boolean)
+  .map((part) => part[0])
+  .join('')
+  .slice(0, 2)
+  .toUpperCase();
+
 const AdminFinancialPage = () => {
   const [timeRange, setTimeRange] = useState('7days');
 
@@ -169,9 +188,9 @@ const AdminFinancialPage = () => {
                     <tr key={index}>
                       <td className="farmer-cell">
                         <div className="farmer-info">
-                          <div className="farmer-avatar">{payout.initials}</div>
+                          <div className="farmer-avatar">{payout.initials || getInitials(getPersonName(payout.farmer))}</div>
                           <div>
-                            <p className="farmer-name">{payout.farmer}</p>
+                            <p className="farmer-name">{getPersonName(payout.farmer)}</p>
                             <p className="farmer-id">ID: {payout.id}</p>
                           </div>
                         </div>

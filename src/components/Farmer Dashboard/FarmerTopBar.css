@@ -228,6 +228,7 @@
 
 .notification-content {
   flex: 1;
+  min-width: 0;
 }
 
 .notification-item-title {
@@ -241,6 +242,7 @@
   font-size: 0.85rem;
   color: #6b7280;
   margin: 0 0 0.5rem 0;
+  overflow-wrap: anywhere;
 }
 
 .notification-time {
@@ -382,8 +384,12 @@
   }
 
   .notification-dropdown {
-    width: 300px;
-    right: -1rem;
+    position: fixed;
+    top: 4.25rem;
+    right: 0.75rem;
+    width: min(360px, calc(100vw - 1.5rem));
+    max-width: calc(100vw - 1.5rem);
+    margin-top: 0;
   }
 
   .profile-details {
@@ -410,8 +416,9 @@
   }
 
   .notification-dropdown {
-    width: calc(100vw - 2rem);
-    right: auto;
-    left: 1rem;
+    right: 0.75rem;
+    left: 0.75rem;
+    width: auto;
+    max-width: none;
   }
 }
