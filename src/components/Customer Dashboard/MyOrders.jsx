@@ -125,7 +125,7 @@ const MyOrders = () => {
               status,
               itemStatus: pickupItem?.status || status,
               itemDeliveryMethod: pickupItem?.deliveryMethod || groupItems[0]?.deliveryMethod,
-              confirmablePickupProductId: pickupItem?.productId,
+              hasConfirmablePickup: Boolean(pickupItem),
               deliveryMethod: groupItems[0]?.deliveryMethod || 'farm_pickup',
               total: groupItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
               items: groupItems
@@ -212,11 +212,11 @@ const MyOrders = () => {
       setOrdersError('');
       setConfirmingOrderId(orderId);
       const order = orders.find((item) => item.id === orderId);
-      if (!order?.productId) {
-        throw new Error('This order is missing its product ID, so delivery cannot be confirmed.');
+      if (!order?.orderId) {
+        throw new Error('This order is missing its order ID, so delivery cannot be confirmed.');
       }
 
-      await confirmOrderReceived(order.orderId, order.productId);
+      await confirmOrderReceived(order.orderId);
       setReloadKey((value) => value + 1);
     } catch (error) {
       setOrdersError(error.message || 'Unable to confirm that this order was received.');
@@ -310,7 +310,7 @@ const MyOrders = () => {
                   {order.farmer}: {order.status}
                 </span>
                 {((order.status === 'Shipped' && order.deliveryMethod !== 'farm_pickup') ||
-                  (order.confirmablePickupProductId && order.itemStatus === 'Processing' && order.itemDeliveryMethod === 'farm_pickup')) && (
+                  (order.hasConfirmablePickup && order.itemStatus === 'Processing' && order.itemDeliveryMethod === 'farm_pickup')) && (
                   <button
                     className="delivered-btn"
                     onClick={() => handleConfirmReceived(order.id)}

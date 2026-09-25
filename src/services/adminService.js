@@ -23,6 +23,7 @@ export const getAdminOverview = () => request('/admin/overview');
 export const getAdminProducts = () => request('/admin/products');
 export const getAdminOrders = () => request('/admin/orders');
 export const getAdminUsers = () => request('/admin/users');
+export const getAdminUserProfile = (userId) => request(`/admin/users/${userId}`);
 export const getAdminFinancials = (range) => request(`/admin/financials?range=${encodeURIComponent(range)}`);
 export const getAdminSettings = () => request('/admin/settings');
 export const updateAdminSettings = (settings) => request('/admin/settings', {
@@ -43,6 +44,7 @@ export default {
   getAdminProducts,
   getAdminOrders,
   getAdminUsers,
+  getAdminUserProfile,
   getAdminFinancials,
   getAdminSettings,
   updateAdminSettings,

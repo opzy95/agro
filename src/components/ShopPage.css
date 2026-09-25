@@ -976,3 +976,18 @@
     font-size: 1rem;
   }
 }
+
+.shop-farmer-filter,
+.shop-cart-error {
+  margin: 1rem 0 0;
+  color: #166534;
+  font-size: 0.95rem;
+}
+
+.shop-cart-error {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.75rem;
+}

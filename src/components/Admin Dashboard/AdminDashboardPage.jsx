@@ -24,35 +24,11 @@ const ProductImage = ({ src, alt, className }) => (
 );
 
 const AdminDashboardPage = () => {
-  const [activeTab, setActiveTab] = useState('all');
-
-  const stats = [
-    {
-      title: 'TOTAL ACTIVE LISTINGS',
-      value: '12,458',
-      trend: '+14.2% from last week',
-      icon: '📦',
-      color: 'default'
-    },
-    {
-      title: 'PENDING GC APPROVALS',
-      value: '142',
-      alert: 'Requires attention',
-      icon: '⏳',
-      color: 'warning'
-    },
-    {
-      title: 'LOW STOCK ALERTS',
-      value: '37',
-      alert: '-12 across 5 categories',
-      icon: '⚠️',
-      color: 'alert'
-    }
-  ];
-
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [productsError, setProductsError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   useEffect(() => {
     getAdminProducts()
       .then((response) => {
@@ -64,16 +40,26 @@ const AdminDashboardPage = () => {
           sku: product.sku || product._id || '-',
           image: getProductImage(product),
           category: product.category || 'Uncategorized',
-          stock: product.availableQuantity ?? product.quantity ?? 0,
+          stock: Number(product.availableQuantity ?? product.quantity ?? 0),
           price: `₦${Number(product.price || 0).toLocaleString()}`,
-          status: String(product.status || 'DRAFT').toUpperCase()
+          status: String(product.status || 'DRAFT').toUpperCase(),
+          vendor: product.farmer?.farmName || product.farmer?.businessName || product.seller || 'Unknown farmer'
         })) : []);
       })
       .catch((error) => setProductsError(error.message))
       .finally(() => setIsLoading(false));
   }, []);
+  const activeListings = products.filter((product) => ['ACTIVE', 'PUBLISHED'].includes(product.status));
   const pendingApprovals = products.filter((product) => ['PENDING', 'PENDING_APPROVAL'].includes(product.status));
+  const lowStockProducts = products.filter((product) => product.stock <= 10 && !['DRAFT', 'INACTIVE'].includes(product.status));
+  const stats = [
+    { title: 'TOTAL ACTIVE LISTINGS', value: activeListings.length.toLocaleString(), icon: '📦', color: 'default' },
+    { title: 'PENDING APPROVALS', value: pendingApprovals.length.toLocaleString(), alert: pendingApprovals.length ? 'Requires attention' : 'No pending approvals', icon: '⏳', color: 'warning' },
+    { title: 'LOW STOCK ALERTS', value: lowStockProducts.length.toLocaleString(), alert: lowStockProducts.length ? 'Requires attention' : 'No low stock products', icon: '⚠️', color: 'alert' }
+  ];
   const categories = [...new Set(products.map((product) => product.category))].map((name) => ({ name, count: products.filter((product) => product.category === name).length, color: '#10b981' }));
+  const totalPages = Math.max(1, Math.ceil(products.length / itemsPerPage));
+  const paginatedProducts = products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   /*
     {
       id: 1,
@@ -206,7 +192,8 @@ const AdminDashboardPage = () => {
                 <tbody>
                   {isLoading && <tr><td colSpan="5">Loading products...</td></tr>}
                   {!isLoading && productsError && <tr><td colSpan="5" role="alert">{productsError}</td></tr>}
-                  {products.map((product) => (
+                  {!isLoading && !productsError && products.length === 0 && <tr><td colSpan="5">No products found.</td></tr>}
+                  {paginatedProducts.map((product) => (
                     <tr key={product.id}>
                       <td className="product-cell">
                         <div className="product-info">
@@ -235,10 +222,11 @@ const AdminDashboardPage = () => {
                 </tbody>
               </table>
               <div className="table-pagination">
-                <p>Showing 1-10 of 12,458</p>
+                <p>Showing {products.length ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, products.length)} of {products.length}</p>
                 <div className="pagination-buttons">
-                  <button className="pagination-btn">Prev</button>
-                  <button className="pagination-btn active">Next</button>
+                  <button className="pagination-btn" onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={currentPage === 1}>Prev</button>
+                  <span>{currentPage} / {totalPages}</span>
+                  <button className="pagination-btn" onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))} disabled={currentPage === totalPages}>Next</button>
                 </div>
               </div>
             </div>
@@ -257,10 +245,13 @@ const AdminDashboardPage = () => {
                 {pendingApprovals.map((item) => (
                   <div key={item.id} className="approval-item">
                     <div className="approval-product">
-                      <div className="approval-image">{item.image}</div>
+                      <div className="approval-image">
+                        <ProductImage src={item.image} alt={item.name} className="approval-product-image" />
+                        {!item.image && '📦'}
+                      </div>
                       <div className="approval-info">
-                        <p className="approval-name">{item.product}</p>
-                        <p className="approval-vendor">{item.vendor}</p>
+                        <p className="approval-name">{item.name}</p>
+                        <p className="approval-vendor">Vendor: {item.vendor}</p>
                       </div>
                     </div>
                     <div className="approval-actions">

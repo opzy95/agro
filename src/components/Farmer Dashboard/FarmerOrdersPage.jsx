@@ -101,7 +101,7 @@ const FarmerOrdersPage = () => {
     getCurrentUser()
       .then((response) => {
         const user = response?.user || response?.data?.user || response?.data || response;
-        setFarmer({
+     setFarmer({
           name: [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.name || 'Green Valley Farm',
           farmName: user?.farmName || 'Premium Producer',
           avatar: user?.profileImage || null,
@@ -136,14 +136,10 @@ const FarmerOrdersPage = () => {
     const order = orders.find((item) => item.id === orderId);
     const status = order && getNextStatus(order);
     if (!status) return;
-    if (!order.productId) {
-      setOrdersError('This order is missing its product ID, so its item status cannot be updated.');
-      return;
-    }
 
     try {
       setUpdatingOrderId(orderId);
-      await updateOrderStatus(order.orderId, order.productId, status);
+      await updateOrderStatus(order.orderId, status);
       const response = await getFarmerOrders();
       setOrders(getResponseList(response).flatMap(mapOrder));
     } catch (error) {

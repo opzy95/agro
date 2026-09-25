@@ -24,10 +24,12 @@ const normalizeWishlistProduct = (product = {}) => {
     ? product.image
     : product.image?.url || product.image?.secure_url || imageList[0] || '';
   const farmer = product.farmer;
+  const farmerId = product.farmerId || (typeof farmer === 'object' ? farmer._id || farmer.id : farmer);
 
   return {
     ...product,
     id: product._id || product.id,
+    farmerId: farmerId ? String(farmerId) : '',
     name: product.name || product.productName || 'Unnamed product',
     price: Number(product.price || 0),
     unit: product.unit || 'unit',

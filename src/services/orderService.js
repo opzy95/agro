@@ -41,11 +41,10 @@ export const getFarmerOrders = async () => {
   return request('/orders/farmer');
 };
 
-export const updateOrderStatus = async (orderId, productId, status) => {
-  return request(`/orders/${orderId}/item-status`, {
+export const updateOrderStatus = async (orderId, status) => {
+  return request(`/orders/${orderId}/status`, {
     method: 'PUT',
     body: JSON.stringify({
-      productId,
       status: String(status).toLowerCase()
     })
   });
@@ -59,11 +58,10 @@ export const cancelOrder = async (orderId) => {
   return request(`/orders/${orderId}/cancel`, { method: 'PUT' });
 };
 
-export const confirmOrderReceived = async (orderId, productId) => {
+export const confirmOrderReceived = async (orderId) => {
   return request(`/orders/${orderId}/confirm-delivery`, {
     method: 'PUT',
     body: JSON.stringify({
-      productId,
       status: 'processing'
     })
   });

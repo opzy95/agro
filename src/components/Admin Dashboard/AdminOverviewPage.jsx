@@ -1,27 +1,88 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from './AdminLayout';
-import { getAdminOverview } from '../../services/adminService';
+import { getAdminFinancials, getAdminOrders, getAdminProducts, getAdminUsers } from '../../services/adminService';
 import './AdminOverviewPage.css';
+
+const getPayload = (response) => response?.data || response || {};
+
+const getList = (response, key) => {
+  const payload = getPayload(response);
+  const list = payload?.[key] || response?.[key] || payload;
+  return Array.isArray(list) ? list : [];
+};
+
+const getOrders = (response) => {
+  const payload = getPayload(response);
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload.orders)) return payload.orders;
+
+  const customerEntries = Array.isArray(payload.customers) ? payload.customers : [];
+  return customerEntries.flatMap((customerEntry) => {
+    const customer = customerEntry.customer || customerEntry.user || customerEntry;
+    const customerOrders = customerEntry.orders
+      || customer?.orders
+      || customerEntry.orderDetails
+      || customerEntry.orderList
+      || customerEntry.purchases
+      || customerEntry.order
+      || customerEntry.customerOrders
+      || (customerEntry.latestOrder ? [customerEntry.latestOrder] : [])
+      || (customerEntry.orderId || customerEntry.orderNumber || customerEntry.totalAmount || customerEntry.total ? [customerEntry] : []);
+
+    return Array.isArray(customerOrders) ? customerOrders : [customerOrders];
+  }).filter(Boolean);
+};
+
+const getStatus = (value) => String(value || '').toLowerCase().replace(/[_-]/g, ' ');
 
 const AdminOverviewPage = () => {
   const [timeRange, setTimeRange] = useState('monthly');
   const [dashboardData, setDashboardData] = useState({ metrics: [], quickActions: [], activities: [], chartData: [] });
 
   useEffect(() => {
-    getAdminOverview().then((response) => {
-      const data = response?.data || response || {};
+    Promise.all([getAdminUsers(), getAdminProducts(), getAdminOrders(), getAdminFinancials('monthly')]).then(([usersResponse, productsResponse, ordersResponse, financialsResponse]) => {
+      const users = getList(usersResponse, 'users');
+      const products = getList(productsResponse, 'products');
+      const orders = getOrders(ordersResponse);
+      const financials = getPayload(financialsResponse);
+      const activeProducts = products.filter((product) => ['published', 'active'].includes(getStatus(product.status)));
+      const pendingFarmers = users.filter((user) => {
+        const role = getStatus(user.role);
+        const verification = getStatus(user.verificationStatus);
+        return role === 'farmer' && ['pending', 'not verified', 'not_verified'].includes(verification);
+      });
+      const lowStockProducts = products.filter((product) => {
+        const quantity = Number(product.availableQuantity ?? product.quantity ?? product.stock ?? 0);
+        return quantity > 0 && quantity <= 5;
+      });
+      const recentOrders = orders.slice(-4).reverse();
+
       setDashboardData({
-        metrics: data.metrics || [],
-        quickActions: data.quickActions || [],
-        activities: data.activities || data.platformActivities || [],
-        chartData: data.chartData || []
+        metrics: [
+          { title: 'TOTAL USERS', value: users.length, icon: '👥', subtitle: `${users.filter((user) => getStatus(user.role) === 'farmer').length} farmers` },
+          { title: 'ACTIVE PRODUCTS', value: activeProducts.length, icon: '📦', subtitle: `${products.length} total listings` },
+          { title: 'TOTAL ORDERS', value: orders.length, icon: '🛒', subtitle: 'All customer orders' },
+          { title: 'PENDING FARMER REVIEWS', value: pendingFarmers.length, icon: '⏳', subtitle: 'Verification required' }
+        ],
+        quickActions: [
+          { title: 'Farmer verification', subtitle: `${pendingFarmers.length} pending review`, icon: '✓', color: 'orange' },
+          { title: 'Low stock products', subtitle: `${lowStockProducts.length} need attention`, icon: '!', color: 'red' }
+        ],
+        activities: recentOrders.map((order) => ({
+          title: `Order ${order.orderNumber || order._id || order.id || ''}`,
+          description: getStatus(order.orderStatus || order.status || 'pending'),
+          time: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Recent',
+          icon: '🛒',
+          color: 'green'
+        })),
+        chartData: financials.chartData || financials.sales || []
       });
     }).catch(() => setDashboardData({ metrics: [], quickActions: [], activities: [], chartData: [] }));
   }, []);
 
   const { metrics, quickActions, activities: platformActivities, chartData } = dashboardData;
 
-  const maxValue = Math.max(...chartData.map(d => d.value));
+  const maxValue = Math.max(1, ...chartData.map(d => Number(d.value || d.amount || 0)));
 
   return (
     <AdminLayout activeMenu="overview" showSearch={true}>

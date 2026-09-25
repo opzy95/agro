@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from './AdminLayout';
-import { getAdminUsers, updateAdminUserVerification } from '../../services/adminService';
+import { getAdminUsers, getAdminUserProfile, updateAdminUserVerification } from '../../services/adminService';
 import './AdminUsersPage.css';
 
 const AdminUsersPage = () => {
@@ -13,6 +13,9 @@ const AdminUsersPage = () => {
   const [totalUsers, setTotalUsers] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [usersError, setUsersError] = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState('');
   useEffect(() => {
     getAdminUsers()
       .then((response) => {
@@ -192,6 +195,21 @@ const AdminUsersPage = () => {
       .catch((error) => setUsersError(error.message));
   };
 
+  const handleViewProfile = async (user) => {
+    setSelectedUser(user);
+    setProfileError('');
+    setIsProfileLoading(true);
+
+    try {
+      const response = await getAdminUserProfile(user.id);
+      setSelectedUser(response?.user || response?.data?.user || response?.data || response);
+    } catch (error) {
+      setProfileError(error.message || 'Unable to load this user profile.');
+    } finally {
+      setIsProfileLoading(false);
+    }
+  };
+
   return (
     <AdminLayout activeMenu="users" showSearch={true}>
       <div className="admin-users-page">
@@ -316,8 +334,12 @@ const AdminUsersPage = () => {
                   </td>
                   <td className="date-cell">{user.dateJoined}</td>
                   <td className="actions-cell">
-                    {user.role.includes('Farmer') && user.verificationStatus === 'not_verified' ? (
-                      <div className="verification-actions">
+                    <div className="user-actions">
+                      <button className="action-link" onClick={() => handleViewProfile(user)}>
+                        View Profile
+                      </button>
+                      {user.role.includes('Farmer') && user.verificationStatus === 'not_verified' && (
+                        <div className="verification-actions">
                         <button 
                           className="btn-verify"
                           onClick={() => handleVerifyUser(user.id, 'verify')}
@@ -330,12 +352,9 @@ const AdminUsersPage = () => {
                         >
                           ❌ Reject
                         </button>
-                      </div>
-                    ) : user.status === 'Pending Review' ? (
-                      <button className="action-link review-link">Review Docs</button>
-                    ) : (
-                      <button className="action-link">View Profile</button>
-                    )}
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -375,6 +394,47 @@ const AdminUsersPage = () => {
           </div>
         </div>
       </div>
+      {selectedUser && (
+        <div className="profile-modal-overlay" role="presentation" onClick={() => setSelectedUser(null)}>
+          <section className="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title" onClick={(event) => event.stopPropagation()}>
+            <div className="profile-modal-header">
+              <div>
+                <p className="profile-modal-eyebrow">User Profile</p>
+                <h2 id="profile-modal-title">{selectedUser.firstName || selectedUser.name || 'User'} {selectedUser.lastName || ''}</h2>
+              </div>
+              <button className="profile-modal-close" type="button" onClick={() => setSelectedUser(null)} aria-label="Close profile">×</button>
+            </div>
+
+            {isProfileLoading && <p className="profile-modal-message">Loading profile...</p>}
+            {profileError && <p className="profile-modal-error" role="alert">{profileError}</p>}
+            {!isProfileLoading && !profileError && (
+              <div className="profile-modal-body">
+                {selectedUser.profileImage && <img className="profile-image" src={selectedUser.profileImage} alt="User profile" />}
+                <div className="profile-details-grid">
+                  <div><span>First name</span><strong>{selectedUser.firstName || '-'}</strong></div>
+                  <div><span>Last name</span><strong>{selectedUser.lastName || '-'}</strong></div>
+                  <div><span>Email</span><strong>{selectedUser.email || '-'}</strong></div>
+                  <div><span>Phone</span><strong>{selectedUser.phone || '-'}</strong></div>
+                  <div><span>Role</span><strong>{selectedUser.role || '-'}</strong></div>
+                  <div><span>Farm name</span><strong>{selectedUser.farmName || '-'}</strong></div>
+                  <div><span>Verification</span><strong>{selectedUser.verificationStatus || '-'}</strong></div>
+                  <div><span>Date joined</span><strong>{selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : '-'}</strong></div>
+                  <div><span>NIN</span><strong>{selectedUser.nin || '-'}</strong></div>
+                  <div><span>BVN</span><strong>{selectedUser.bvn || '-'}</strong></div>
+                </div>
+                <div className="profile-documents">
+                  <h3>Farmer Documents</h3>
+                  {selectedUser.ninDocument ? (
+                    <a href={selectedUser.ninDocument} target="_blank" rel="noreferrer">View NIN Document</a>
+                  ) : (
+                    <p>No NIN document uploaded.</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
     </AdminLayout>
   );
 };

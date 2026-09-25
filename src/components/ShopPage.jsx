@@ -85,7 +85,7 @@ const ProductDetailsModal = ({ product, onClose, onAddToCart, getItemQuantity })
 };
 
 const ShopPage = () => {
-  const { addToCart, getItemQuantity } = useCart();
+  const { addToCart, getItemQuantity, cartFarmerId } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('popular');
@@ -442,6 +442,7 @@ const ShopPage = () => {
   const [loadError, setLoadError] = useState('');
   const [reviewingProductId, setReviewingProductId] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [cartAddError, setCartAddError] = useState('');
 
   const normalizeProduct = (backendProduct) => {
     const imageList = (backendProduct.images || [])
@@ -455,8 +456,12 @@ const ShopPage = () => {
       : farmer?.farmName || farmer?.businessName || [farmer?.firstName, farmer?.lastName].filter(Boolean).join(' ') || 'Local Farmer';
     const status = String(backendProduct.status || '').toLowerCase();
 
+    const farmerId = backendProduct.farmerId
+      || (typeof farmer === 'object' ? farmer._id || farmer.id : farmer);
+
     return {
       id: backendProduct._id || backendProduct.id,
+      farmerId: farmerId ? String(farmerId) : '',
       name: backendProduct.name || backendProduct.productName || 'Unnamed product',
       price: Number(backendProduct.price || 0),
       unit: backendProduct.unit || 'unit',
@@ -479,9 +484,12 @@ const ShopPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await getProducts();
+        const response = await getProducts(cartFarmerId ? { farmerId: cartFarmerId } : {});
         const backendProducts = response?.products || response?.data?.products || response?.data || response || [];
-        setProducts((Array.isArray(backendProducts) ? backendProducts : []).map(normalizeProduct));
+        const normalizedProducts = (Array.isArray(backendProducts) ? backendProducts : []).map(normalizeProduct);
+        setProducts(cartFarmerId
+          ? normalizedProducts.filter((product) => product.farmerId === String(cartFarmerId))
+          : normalizedProducts);
       } catch (error) {
         console.error('Failed to fetch shop products:', error);
         setLoadError(error.message || 'Unable to load products.');
@@ -492,10 +500,15 @@ const ShopPage = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [cartFarmerId]);
 
-  const handleAddToCart = (product) => {
-    addToCart(product);
+  const handleAddToCart = async (product) => {
+    setCartAddError('');
+    try {
+      await addToCart(product);
+    } catch (error) {
+      setCartAddError(error.message || 'Unable to add this product to your cart.');
+    }
   };
 
   const handleProductRating = async (product, rating) => {
@@ -604,6 +617,8 @@ const ShopPage = () => {
             Discover premium, farm-fresh produce and artisanal goods sourced directly 
             from trusted local growers.
           </p>
+          {cartFarmerId && <p className="shop-farmer-filter">Showing products from the farmer in your cart.</p>}
+          {cartAddError && <p className="shop-cart-error" role="alert">{cartAddError}</p>}
         </div>
       </section>
 

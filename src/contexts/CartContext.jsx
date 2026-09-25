@@ -11,6 +11,13 @@ const initialCartState = {
 const unwrapCart = (response) => response?.cart || response?.data?.cart || response?.data || response;
 const isObjectId = (value) => typeof value === 'string' && /^[a-f\d]{24}$/i.test(value);
 
+const getFarmerId = (value = {}) => {
+  const farmer = value.farmer;
+  if (value.farmerId) return String(value.farmerId);
+  if (typeof farmer === 'string' && farmer.trim()) return farmer;
+  return farmer?._id || farmer?.id || farmer?.farmerId ? String(farmer._id || farmer.id || farmer.farmerId) : '';
+};
+
 const getSellerName = (value) => {
   if (!value || isObjectId(value)) return '';
   if (typeof value === 'string') return value;
@@ -28,6 +35,7 @@ const normalizeCart = (cart, sellerLookup = {}) => {
     return {
       ...product,
       id: productId,
+      farmerId: getFarmerId(item) || getFarmerId(product),
       name: item.name || product.name,
       price: Number(item.price ?? product.price ?? 0),
       image: product.image || product.images?.[0],
@@ -128,6 +136,15 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCart = (product) => {
+    const productFarmerId = getFarmerId(product);
+    const cartFarmerId = cartState.items[0]?.farmerId || '';
+
+    if (cartFarmerId && productFarmerId && cartFarmerId !== productFarmerId) {
+      const error = new Error('Your cart contains products from another farmer. Complete or clear your current cart before adding this product.');
+      setCartError(error.message);
+      return Promise.reject(error);
+    }
+
     rememberSeller(product);
     return syncCart(() => cartService.addToCart(product.id, 1));
   };
@@ -160,6 +177,7 @@ export const CartProvider = ({ children }) => {
     updateQuantity,
     clearCart,
     cartError,
+    cartFarmerId: cartState.items[0]?.farmerId || '',
     getItemQuantity,
     isInCart
   };

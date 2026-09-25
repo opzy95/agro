@@ -8,9 +8,15 @@ import './Wishlist.css';
 const Wishlist = () => {
   const { items: wishlistItems, removeFromWishlist, clearWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const [cartAddError, setCartAddError] = React.useState('');
 
-  const handleAddToCart = (product) => {
-    addToCart(product);
+  const handleAddToCart = async (product) => {
+    setCartAddError('');
+    try {
+      await addToCart(product);
+    } catch (error) {
+      setCartAddError(error.message || 'Unable to add this product to your cart.');
+    }
     // Optionally remove from wishlist after adding to cart
     // removeFromWishlist(product.id);
   };
@@ -32,6 +38,7 @@ const Wishlist = () => {
 
       {/* Page Title */}
       <h1 className="wishlist-title">My Wishlist</h1>
+      {cartAddError && <p className="wishlist-cart-error" role="alert">{cartAddError}</p>}
 
       <div className="wishlist-content">
         {wishlistItems.length === 0 ? (
