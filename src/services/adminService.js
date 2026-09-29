@@ -25,6 +25,14 @@ export const getAdminOrders = () => request('/admin/orders');
 export const getAdminUsers = () => request('/admin/users');
 export const getAdminUserProfile = (userId) => request(`/admin/users/${userId}`);
 export const getAdminFinancials = (range) => request(`/admin/financials?range=${encodeURIComponent(range)}`);
+export const getAdminWithdrawals = () => request('/admin/withdrawals');
+export const approveAdminWithdrawal = (withdrawalId) => request(`/admin/withdrawals/${withdrawalId}/approve`, {
+  method: 'PUT'
+});
+export const rejectAdminWithdrawal = (withdrawalId, rejectionReason) => request(`/admin/withdrawals/${withdrawalId}/reject`, {
+  method: 'PUT',
+  body: JSON.stringify({ rejectionReason })
+});
 export const getAdminSettings = () => request('/admin/settings');
 export const updateAdminSettings = (settings) => request('/admin/settings', {
   method: 'PUT',
@@ -46,6 +54,9 @@ export default {
   getAdminUsers,
   getAdminUserProfile,
   getAdminFinancials,
+  getAdminWithdrawals,
+  approveAdminWithdrawal,
+  rejectAdminWithdrawal,
   getAdminSettings,
   updateAdminSettings,
   updateAdminOrderStatus,

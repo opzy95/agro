@@ -318,6 +318,12 @@
   text-align: center;
 }
 
+.withdrawal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
 .btn-approve {
   padding: 0.5rem 1rem;
   background: #059669;
@@ -332,6 +338,28 @@
 
 .btn-approve:hover {
   background: #047857;
+}
+
+.btn-reject {
+  padding: 0.5rem 1rem;
+  background: #dc2626;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-reject:hover {
+  background: #b91c1c;
+}
+
+.btn-approve:disabled,
+.btn-reject:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .processed-text {

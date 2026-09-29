@@ -2,7 +2,7 @@
 .admin-topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   height: 80px;
   background: white;
   border-bottom: 1px solid #e5e7eb;
@@ -19,6 +19,8 @@
   border-radius: 8px;
   background: white;
   cursor: pointer;
+  margin-right: auto;
+  flex-shrink: 0;
 }
 
 .admin-mobile-menu-btn span {
@@ -31,13 +33,9 @@
 
 /* Search Container */
 .search-container {
-  flex: 1;
-  max-width: 400px;
+  flex: 0 1 400px;
+  min-width: 120px;
   position: relative;
-}
-
-.admin-topbar > .search-container {
-  display: none;
 }
 
 .search-icon {
@@ -74,7 +72,10 @@
 .topbar-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 1.5rem;
+  min-width: 0;
+  margin-left: auto;
 }
 
 /* Icon Buttons */
@@ -261,7 +262,7 @@
   }
 
   .search-container {
-    max-width: 300px;
+    flex-basis: 300px;
   }
 
   .profile-info {
@@ -282,7 +283,7 @@
   }
 
   .search-container {
-    max-width: 200px;
+    flex-basis: 200px;
   }
 
   .search-input {
@@ -324,6 +325,16 @@
 
   .topbar-right {
     gap: 0.5rem;
+    flex: 1;
+  }
+
+  .search-container {
+    flex-basis: 140px;
+    min-width: 96px;
+  }
+
+  .search-input {
+    padding-left: 2.25rem;
   }
 
   .profile-role {

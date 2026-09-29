@@ -87,7 +87,8 @@ const FarmerSettingsPage = () => {
     bankName: '',
     bankCode: '',
     accountNumber: '',
-    accountName: ''
+    accountName: '',
+    isDefault: true
   });
 
   const farmer = {
@@ -162,16 +163,21 @@ const FarmerSettingsPage = () => {
     try {
       const response = await addBankAccount(newBankAccount);
       const account = response?.bankAccount || response?.account || response;
-      setBankAccounts((accounts) => [...accounts, {
+      const addedAccount = {
         ...account,
         id: account._id || account.id,
         bankName: account.bankName || newBankAccount.bankName,
         bankCode: account.bankCode || newBankAccount.bankCode,
         accountNumber: account.accountNumber || newBankAccount.accountNumber,
         accountName: account.accountName || newBankAccount.accountName,
+        isDefault: account.isDefault ?? newBankAccount.isDefault,
         dateAdded: account.dateAdded || account.createdAt || new Date().toISOString()
-      }]);
-      setNewBankAccount({ bankName: '', bankCode: '', accountNumber: '', accountName: '' });
+      };
+      setBankAccounts((accounts) => [...accounts.map((existingAccount) => ({
+        ...existingAccount,
+        isDefault: addedAccount.isDefault ? false : existingAccount.isDefault
+      })), addedAccount]);
+      setNewBankAccount({ bankName: '', bankCode: '', accountNumber: '', accountName: '', isDefault: true });
       setShowAddBankModal(false);
     } catch (error) {
       alert(error?.message || 'Unable to add bank account.');
@@ -303,6 +309,14 @@ const FarmerSettingsPage = () => {
                             placeholder="Enter account name"
                           />
                         </div>
+                        <label className="bank-default-option">
+                          <input
+                            type="checkbox"
+                            checked={newBankAccount.isDefault}
+                            onChange={(event) => setNewBankAccount({ ...newBankAccount, isDefault: event.target.checked })}
+                          />
+                          Set as default withdrawal account
+                        </label>
                       </div>
                       <div className="modal-footer">
                         <button

@@ -59,25 +59,24 @@ const AdminTopBar = ({ onMobileMenuToggle, showSearch = true }) => {
         <span></span>
       </button>
 
-      {/* Search Bar */}
-      {showSearch && (
-        <div className="search-container">
-          <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.35-4.35"/>
-          </svg>
-          <input
-            type="text"
-            placeholder="Search inventory..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
-          />
-        </div>
-      )}
-
       {/* Right Section */}
       <div className="topbar-right">
+        {showSearch && (
+          <div className="search-container">
+            <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search inventory..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+          </div>
+        )}
+
         {/* Notifications */}
         <div className="admin-notification-container">
           <button

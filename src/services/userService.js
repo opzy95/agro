@@ -104,6 +104,10 @@ export const requestWithdrawal = async (amount) => {
   });
 };
 
+export const getMyWithdrawals = async () => {
+  return request('/users/withdrawals');
+};
+
 export const addBankAccount = async (bankAccountData) => {
   return request('/users/bank-accounts', {
     method: 'POST',
@@ -125,6 +129,7 @@ export default {
   getMyWallet,
   getMyBankAccounts,
   requestWithdrawal,
+  getMyWithdrawals,
   addBankAccount,
   deleteBankAccount
 };

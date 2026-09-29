@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from './AdminLayout';
-import { getAdminFinancials } from '../../services/adminService';
+import {
+  approveAdminWithdrawal,
+  getAdminFinancials,
+  getAdminWithdrawals,
+  rejectAdminWithdrawal
+} from '../../services/adminService';
 import './AdminFinancialPage.css';
 
 
@@ -25,15 +30,39 @@ const getInitials = (name) => String(name || 'UF')
 const AdminFinancialPage = () => {
   const [timeRange, setTimeRange] = useState('7days');
 
-  const [financialData, setFinancialData] = useState({ stats: [], payoutQueue: [], transactions: [], chartData: [] });
+  const [financialData, setFinancialData] = useState({ stats: [], transactions: [], chartData: [] });
+  const [payoutQueue, setPayoutQueue] = useState([]);
+  const [payoutLoading, setPayoutLoading] = useState(true);
+  const [payoutError, setPayoutError] = useState('');
+  const [payoutActionId, setPayoutActionId] = useState('');
+  const [payoutRefreshKey, setPayoutRefreshKey] = useState(0);
+
   useEffect(() => {
     getAdminFinancials(timeRange).then((response) => {
       const data = response?.data || response || {};
-      setFinancialData({ stats: data.stats || [], payoutQueue: data.payoutQueue || [], transactions: data.transactions || [], chartData: data.chartData || [] });
-    }).catch(() => setFinancialData({ stats: [], payoutQueue: [], transactions: [], chartData: [] }));
+      setFinancialData({ stats: data.stats || [], transactions: data.transactions || [], chartData: data.chartData || [] });
+    }).catch(() => setFinancialData({ stats: [], transactions: [], chartData: [] }));
   }, [timeRange]);
 
-  const { stats, payoutQueue, transactions, chartData } = financialData;
+  useEffect(() => {
+    let active = true;
+    setPayoutLoading(true);
+    getAdminWithdrawals().then((response) => {
+      if (!active) return;
+      const data = response?.data || response || {};
+      setPayoutQueue(Array.isArray(data.withdrawals) ? data.withdrawals : []);
+      setPayoutError('');
+    }).catch((error) => {
+      if (!active) return;
+      setPayoutQueue([]);
+      setPayoutError(error.message || 'Unable to load withdrawals.');
+    }).finally(() => {
+      if (active) setPayoutLoading(false);
+    });
+    return () => { active = false; };
+  }, [payoutRefreshKey]);
+
+  const { stats, transactions, chartData } = financialData;
   /*
   const legacyPayoutQueue = [
     {
@@ -115,19 +144,49 @@ const AdminFinancialPage = () => {
   const maxValue = Math.max(...chartData.map((data) => data.value), 1);
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case 'Complete':
+    switch (String(status || '').toLowerCase()) {
+      case 'complete':
+      case 'paid':
         return 'complete';
-      case 'Processing':
+      case 'processing':
         return 'processing';
-      case 'Pending':
+      case 'pending':
         return 'pending';
-      case 'Cleared':
+      case 'cleared':
         return 'cleared';
+      case 'rejected':
+        return 'rejected';
       default:
         return '';
     }
   };
+
+  const handleWithdrawalAction = async (withdrawal, action) => {
+    const withdrawalId = withdrawal._id || withdrawal.id;
+    if (!withdrawalId || payoutActionId) return;
+
+    let rejectionReason = '';
+    if (action === 'reject') {
+      rejectionReason = window.prompt('Enter a reason for rejecting this withdrawal:')?.trim() || '';
+      if (!rejectionReason) return;
+    } else if (!window.confirm('Approve and mark this withdrawal as paid?')) {
+      return;
+    }
+
+    setPayoutActionId(withdrawalId);
+    setPayoutError('');
+    try {
+      if (action === 'approve') await approveAdminWithdrawal(withdrawalId);
+      else await rejectAdminWithdrawal(withdrawalId, rejectionReason);
+      setPayoutRefreshKey((current) => current + 1);
+    } catch (error) {
+      setPayoutError(error.message || `Unable to ${action} withdrawal.`);
+    } finally {
+      setPayoutActionId('');
+    }
+  };
+
+  const formatMoney = (amount) => `₦${Number(amount || 0).toLocaleString('en-NG')}`;
 
   return (
     <AdminLayout activeMenu="financial" showSearch={true}>
@@ -177,42 +236,58 @@ const AdminFinancialPage = () => {
                     <th>Farmer/Vendor</th>
                     <th>Bank Name</th>
                     <th>Account Number</th>
-                    <th>Available Balance</th>
+                    <th>Amount</th>
                     <th>Platform Fee</th>
+                    <th>Net Amount</th>
                     <th>Status</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {payoutQueue.map((payout, index) => (
-                    <tr key={index}>
+                  {payoutLoading && <tr><td colSpan="8">Loading withdrawal requests...</td></tr>}
+                  {!payoutLoading && payoutError && <tr><td colSpan="8">{payoutError}</td></tr>}
+                  {!payoutLoading && !payoutError && payoutQueue.length === 0 && <tr><td colSpan="8">No withdrawal requests found.</td></tr>}
+                  {!payoutLoading && payoutQueue.map((payout) => {
+                    const bankAccount = payout.bankAccount || {};
+                    const status = String(payout.status || 'pending').toLowerCase();
+                    const withdrawalId = payout._id || payout.id;
+                    return (
+                    <tr key={withdrawalId}>
                       <td className="farmer-cell">
                         <div className="farmer-info">
-                          <div className="farmer-avatar">{payout.initials || getInitials(getPersonName(payout.farmer))}</div>
+                          <div className="farmer-avatar">{getInitials(getPersonName(payout.farmer || payout.user))}</div>
                           <div>
-                            <p className="farmer-name">{getPersonName(payout.farmer)}</p>
-                            <p className="farmer-id">ID: {payout.id}</p>
+                            <p className="farmer-name">{getPersonName(payout.farmer || payout.user)}</p>
+                            <p className="farmer-id">ID: {withdrawalId}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="bank-cell">{payout.bankName}</td>
-                      <td className="account-cell">{payout.accountNumber}</td>
-                      <td className="balance-cell">{payout.balance}</td>
-                      <td className="fee-cell">{payout.fee}</td>
+                      <td className="bank-cell">{bankAccount.bankName || 'Not provided'}</td>
+                      <td className="account-cell">{bankAccount.accountNumber || 'Not provided'}</td>
+                      <td className="balance-cell">{formatMoney(payout.amount)}</td>
+                      <td className="fee-cell">{formatMoney(payout.platformFee)}</td>
+                      <td className="balance-cell">{formatMoney(payout.netAmount)}</td>
                       <td>
-                        <span className={`status-badge ${getStatusColor(payout.status)}`}>
-                          {payout.status === 'Pending' && '●'} {payout.status}
+                        <span className={`status-badge ${getStatusColor(status)}`}>
+                          {status === 'pending' && '●'} {status}
                         </span>
                       </td>
                       <td className="action-cell">
-                        {payout.status === 'Pending' ? (
-                          <button className="btn-approve">{payout.action}</button>
+                        {status === 'pending' ? (
+                          <div className="withdrawal-actions">
+                            <button className="btn-approve" disabled={Boolean(payoutActionId)} onClick={() => handleWithdrawalAction(payout, 'approve')}>
+                              {payoutActionId === withdrawalId ? 'Working...' : 'Approve'}
+                            </button>
+                            <button className="btn-reject" disabled={Boolean(payoutActionId)} onClick={() => handleWithdrawalAction(payout, 'reject')}>
+                              Reject
+                            </button>
+                          </div>
                         ) : (
-                          <span className="processed-text">{payout.action}</span>
+                          <span className="processed-text">{status}</span>
                         )}
                       </td>
                     </tr>
-                  ))}
+                  );})}
                 </tbody>
               </table>
             </div>
