@@ -55,30 +55,84 @@ const LandingPage = () => {
       <section className="category-section">
         <div className="container">
           <h2 className="section-title">Shop by Category</h2>
+          <p className="section-subtitle">Browse our wide selection of fresh, farm-to-table products</p>
           <div className="category-grid">
-            <div className="category-item">
-              <div className="category-icon">🥬</div>
-              <h3>Fresh Vegetables</h3>
+            <div className="category-card" onClick={() => navigate(ROUTES.CATEGORIES)}>
+              <div className="category-image-wrapper">
+                <img src={background1} alt="Fresh Vegetables" className="category-image" />
+                <div className="category-overlay">
+                  <span className="category-badge">Fresh Vegetables</span>
+                </div>
+              </div>
+              <div className="category-info">
+                <h3>Fresh Vegetables</h3>
+                <p>Crisp and nutritious vegetables</p>
+              </div>
             </div>
-            <div className="category-item">
-              <div className="category-icon">🍎</div>
-              <h3>Seasonal Fruits</h3>
+            
+            <div className="category-card" onClick={() => navigate(ROUTES.CATEGORIES)}>
+              <div className="category-image-wrapper">
+                <img src={heroImg} alt="Seasonal Fruits" className="category-image" />
+                <div className="category-overlay">
+                  <span className="category-badge">Seasonal Fruits</span>
+                </div>
+              </div>
+              <div className="category-info">
+                <h3>Seasonal Fruits</h3>
+                <p>Sweet and fresh fruits</p>
+              </div>
             </div>
-            <div className="category-item">
-              <div className="category-icon">🌾</div>
-              <h3>Grains & Cereals</h3>
+            
+            <div className="category-card" onClick={() => navigate(ROUTES.CATEGORIES)}>
+              <div className="category-image-wrapper">
+                <img src={background} alt="Dairy Products" className="category-image" />
+                <div className="category-overlay">
+                  <span className="category-badge">Dairy Products</span>
+                </div>
+              </div>
+              <div className="category-info">
+                <h3>Dairy Products</h3>
+                <p>Farm-fresh dairy items</p>
+              </div>
             </div>
-            <div className="category-item">
-              <div className="category-icon">🥛</div>
-              <h3>Dairy Products</h3>
+            
+            <div className="category-card" onClick={() => navigate(ROUTES.CATEGORIES)}>
+              <div className="category-image-wrapper">
+                <img src={background2} alt="Grains & Cereals" className="category-image" />
+                <div className="category-overlay">
+                  <span className="category-badge">Grains & Cereals</span>
+                </div>
+              </div>
+              <div className="category-info">
+                <h3>Grains & Cereals</h3>
+                <p>Healthy and wholesome grains</p>
+              </div>
             </div>
-            <div className="category-item">
-              <div className="category-icon">🥩</div>
-              <h3>Fresh Meat</h3>
+            
+            <div className="category-card" onClick={() => navigate(ROUTES.CATEGORIES)}>
+              <div className="category-image-wrapper">
+                <img src={farmersWorking} alt="Fresh Herbs" className="category-image" />
+                <div className="category-overlay">
+                  <span className="category-badge">Fresh Herbs</span>
+                </div>
+              </div>
+              <div className="category-info">
+                <h3>Fresh Herbs</h3>
+                <p>Aromatic and flavorful herbs</p>
+              </div>
             </div>
-            <div className="category-item">
-              <div className="category-icon">🌿</div>
-              <h3>Herbs & Spices</h3>
+            
+            <div className="category-card" onClick={() => navigate(ROUTES.CATEGORIES)}>
+              <div className="category-image-wrapper">
+                <img src={backgroundImage} alt="Organic Specials" className="category-image" />
+                <div className="category-overlay">
+                  <span className="category-badge">Organic Specials</span>
+                </div>
+              </div>
+              <div className="category-info">
+                <h3>Organic Specials</h3>
+                <p>Premium organic selection</p>
+              </div>
             </div>
           </div>
         </div>

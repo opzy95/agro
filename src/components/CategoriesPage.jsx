@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CategoriesPage.css';
 
@@ -12,232 +12,185 @@ import heroImg from '../assets/hero.png';
 
 const CategoriesPage = () => {
   const navigate = useNavigate();
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [wishlist, setWishlist] = useState(new Set());
+
+  const categories = [
+    { id: 'vegetables', name: 'Vegetables', icon: '🥬', count: 3 },
+    { id: 'fruits', name: 'Fruits', icon: '🍎', count: 3 },
+    { id: 'dairy', name: 'Dairy & Eggs', icon: '🥛', count: 4 }
+  ];
+
+  const allProducts = [
+    // Vegetables
+    { id: 1, category: 'vegetables', name: 'Heirloom Organic Carrots', price: 4.50, unit: 'bunch', image: background1, badge: 'Organic', rating: 4.8 },
+    { id: 2, category: 'vegetables', name: 'Mixed Bell Peppers', price: 3.99, unit: 'lb', image: background2, rating: 4.6 },
+    { id: 3, category: 'vegetables', name: 'Leafy Greens', price: 5.00, unit: 'bunch', image: farmersWorking, badge: 'Fresh', rating: 4.9 },
+    
+    // Fruits
+    { id: 4, category: 'fruits', name: 'Vine-Ripened Cherry Tomatoes', price: 5.20, unit: 'lb', image: background, badge: 'Fresh Harvest', rating: 4.7 },
+    { id: 5, category: 'fruits', name: 'Organic Strawberries', price: 6.50, unit: 'lb', image: heroImg, rating: 4.8 },
+    { id: 6, category: 'fruits', name: 'Citrus Collection', price: 7.99, unit: 'lb', image: backgroundImage, rating: 4.5 },
+    
+    // Dairy & Eggs
+    { id: 7, category: 'dairy', name: 'Free-Range Brown Eggs', price: 5.99, unit: 'dozen', image: background1, rating: 4.9 },
+    { id: 8, category: 'dairy', name: 'Aged Farmhouse Cheddar', price: 8.50, unit: 'lb', image: background2, rating: 4.7 },
+    { id: 9, category: 'dairy', name: 'Whole Creamline Milk', price: 4.25, unit: 'half gallon', image: farmersWorking, rating: 4.8 },
+    { id: 10, category: 'dairy', name: 'Cultured Pastured Butter', price: 6.00, unit: 'lb', image: background, rating: 4.6 }
+  ];
+
+  const filteredProducts = selectedCategory === 'all' 
+    ? allProducts 
+    : allProducts.filter(p => p.category === selectedCategory);
+
+  const toggleWishlist = (id) => {
+    const newWishlist = new Set(wishlist);
+    if (newWishlist.has(id)) {
+      newWishlist.delete(id);
+    } else {
+      newWishlist.add(id);
+    }
+    setWishlist(newWishlist);
+  };
+
+  const renderStars = (rating) => {
+    return '★'.repeat(Math.floor(rating)) + (rating % 1 ? '☆' : '');
+  };
 
   return (
     <main className="categories-page">
-      {/* Page Header */}
-      <section className="categories-header">
+      {/* Category Filter Section - Sticky */}
+      <section className="categories-filter-section">
         <div className="categories-container">
-          <h1 className="page-title">Explore Our Categories</h1>
-          <p className="page-subtitle">
-            Browse our extensive selection of farm-fresh produce and artisanal goods,
-            <br />categorized for your convenience.
-          </p>
-        </div>
-      </section>
-
-      {/* Vegetables Section */}
-      <section className="category-section">
-        <div className="categories-container">
-          <div className="section-header">
-            <h2 className="category-title">Vegetables</h2>
-            <p className="category-subtitle">
-              Crisp, nutritious, and straight from the soil. Discover our range of leafy greens, root vegetables, and more.
-            </p>
+          <div className="filter-header">
+            <h2 className="filter-title">Shop by Category</h2>
+            <span className="product-count">{filteredProducts.length} Products</span>
           </div>
-
-          <div className="vegetables-grid">
-            {/* Large Featured Product */}
-            <div className="product-card large-card">
-              <div className="product-image">
-                <img src={farmersWorking} alt="Leafy Greens" />
-                <div className="product-overlay">
-                  <h3 className="overlay-title">Leafy Greens</h3>
-                  <p className="overlay-description">Packed with vitamins and flavor</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Small Product Cards */}
-            <div className="product-card small-card">
-              <div className="product-image">
-                <img src={background1} alt="Heirloom Organic Carrots" />
-                <span className="organic-badge">Organic</span>
-              </div>
-              <div className="product-details">
-                <h4 className="product-name">Heirloom Organic Carrots</h4>
-                <div className="product-pricing">
-                  <span className="price">$4.50</span>
-                  <span className="unit">/ bunch</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="product-card small-card">
-              <div className="product-image">
-                <img src={background2} alt="Mixed Bell Peppers" />
-              </div>
-              <div className="product-details">
-                <h4 className="product-name">Mixed Bell Peppers</h4>
-                <div className="product-pricing">
-                  <span className="price">$3.99</span>
-                  <span className="unit">/ lb</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Seasonal Banner */}
-          <div className="seasonal-banner">
-            <div className="banner-content">
-              <div className="banner-text">
-                <span className="seasonal-label">SEASONAL HIGHLIGHT</span>
-                <h3 className="banner-title">Autumn Harvest Sale</h3>
-                <p className="banner-description">
-                  Get up to 30% off on selected<br />
-                  seasonal root<br />
-                  vegetables and orchard fruits.<br />
-                  Sourced directly<br />
-                  from verified local farms.
-                </p>
-                <button className="shop-sale-btn">Shop the Sale</button>
-              </div>
-            </div>
-            <div className="banner-image">
-              <img src={backgroundImage} alt="Autumn Harvest Sale" />
-            </div>
+          
+          <div className="filter-wrapper">
+            <button 
+              className={`category-filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
+              onClick={() => setSelectedCategory('all')}
+            >
+              <span className="filter-icon">🏪</span>
+              <span className="filter-text">All</span>
+            </button>
+            
+            {categories.map(cat => (
+              <button 
+                key={cat.id}
+                className={`category-filter-btn ${selectedCategory === cat.id ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(cat.id)}
+              >
+                <span className="filter-icon">{cat.icon}</span>
+                <span className="filter-text">{cat.name}</span>
+              </button>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Fruits Section */}
-      <section className="category-section">
+      {/* Products Grid Section */}
+      <section className="products-section">
         <div className="categories-container">
-          <div className="section-header">
-            <h2 className="category-title">Fruits</h2>
-            <p className="category-subtitle">
-              Sweet, juicy, and naturally delicious. Explore seasonal orchard fruits, vibrant berries, and zesty citrus.
-            </p>
+          {/* Products Grid */}
+          <div className="products-grid">
+            {filteredProducts.map(product => (
+              <div key={product.id} className="product-card">
+                <div className="product-image-container">
+                  <img src={product.image} alt={product.name} className="product-image11" />
+                  
+                  {product.badge && (
+                    <span className="product-badge">{product.badge}</span>
+                  )}
+                  
+                  <button 
+                    className={`wishlist-btn ${wishlist.has(product.id) ? 'liked' : ''}`}
+                    onClick={() => toggleWishlist(product.id)}
+                  >
+                    {wishlist.has(product.id) ? '♥' : '♡'}
+                  </button>
+                  
+                  <div className="product-hover-overlay">
+                  </div>
+                </div>
+
+                <div className="product-details">
+                  <div className="product-rating">
+                    <span className="stars">{renderStars(product.rating)}</span>
+                    <span className="rating-value">{product.rating}</span>
+                  </div>
+                  
+                  <h3 className="product-name">{product.name}</h3>
+                  
+                  <div className="product-meta">
+                    <div className="product-pricing">
+                      <span className="price">${product.price.toFixed(2)}</span>
+                      <span className="unit">per {product.unit}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className="fruits-grid">
-            {/* Small Product Cards */}
-            <div className="product-card small-card">
-              <div className="product-image">
-                <img src={background} alt="Vine-Ripened Cherry Tomatoes" />
-                <span className="fresh-badge">Fresh Harvest</span>
-              </div>
-              <div className="product-details">
-                <h4 className="product-name">Vine-Ripened Cherry Tomatoes</h4>
-                <div className="product-pricing">
-                  <span className="price">$5.20</span>
-                  <span className="unit">/ lb</span>
-                </div>
-              </div>
+          {/* Empty State */}
+          {filteredProducts.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-icon">📭</div>
+              <h3>No products found</h3>
+              <p>Try selecting a different category</p>
             </div>
+          )}
+        </div>
+      </section>
 
-            <div className="product-card small-card">
-              <div className="product-image">
-                <img src={heroImg} alt="Organic Strawberries" />
-              </div>
-              <div className="product-details">
-                <h4 className="product-name">Organic Strawberries</h4>
-                <div className="product-pricing">
-                  <span className="price">$6.50</span>
-                  <span className="unit">/ lb</span>
-                </div>
-              </div>
+      {/* Promo Banner */}
+      <section className="promo-section">
+        <div className="categories-container">
+          <div className="promo-card">
+            <div className="promo-text">
+              <span className="promo-badge">Limited Time Offer</span>
+              <h2 className="promo-title">Fresh Harvest Sale</h2>
+              <p className="promo-desc">Up to 30% off on seasonal produce. Farm-fresh quality guaranteed.</p>
+              <button className="promo-cta">Shop Sale</button>
             </div>
-
-            {/* Large Featured Product */}
-            <div className="product-card large-card">
-              <div className="product-image">
-                <img src={backgroundImage} alt="Citrus Collection" />
-                <div className="product-overlay">
-                  <h3 className="overlay-title">Citrus Collection</h3>
-                  <p className="overlay-description">Brighten your day with fresh citrus</p>
-                </div>
-              </div>
+            <div className="promo-visual">
+              <img src={backgroundImage} alt="Fresh Harvest" className="promo-image" />
+              <div className="promo-glow"></div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Dairy & Eggs Section */}
-      <section className="category-section">
+      {/* Why Choose Us */}
+      <section className="benefits-section">
         <div className="categories-container">
-          <div className="section-header">
-            <h2 className="category-title">Dairy & Eggs</h2>
-            <p className="category-subtitle">
-              Farm-fresh staples for your daily needs, including artisanal cheeses, rich milk, and free-range eggs.
-            </p>
-          </div>
-
-          <div className="dairy-grid">
-            <div className="product-card small-card">
-              <div className="product-image">
-                <img src={background1} alt="Free-Range Brown Eggs" />
-              </div>
-              <div className="product-details">
-                <h4 className="product-name">Free-Range Brown Eggs</h4>
-                <div className="product-pricing">
-                  <span className="price">$5.99</span>
-                  <span className="unit">/ dozen</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="product-card small-card">
-              <div className="product-image">
-                <img src={background2} alt="Aged Farmhouse Cheddar" />
-              </div>
-              <div className="product-details">
-                <h4 className="product-name">Aged Farmhouse Cheddar</h4>
-                <div className="product-pricing">
-                  <span className="price">$8.50</span>
-                  <span className="unit">/ lb</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="product-card small-card">
-              <div className="product-image">
-                <img src={farmersWorking} alt="Whole Creamline Milk" />
-              </div>
-              <div className="product-details">
-                <h4 className="product-name">Whole Creamline Milk</h4>
-                <div className="product-pricing">
-                  <span className="price">$4.25</span>
-                  <span className="unit">/ half gallon</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="product-card small-card">
-              <div className="product-image">
-                <img src={background} alt="Cultured Pastured Butter" />
-              </div>
-              <div className="product-details">
-                <h4 className="product-name">Cultured Pastured Butter</h4>
-                <div className="product-pricing">
-                  <span className="price">$6.00</span>
-                  <span className="unit">/ lb</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer Section */}
-      <section className="categories-footer">
-        <div className="categories-container">
-          <div className="footer-content">
-            <div className="footer-brand">
-              <h3 className="footer-title">HarvestHub</h3>
-              <p className="footer-text">
-                <span className="checkmark">✓</span>
-                © 2024 HarvestHub. Cultivating quality connections.
-              </p>
+          <h2 className="section-title">Why Choose AgroFresh</h2>
+          
+          <div className="benefits-grid">
+            <div className="benefit-item">
+              <div className="benefit-icon">🌱</div>
+              <h4>100% Farm Fresh</h4>
+              <p>Direct from local farms</p>
             </div>
             
-            <div className="footer-links">
-              <div className="footer-column">
-                <a href="#privacy" className="footer-link">Privacy Policy</a>
-                <a href="#terms" className="footer-link">Terms of Service</a>
-                <a href="#shipping" className="footer-link">Shipping Info</a>
-                <a href="#returns" className="footer-link">Returns</a>
-              </div>
+            <div className="benefit-item">
+              <div className="benefit-icon">✓</div>
+              <h4>Verified Quality</h4>
+              <p>All products inspected</p>
+            </div>
+            
+            <div className="benefit-item">
+              <div className="benefit-icon">🚚</div>
+              <h4>Fast Delivery</h4>
+              <p>Same-day available</p>
+            </div>
+            
+            <div className="benefit-item">
+              <div className="benefit-icon">💚</div>
+              <h4>Support Local</h4>
+              <p>Fair farmer prices</p>
             </div>
           </div>
         </div>

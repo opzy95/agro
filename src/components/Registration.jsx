@@ -143,7 +143,7 @@ const Registration = () => {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  placeholder="Jane"
+                  placeholder="first name"
                   required
                 />
               </div>
@@ -155,7 +155,7 @@ const Registration = () => {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  placeholder="Doe"
+                  placeholder="last name"
                   required
                 />
               </div>
