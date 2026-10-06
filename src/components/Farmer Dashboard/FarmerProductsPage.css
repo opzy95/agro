@@ -220,7 +220,7 @@
 .product-image-wrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 1.3;
   background: #f9fafb;
   overflow: hidden;
 }
@@ -249,15 +249,15 @@
 
 .product-thumbnails {
   display: flex;
-  gap: 0.4rem;
-  padding: 0.6rem 0.75rem 0;
+  gap: 0.35rem;
+  padding: 0.45rem 0.65rem 0;
   overflow-x: auto;
 }
 
 .product-thumbnail {
-  flex: 0 0 42px;
-  width: 42px;
-  height: 42px;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
   padding: 0;
   border: 2px solid #e5e7eb;
   border-radius: 6px;
@@ -278,9 +278,9 @@
 
 .product-status {
   position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  padding: 0.5rem 0.75rem;
+  top: 0.6rem;
+  left: 0.6rem;
+  padding: 0.4rem 0.65rem;
   background: white;
   border-radius: 6px;
   font-size: 0.75rem;
@@ -307,25 +307,25 @@
 }
 
 .product-details {
-  padding: 1.25rem;
+  padding: 0.85rem 1rem 1rem;
 }
 
 .product-name {
   font-size: 1.1rem;
   font-weight: 600;
   color: #111827;
-  margin: 0 0 0.25rem 0;
+  margin: 0 0 0.2rem;
 }
 
 .product-category {
   font-size: 0.85rem;
   color: #6b7280;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.65rem;
 }
 
 .product-price-section {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .product-price-info,
