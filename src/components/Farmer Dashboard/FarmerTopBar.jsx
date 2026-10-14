@@ -6,6 +6,7 @@ import './FarmerTopBar.css';
 
 const FarmerTopBar = ({ 
   onMobileMenuToggle,
+  title = 'Farmer Dashboard',
   showSearch = true,
   showNotifications = true,
   farmer = {} 
@@ -79,7 +80,7 @@ const FarmerTopBar = ({
 
       {/* Page Title */}
       <div className="topbar-title">
-        <h2 className="title-text">Farmer Dashboard</h2>
+          <h2 className="title-text">{title}</h2>
       </div>
 
       {/* Center Search Bar */}

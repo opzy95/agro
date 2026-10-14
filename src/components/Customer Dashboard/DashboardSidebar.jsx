@@ -58,7 +58,7 @@ const DashboardSidebar = ({ user }) => {
       // icon: '❓',
       label: 'Help Center',
       path: '/help',
-      isActive: false
+      isActive: location.pathname === '/help'
     }
   ];
 

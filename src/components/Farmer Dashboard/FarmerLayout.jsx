@@ -3,7 +3,7 @@ import FarmerSidebar from './FarmerSidebar';
 import FarmerTopBar from './FarmerTopBar';
 import './FarmerLayout.css';
 
-const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifications = true }) => {
+const FarmerLayout = ({ children, farmer, title = 'Farmer Dashboard', showSearch = true, showNotifications = true }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -32,8 +32,10 @@ const FarmerLayout = ({ children, farmer, title, showSearch = true, showNotifica
         <div className="farmer-layout-topbar">
           <FarmerTopBar 
             onMobileMenuToggle={toggleSidebar}
+            title={title}
             showSearch={showSearch}
             showNotifications={showNotifications}
+            farmer={farmer}
           />
         </div>
 

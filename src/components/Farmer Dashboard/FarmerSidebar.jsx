@@ -57,7 +57,7 @@ const FarmerSidebar = ({ farmer }) => {
       icon: '❓',
       label: 'Help Center',
       path: '/help',
-      isActive: false
+      isActive: location.pathname === '/help'
     }
   ];
 
