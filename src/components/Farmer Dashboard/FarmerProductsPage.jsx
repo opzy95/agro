@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import FarmerLayout from './FarmerLayout';
 import AddProductModal from './AddProductModal';
-import { getMyProducts } from '../../services/productService';
+import { getMyProducts, setProductStatus } from '../../services/productService';
 import { getCurrentUser } from '../../services/userService';
 import './FarmerProductsPage.css';
 
 // Import images from assets
 import tomatoImg from '../../assets/tomato.png';
 
-const ProductCard = ({ product, getStatusColor, onOpen }) => {
+const ProductCard = ({ product, getStatusColor, onOpen, onToggleStatus, isUpdatingStatus }) => {
   const images = product.images?.length ? product.images : [product.image];
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
@@ -52,7 +52,19 @@ const ProductCard = ({ product, getStatusColor, onOpen }) => {
           </div>
         </div>
       </div>
-      <button className="product-menu" type="button" onClick={(event) => event.stopPropagation()}>⋮</button>
+      <button
+        className={`product-menu ${product.status === 'Inactive' ? 'resume' : ''}`}
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onToggleStatus(product);
+        }}
+        disabled={isUpdatingStatus}
+        aria-label={`${product.status === 'Inactive' ? 'Activate' : 'Pause'} ${product.name}`}
+        title={product.status === 'Inactive' ? 'Activate product' : 'Pause selling'}
+      >
+        {isUpdatingStatus ? 'Saving...' : product.status === 'Inactive' ? 'Activate' : 'Pause'}
+      </button>
     </div>
   );
 };
@@ -127,6 +139,8 @@ const FarmerProductsPage = () => {
 
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [updatingStatusId, setUpdatingStatusId] = useState(null);
+  const [statusError, setStatusError] = useState('');
 
   const normalizeProduct = (backendProduct) => {
     const imageList = backendProduct.images?.length
@@ -135,11 +149,14 @@ const FarmerProductsPage = () => {
     const imageUrl = backendProduct.image || imageList[0] || tomatoImg;
     const availableQuantity = Number(backendProduct.availableQuantity ?? backendProduct.quantity ?? 0);
     const unit = String(backendProduct.unit || 'unit').replace(/^per\s+/i, '');
-    const status = backendProduct.status === 'draft'
+    const backendStatus = String(backendProduct.status || '').toLowerCase();
+    const status = backendStatus === 'draft'
       ? 'Draft'
-      : backendProduct.status === 'published' || backendProduct.status === 'active'
+      : backendStatus === 'published' || backendStatus === 'active'
         ? 'Active'
-        : backendProduct.status || 'Draft';
+        : backendStatus === 'inactive' || backendStatus === 'paused'
+          ? 'Inactive'
+          : backendProduct.status || 'Draft';
 
     return {
       id: backendProduct._id || backendProduct.id,
@@ -209,6 +226,13 @@ const FarmerProductsPage = () => {
       status: 'Out of Stock'
     },
     {
+      title: 'Inactive',
+      value: products.filter(p => p.status === 'Inactive').length.toString(),
+      icon: 'Ⅱ',
+      color: 'warning',
+      status: 'Inactive'
+    },
+    {
       title: 'Drafts',
       value: products.filter(p => p.status === 'Draft').length.toString(),
       icon: '📝',
@@ -232,6 +256,8 @@ const FarmerProductsPage = () => {
         return 'out-of-stock';
       case 'Draft':
         return 'draft';
+      case 'Inactive':
+        return 'inactive';
       default:
         return '';
     }
@@ -244,6 +270,24 @@ const FarmerProductsPage = () => {
 
     setProducts(prevProducts => [...prevProducts, newProduct]);
     setShowAddProductModal(false);
+  };
+
+  const handleToggleProductStatus = async (product) => {
+    const nextStatus = product.status === 'Inactive' ? 'active' : 'inactive';
+    if (nextStatus === 'inactive' && !window.confirm(`Pause selling "${product.name}"? Buyers will no longer see it.`)) return;
+
+    setStatusError('');
+    setUpdatingStatusId(product.id);
+    try {
+      await setProductStatus(product.id, nextStatus);
+      const updatedProduct = { ...product, status: nextStatus === 'inactive' ? 'Inactive' : 'Active' };
+      setProducts((currentProducts) => currentProducts.map((item) => item.id === product.id ? updatedProduct : item));
+      setSelectedProduct((currentProduct) => currentProduct?.id === product.id ? updatedProduct : currentProduct);
+    } catch (error) {
+      setStatusError(error.message || 'Unable to update this product. Please try again.');
+    } finally {
+      setUpdatingStatusId(null);
+    }
   };
 
   return (
@@ -314,6 +358,7 @@ const FarmerProductsPage = () => {
             <option>All Status</option>
             <option>Active</option>
             <option>Out of Stock</option>
+            <option>Inactive</option>
             <option>Draft</option>
           </select>
 
@@ -331,6 +376,7 @@ const FarmerProductsPage = () => {
         </div>
 
         {/* Products Grid */}
+        {statusError && <p className="product-status-error" role="alert">{statusError}</p>}
         <div className="products-grid">
           {isLoading ? (
             <div className="no-products">
@@ -338,7 +384,14 @@ const FarmerProductsPage = () => {
             </div>
           ) : filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} getStatusColor={getStatusColor} onOpen={setSelectedProduct} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                getStatusColor={getStatusColor}
+                onOpen={setSelectedProduct}
+                onToggleStatus={handleToggleProductStatus}
+                isUpdatingStatus={updatingStatusId === product.id}
+              />
             ))
           ) : (
             <div className="no-products">

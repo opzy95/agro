@@ -84,6 +84,13 @@ export const getMyProducts = async () => {
   return request('/products/my');
 };
 
+export const setProductStatus = async (id, status) => {
+  return request(`/products/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status })
+  });
+};
+
 export const addProductReview = async (productId, rating) => {
   return request(`/products/${productId}/reviews`, {
     method: 'POST',
@@ -179,6 +186,7 @@ export default {
   getProducts,
   getProductById,
   getMyProducts,
+  setProductStatus,
   addProductReview,
   getProductReviews,
   createProduct,

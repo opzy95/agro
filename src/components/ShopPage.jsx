@@ -461,6 +461,7 @@ const ShopPage = () => {
 
     return {
       id: backendProduct._id || backendProduct.id,
+      status,
       farmerId: farmerId ? String(farmerId) : '',
       name: backendProduct.name || backendProduct.productName || 'Unnamed product',
       price: Number(backendProduct.price || 0),
@@ -486,7 +487,9 @@ const ShopPage = () => {
       try {
         const response = await getProducts(cartFarmerId ? { farmerId: cartFarmerId } : {});
         const backendProducts = response?.products || response?.data?.products || response?.data || response || [];
-        const normalizedProducts = (Array.isArray(backendProducts) ? backendProducts : []).map(normalizeProduct);
+        const normalizedProducts = (Array.isArray(backendProducts) ? backendProducts : [])
+          .map(normalizeProduct)
+          .filter((product) => product.status !== 'paused' && product.status !== 'inactive');
         setProducts(cartFarmerId
           ? normalizedProducts.filter((product) => product.farmerId === String(cartFarmerId))
           : normalizedProducts);
