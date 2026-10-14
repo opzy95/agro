@@ -113,7 +113,8 @@ const guides = [
     readTime: '4 min read',
     image: farmImage,
     alt: 'A farm and fields at sunrise',
-    to: '/customer/settings',
+    customerTo: '/customer/settings',
+    farmerTo: '/farmer/settings',
     keywords: 'account profile register setup'
   },
   {
@@ -123,7 +124,8 @@ const guides = [
     readTime: '5 min read',
     image: fieldImage,
     alt: 'Farmers working among rows of crops',
-    to: '/farmer/products',
+    customerTo: '/customer/dashboard',
+    farmerTo: '/farmer/products',
     keywords: 'farmer product listing photos quantity price'
   },
   {
@@ -133,7 +135,8 @@ const guides = [
     readTime: '3 min read',
     image: produceImage,
     alt: 'Fresh vegetables arranged for sale',
-    to: '/shop',
+    customerTo: '/shop',
+    farmerTo: '/farmer/products',
     keywords: 'buyer search products shop compare'
   },
   {
@@ -143,7 +146,8 @@ const guides = [
     readTime: '4 min read',
     image: orchardImage,
     alt: 'Rows of fruit trees on a farm',
-    to: '/customer/orders',
+    customerTo: '/customer/orders',
+    farmerTo: '/farmer/orders',
     keywords: 'orders payments delivery tracking'
   }
 ];
@@ -169,7 +173,7 @@ const HelpIcon = ({ name, size = 22 }) => (
 
 const getProfile = (response) => response?.user || response?.data?.user || response?.data || response || {};
 
-const HelpCenterContent = () => {
+const HelpCenterContent = ({ isFarmer }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [openFaq, setOpenFaq] = useState('create-account');
   const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -236,7 +240,11 @@ const HelpCenterContent = () => {
                 <div className="help-category-icon"><HelpIcon name={category.icon} /></div>
                 <h3>{category.title}</h3>
                 <p>{category.description}</p>
-                <button type="button" className="help-text-link" onClick={() => searchFor(category.title.split(' ')[0])}>
+                <button
+                  type="button"
+                  className="help-text-link"
+                  onClick={() => searchFor(category.id === 'for-farmers' ? 'farmer' : category.id === 'for-buyers' ? 'buyer' : category.title.split(' ')[0])}
+                >
                   Explore topic <HelpIcon name="arrow" size={15} />
                 </button>
               </article>
@@ -287,14 +295,14 @@ const HelpCenterContent = () => {
           <div className="help-guide-grid">
             {filteredGuides.map((guide) => (
               <article className="help-guide" key={guide.id}>
-                <Link to={guide.to} className="help-guide-image-link" aria-label={`Open ${guide.title}`}>
+                <Link to={isFarmer ? guide.farmerTo : guide.customerTo} className="help-guide-image-link" aria-label={`Open ${guide.title}`}>
                   <img src={guide.image} alt={guide.alt} />
                   <span>{guide.readTime}</span>
                 </Link>
                 <div className="help-guide-copy">
                   <h3>{guide.title}</h3>
                   <p>{guide.description}</p>
-                  <Link className="help-text-link" to={guide.to}>Open guide <HelpIcon name="arrow" size={15} /></Link>
+                  <Link className="help-text-link" to={isFarmer ? guide.farmerTo : guide.customerTo}>Open guide <HelpIcon name="arrow" size={15} /></Link>
                 </div>
               </article>
             ))}
@@ -363,11 +371,11 @@ const HelpCenterPage = () => {
 
   return isFarmer ? (
     <FarmerLayout farmer={profile} title="Help Center" showSearch={false} showNotifications={true}>
-      <HelpCenterContent />
+      <HelpCenterContent isFarmer />
     </FarmerLayout>
   ) : (
     <DashboardLayout title="Help Center" showSearch={true} showNotifications={true}>
-      <HelpCenterContent />
+      <HelpCenterContent isFarmer={false} />
     </DashboardLayout>
   );
 };
