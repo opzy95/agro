@@ -64,6 +64,66 @@
   box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
 }
 
+/* Revenue Summary */
+.revenue-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem 2rem;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 12px;
+}
+
+.revenue-label,
+.revenue-caption,
+.period-revenue-value {
+  margin: 0;
+}
+
+.revenue-label,
+.period-revenue label {
+  color: #047857;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.revenue-value {
+  margin: 0.35rem 0;
+  color: #064e3b;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.revenue-caption {
+  color: #4b6359;
+  font-size: 0.85rem;
+}
+
+.period-revenue {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 180px);
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.period-revenue-value {
+  grid-column: 1 / -1;
+  color: #064e3b;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.transactions-period {
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
 /* Stats Grid */
 .stats-grid {
   display: grid;
@@ -535,6 +595,21 @@
     font-size: 1.5rem;
   }
 
+  .revenue-summary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .period-revenue {
+    width: 100%;
+    grid-template-columns: 1fr minmax(120px, 180px);
+  }
+
+  .period-revenue-value {
+    text-align: left;
+  }
+
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
@@ -605,6 +680,14 @@
 
   .time-filter {
     width: 100%;
+  }
+
+  .period-revenue {
+    grid-template-columns: 1fr;
+  }
+
+  .period-revenue-value {
+    grid-column: auto;
   }
 
   .payout-table,

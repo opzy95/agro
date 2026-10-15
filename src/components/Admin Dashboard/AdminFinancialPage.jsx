@@ -8,6 +8,21 @@ import {
 } from '../../services/adminService';
 import './AdminFinancialPage.css';
 
+const getRevenueValues = (data) => {
+  const revenueStat = Array.isArray(data.stats)
+    ? data.stats.find((stat) => /revenue/i.test(stat.title || stat.label || stat.name || ''))
+    : null;
+  const parseAmount = (value) => Number(String(value ?? '').replace(/[^\d.-]/g, '')) || 0;
+  const periodRevenue = parseAmount(data.periodRevenue ?? data.revenueForPeriod ?? data.revenue ?? revenueStat?.amount ?? revenueStat?.value ?? data.totalRevenue);
+
+  return {
+    totalRevenue: parseAmount(data.totalRevenue ?? data.lifetimeRevenue ?? revenueStat?.amount ?? revenueStat?.value ?? periodRevenue),
+    periodRevenue
+  };
+};
+
+const periodLabels = { daily: 'Today', weekly: 'This week', monthly: 'This month' };
+
 
 const getPersonName = (person) => {
   if (!person) return 'Unknown farmer';
@@ -28,9 +43,10 @@ const getInitials = (name) => String(name || 'UF')
   .toUpperCase();
 
 const AdminFinancialPage = () => {
-  const [timeRange, setTimeRange] = useState('7days');
+  const [timeRange, setTimeRange] = useState('monthly');
 
   const [financialData, setFinancialData] = useState({ stats: [], transactions: [], chartData: [] });
+  const [revenueData, setRevenueData] = useState({ totalRevenue: 0, periodRevenue: 0 });
   const [payoutQueue, setPayoutQueue] = useState([]);
   const [payoutLoading, setPayoutLoading] = useState(true);
   const [payoutError, setPayoutError] = useState('');
@@ -41,7 +57,11 @@ const AdminFinancialPage = () => {
     getAdminFinancials(timeRange).then((response) => {
       const data = response?.data || response || {};
       setFinancialData({ stats: data.stats || [], transactions: data.transactions || [], chartData: data.chartData || [] });
-    }).catch(() => setFinancialData({ stats: [], transactions: [], chartData: [] }));
+      setRevenueData(getRevenueValues(data));
+    }).catch(() => {
+      setFinancialData({ stats: [], transactions: [], chartData: [] });
+      setRevenueData({ totalRevenue: 0, periodRevenue: 0 });
+    });
   }, [timeRange]);
 
   useEffect(() => {
@@ -203,6 +223,28 @@ const AdminFinancialPage = () => {
           </div>
         </div>
 
+        <section className="revenue-summary" aria-label="Revenue summary">
+          <div className="revenue-total">
+            <p className="revenue-label">Total Revenue</p>
+            <p className="revenue-value">{formatMoney(revenueData.totalRevenue)}</p>
+            <p className="revenue-caption">Platform revenue</p>
+          </div>
+          <div className="period-revenue">
+            <label htmlFor="revenue-period">Revenue by period</label>
+            <select
+              id="revenue-period"
+              className="time-filter"
+              value={timeRange}
+              onChange={(event) => setTimeRange(event.target.value)}
+            >
+              <option value="daily">Day</option>
+              <option value="weekly">Week</option>
+              <option value="monthly">Month</option>
+            </select>
+            <p className="period-revenue-value">{periodLabels[timeRange]}: {formatMoney(revenueData.periodRevenue)}</p>
+          </div>
+        </section>
+
         {/* Stats Grid */}
         <div className="stats-grid">
           {stats.map((stat, index) => (
@@ -325,15 +367,7 @@ const AdminFinancialPage = () => {
         <div className="transactions-section">
           <div className="section-header">
             <h2 className="section-title">Recent Transactions & Fee Breakdown</h2>
-            <select 
-              className="time-filter"
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-            >
-              <option value="7days">Last 7 Days</option>
-              <option value="30days">Last 30 Days</option>
-              <option value="90days">Last 90 Days</option>
-            </select>
+            <span className="transactions-period">{periodLabels[timeRange]}</span>
           </div>
 
           <div className="table-wrapper">

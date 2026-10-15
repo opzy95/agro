@@ -35,6 +35,14 @@ const getOrders = (response) => {
 
 const getStatus = (value) => String(value || '').toLowerCase().replace(/[_-]/g, ' ');
 
+const getRevenue = (financials) => {
+  const revenueStat = Array.isArray(financials.stats)
+    ? financials.stats.find((stat) => /revenue/i.test(stat.title || stat.label || stat.name || ''))
+    : null;
+  const value = financials.totalRevenue ?? financials.revenue ?? revenueStat?.amount ?? revenueStat?.value ?? 0;
+  return Number(String(value).replace(/[^\d.-]/g, '')) || 0;
+};
+
 const AdminOverviewPage = () => {
   const [timeRange, setTimeRange] = useState('monthly');
   const [dashboardData, setDashboardData] = useState({ metrics: [], quickActions: [], activities: [], chartData: [] });
@@ -59,6 +67,7 @@ const AdminOverviewPage = () => {
 
       setDashboardData({
         metrics: [
+          { title: 'TOTAL REVENUE', value: `₦${getRevenue(financials).toLocaleString('en-NG')}`, icon: '💰' },
           { title: 'TOTAL USERS', value: users.length, icon: '👥', subtitle: `${users.filter((user) => getStatus(user.role) === 'farmer').length} farmers` },
           { title: 'ACTIVE PRODUCTS', value: activeProducts.length, icon: '📦', subtitle: `${products.length} total listings` },
           { title: 'TOTAL ORDERS', value: orders.length, icon: '🛒', subtitle: 'All customer orders' },
