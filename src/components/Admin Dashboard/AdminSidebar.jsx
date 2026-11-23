@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { logout } from '../../services/authService';
 import './AdminSidebar.css';
 
 const AdminSidebar = ({ activeMenu }) => {
@@ -17,16 +16,6 @@ const AdminSidebar = ({ activeMenu }) => {
 
   const handleMenuClick = (path) => {
     navigate(path);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Unable to revoke the session during logout.', error);
-    } finally {
-      navigate('/login');
-    }
   };
 
   return (
@@ -60,10 +49,6 @@ const AdminSidebar = ({ activeMenu }) => {
         <button className="menu-item support">
           <span className="menu-icon">❓</span>
           <span className="menu-label">Support</span>
-        </button>
-        <button className="menu-item logout" onClick={handleLogout}>
-          <span className="menu-icon">🚪</span>
-          <span className="menu-label">Logout</span>
         </button>
       </div>
     </aside>

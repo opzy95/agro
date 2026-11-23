@@ -1,12 +1,9 @@
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../routes/routeUtils';
-import { logout } from '../../services/authService';
+import { Link, useLocation } from 'react-router-dom';
 import './DashboardSidebar.css';
 
 const DashboardSidebar = ({ user }) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const profileName = user?.name || 'Customer';
   const profileInitials = profileName
     .split(' ')
@@ -14,16 +11,6 @@ const DashboardSidebar = ({ user }) => {
     .join('')
     .slice(0, 2)
     .toUpperCase();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Unable to revoke the session during logout.', error);
-    } finally {
-      navigate(ROUTES.LOGIN);
-    }
-  };
 
   const menuItems = [
     {
@@ -134,16 +121,6 @@ const DashboardSidebar = ({ user }) => {
               </Link>
             </li>
           ))}
-          {/* Logout Button */}
-          <li className="sidebar-nav-item">
-            <button 
-              onClick={handleLogout}
-              className="sidebar-nav-link logout-link logout-btn"
-            >
-              <span className="nav-icon">🚪</span>
-              <span className="nav-label">Logout</span>
-            </button>
-          </li>
         </ul>
 
         {/* Go to Shop Button */}

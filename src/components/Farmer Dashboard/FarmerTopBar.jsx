@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LogoutButton from '../LogoutButton';
 import VerificationBadge from '../VerificationBadge';
 import { getMyNotifications, markAllNotificationsAsRead, markNotificationAsRead } from '../../services/notificationService';
 import './FarmerTopBar.css';
@@ -196,6 +197,7 @@ const FarmerTopBar = ({
             </div>
           </button>
         </div>
+        <LogoutButton className="dashboard-logout-btn" />
       </div>
     </header>
   );

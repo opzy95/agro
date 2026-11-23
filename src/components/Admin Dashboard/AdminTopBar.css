@@ -78,6 +78,32 @@
   margin-left: auto;
 }
 
+.dashboard-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff;
+  color: #b91c1c;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.dashboard-logout-btn:hover {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.dashboard-logout-btn:focus-visible {
+  outline: 2px solid #b91c1c;
+  outline-offset: 2px;
+}
+
 /* Icon Buttons */
 .topbar-icon-btn {
   background: transparent;

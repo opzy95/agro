@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
+import LogoutButton from '../LogoutButton';
 import { getMyNotifications, markAllNotificationsAsRead, markNotificationAsRead } from '../../services/notificationService';
 import './DashboardTopBar.css';
 
@@ -188,6 +189,8 @@ const DashboardTopBar = ({
             <span className="cart-badge">{cartItems}</span>
           )}
         </Link>
+
+        <LogoutButton className="dashboard-logout-btn" />
 
         {/* Profile */}
         <div className="profile-container">
