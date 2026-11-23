@@ -1,4 +1,9 @@
 import API_URL from './api';
+import {
+  clearAuthTokens,
+  getRefreshToken,
+  saveAuthTokens
+} from './authenticatedFetch';
 
 const API_BASE_URL = API_URL;
 
@@ -27,23 +32,24 @@ export const login = async ({ email, password, rememberMe }) => {
     body: JSON.stringify({ email, password })
   });
 
-  if (result.token) {
-    const storage = rememberMe ? localStorage : sessionStorage;
-    storage.setItem('authToken', result.token);
+  saveAuthTokens(result, rememberMe);
 
-    if (result.user) {
-      storage.setItem('user', JSON.stringify(result.user));
-    }
+  if (result.user) {
+    const storage = rememberMe ? localStorage : sessionStorage;
+    storage.setItem('user', JSON.stringify(result.user));
   }
 
   return result;
 };
 
 export const register = async ({ userType, ...registrationData }) => {
-  return request('/auth/register', {
+  const result = await request('/auth/register', {
     method: 'POST',
     body: JSON.stringify({ role: userType, ...registrationData })
   });
+
+  saveAuthTokens(result);
+  return result;
 };
 
 export const verifyEmail = async ({ email, code }) => {
@@ -74,7 +80,17 @@ export const resetPassword = async ({ email, code, password, confirmPassword }) 
   });
 };
 
-export const logout = () => {
-  localStorage.removeItem('authToken');
-  sessionStorage.removeItem('authToken');
+export const logout = async () => {
+  const refreshToken = getRefreshToken();
+
+  try {
+    if (refreshToken) {
+      await request('/auth/logout', {
+        method: 'POST',
+        body: JSON.stringify({ refreshToken })
+      });
+    }
+  } finally {
+    clearAuthTokens();
+  }
 };

@@ -8,9 +8,14 @@ const FarmerSidebar = ({ farmer }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Unable to revoke the session during logout.', error);
+    } finally {
+      navigate('/login');
+    }
   };
 
   const menuItems = [

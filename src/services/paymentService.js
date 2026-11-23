@@ -1,28 +1,19 @@
 import API_URL from './api';
-
-const getAuthToken = () => {
-  return (
-    localStorage.getItem('authToken') ||
-    sessionStorage.getItem('authToken')
-  );
-};
+import { authenticatedFetch, getAccessToken } from './authenticatedFetch';
 
 export const initializeOrderPayment = async (orderData) => {
-  const token = getAuthToken();
-
   console.log('[PaymentService] Sending payment initialization request', {
     itemCount: orderData.items?.length,
     amount: orderData.deliveryFee,
     deliveryMethod: orderData.deliveryMethod,
     hasShippingAddress: Boolean(orderData.shippingAddress),
-    hasAuthToken: Boolean(token)
+    hasAuthToken: Boolean(getAccessToken())
   });
 
-  const response = await fetch(`${API_URL}/orders`, {
+  const response = await authenticatedFetch(`${API_URL}/orders`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify(orderData)
   });
@@ -51,20 +42,17 @@ export const initializeOrderPayment = async (orderData) => {
 };
 
 export const verifyOrderPayment = async (reference) => {
-  const token = getAuthToken();
-
   console.log('[PaymentService] Sending payment verification request', {
     reference,
-    hasAuthToken: Boolean(token)
+    hasAuthToken: Boolean(getAccessToken())
   });
 
-  const response = await fetch(
+  const response = await authenticatedFetch(
     `${API_URL}/orders/payment/verify`,
     {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ reference })
     }

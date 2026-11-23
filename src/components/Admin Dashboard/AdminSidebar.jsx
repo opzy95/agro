@@ -19,9 +19,14 @@ const AdminSidebar = ({ activeMenu }) => {
     navigate(path);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Unable to revoke the session during logout.', error);
+    } finally {
+      navigate('/login');
+    }
   };
 
   return (

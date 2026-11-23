@@ -15,9 +15,14 @@ const DashboardSidebar = ({ user }) => {
     .slice(0, 2)
     .toUpperCase();
 
-  const handleLogout = () => {
-    logout();
-    navigate(ROUTES.LOGIN);
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Unable to revoke the session during logout.', error);
+    } finally {
+      navigate(ROUTES.LOGIN);
+    }
   };
 
   const menuItems = [

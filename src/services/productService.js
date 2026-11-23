@@ -1,31 +1,15 @@
 import API_URL from './api';
+import { authenticatedFetch } from './authenticatedFetch';
 
 const API_BASE_URL = API_URL;
-
-const getAuthToken = () => {
-  return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-};
-
-const buildAuthHeaders = (headers = {}) => {
-  const token = getAuthToken();
-
-  if (!token) {
-    return headers;
-  }
-
-  return {
-    ...headers,
-    Authorization: `Bearer ${token}`
-  };
-};
 
 const request = async (path, options = {}) => {
   const isFormData = options.body instanceof FormData;
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await authenticatedFetch(`${API_BASE_URL}${path}`, {
     headers: {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-      ...buildAuthHeaders(options.headers || {})
+      ...(options.headers || {})
     },
     ...options
   });

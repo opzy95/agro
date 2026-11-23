@@ -1,13 +1,10 @@
 import API_URL from './api';
-
-const getAuthToken = () => localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+import { authenticatedFetch } from './authenticatedFetch';
 
 const request = async (path, options = {}) => {
-  const token = getAuthToken();
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await authenticatedFetch(`${API_URL}${path}`, {
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {})
     },
     ...options

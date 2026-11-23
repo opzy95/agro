@@ -56,10 +56,6 @@ const Cart = () => {
     setShippingAddress((current) => ({ ...current, [name]: value }));
   };
 
-  const getAuthToken = () => {
-    return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-  };
-
   const submitOrder = async (event) => {
     event.preventDefault();
     setCheckoutError('');
@@ -93,7 +89,7 @@ const Cart = () => {
           address: shippingAddress.address.trim()
         } : null,
         deliveryFee: requiresAddress ? deliveryFee : 0
-      }, getAuthToken());
+      });
 
       const authorizationUrl =
         payment?.authorizationUrl || payment?.payment?.authorizationUrl;
