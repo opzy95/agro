@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import LogoutButton from '../LogoutButton';
 import './AdminSidebar.css';
 
 const AdminSidebar = ({ activeMenu }) => {
@@ -50,6 +51,7 @@ const AdminSidebar = ({ activeMenu }) => {
           <span className="menu-icon">❓</span>
           <span className="menu-label">Support</span>
         </button>
+        <LogoutButton className="menu-item logout" />
       </div>
     </aside>
   );

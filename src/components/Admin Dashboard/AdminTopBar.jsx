@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import LogoutButton from '../LogoutButton';
 import { getMyNotifications, markAllNotificationsAsRead, markNotificationAsRead } from '../../services/notificationService';
 import './AdminTopBar.css';
 
@@ -131,7 +130,6 @@ const AdminTopBar = ({ onMobileMenuToggle, showSearch = true }) => {
             <p className="profile-role">Administrator</p>
           </div>
         </div>
-        <LogoutButton className="dashboard-logout-btn" />
       </div>
     </div>
   );

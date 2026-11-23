@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import LogoutButton from '../LogoutButton';
 import './DashboardSidebar.css';
 
 const DashboardSidebar = ({ user }) => {
@@ -121,6 +122,9 @@ const DashboardSidebar = ({ user }) => {
               </Link>
             </li>
           ))}
+          <li className="sidebar-nav-item">
+            <LogoutButton className="sidebar-nav-link logout-link logout-btn" />
+          </li>
         </ul>
 
         {/* Go to Shop Button */}

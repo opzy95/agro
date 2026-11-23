@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import LogoutButton from '../LogoutButton';
 import VerificationBadge from '../VerificationBadge';
 import './FarmerSidebar.css';
 
@@ -117,6 +118,9 @@ const FarmerSidebar = ({ farmer }) => {
               </Link>
             </li>
           ))}
+          <li className="sidebar-nav-item">
+            <LogoutButton className="sidebar-nav-link logout-link logout-btn" />
+          </li>
         </ul>
       </div>
     </div>
