@@ -1,4 +1,14 @@
 /* Farmer Settings Page Styles */
+.farmer-settings-page {
+  min-height: calc(100vh - 80px);
+  padding: 2rem;
+  background: #f9fafb;
+}
+
+.farmer-settings-header {
+  margin-bottom: 2rem;
+}
+
 .settings-container {
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -892,17 +902,93 @@ input:checked + .slider:before {
 /* Mobile Responsive */
 @media (max-width: 1024px) {
   .settings-container {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 
   .settings-sidebar {
-    order: 2;
+    display: contents;
+  }
+
+  .settings-nav {
+    order: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .settings-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .settings-nav-item {
+    flex: 0 0 auto;
+    width: auto;
+    margin-bottom: 0;
+    padding: 0.75rem;
+    white-space: nowrap;
+    font-size: 0.85rem;
+  }
+
+  .settings-nav-item .nav-label {
+    flex: 0 0 auto;
   }
 
   .settings-content {
-    order: 1;
+    order: 2;
     padding: 2rem;
+  }
+
+  .settings-profile-card {
+    order: 0;
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    grid-template-areas:
+      "avatar info"
+      "avatar photo";
+    align-items: center;
+    gap: 0 0.75rem;
+    padding: 0.75rem 1rem;
+    text-align: left;
+  }
+
+  .profile-avatar-large {
+    grid-area: avatar;
+    width: 56px;
+    height: 56px;
+    margin: 0;
+    font-size: 1.75rem;
+  }
+
+  .settings-profile-card .profile-info {
+    grid-area: info;
+    min-width: 0;
+  }
+
+  .settings-profile-card .profile-info h3 {
+    font-size: 1rem;
+  }
+
+  .settings-profile-card .profile-info p {
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+  }
+
+  .settings-profile-card .verified-badge {
+    padding: 0.2rem 0.55rem;
+    font-size: 0.7rem;
+  }
+
+  .change-image-button {
+    grid-area: photo;
+    justify-self: start;
+    margin: 0;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
   }
 
   .form-row {
@@ -916,6 +1002,18 @@ input:checked + .slider:before {
 }
 
 @media (max-width: 768px) {
+  .farmer-settings-page {
+    padding: 1rem;
+  }
+
+  .profile-settings-section {
+    padding: 1rem;
+  }
+
+  .farmer-settings-header {
+    margin-bottom: 1rem;
+  }
+
   .settings-content {
     padding: 1.5rem;
   }
@@ -946,6 +1044,10 @@ input:checked + .slider:before {
 }
 
 @media (max-width: 480px) {
+  .farmer-settings-page {
+    padding: 0.75rem;
+  }
+
   .settings-container {
     gap: 1rem;
   }
@@ -955,13 +1057,7 @@ input:checked + .slider:before {
   }
 
   .settings-profile-card {
-    padding: 1.5rem;
-  }
-
-  .profile-avatar-large {
-    width: 60px;
-    height: 60px;
-    font-size: 2rem;
+    padding: 0.75rem;
   }
 
   .section-header h2 {

@@ -201,4 +201,16 @@
   .farmer-sidebar {
     width: 200px;
   }
+
+  .sidebar-logo {
+    padding: 0.75rem 1rem;
+  }
+
+  .sidebar-nav {
+    flex: 0 0 auto;
+  }
+
+  .sidebar-bottom {
+    margin-top: 0;
+  }
 }

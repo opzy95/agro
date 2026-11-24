@@ -199,13 +199,9 @@ const FarmerSettingsPage = () => {
 
   return (
     <FarmerLayout farmer={farmer} showSearch={true} showNotifications={true}>
-      <div style={{ 
-        background: '#f9fafb',
-        padding: '2rem',
-        minHeight: 'calc(100vh - 80px)'
-      }}>
+      <div className="farmer-settings-page">
         {/* Header */}
-        <div style={{ marginBottom: '2rem' }}>
+        <div className="farmer-settings-header">
           <h1 style={{
             fontSize: '1.75rem',
             fontWeight: 700,
@@ -354,7 +350,7 @@ const FarmerSettingsPage = () => {
           {/* Content Area */}
           <div className="settings-content">
             {activeTab === 'profile' && (
-              <div className="settings-section">
+              <div className="settings-section profile-settings-section">
                 <div className="section-header">
                   <h2>Farm Profile</h2>
                   <p>Manage your farm information and public profile</p>
